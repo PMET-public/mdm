@@ -16,9 +16,23 @@ msg() {
 # increase the size & clear the terminal
 printf '\e[8;50;140t' && clear
 
+
+# grab latest mdm and link it
+repo_url="https://github.com/PMET-public/mdm"
+mdm_path="$HOME/.mdm"
+mkdir -p "$mdm_path"
+cd "$mdm_path"
+latest_release_ver=$(curl -s "$repo_url/releases" | \
+  perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1')
+
+curl -O "$repo_url/archive/$latest_release_ver.tar.gz"
+tar -zxf "$latest_release_ver.tar.gz" -C "$latest_release_ver"
+ln -sf "$latest_release_ver" current
+
 msg "
 
-Once all requirements are installed and validated, this script will not need to run again. (This script will require an admin account.)
+Once all requirements are installed and validated, this script will not need to run again.
+(This script will require an admin account.)
 
 "
 
@@ -43,7 +57,8 @@ open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
 
 msg "
 
-CLI dependencies successfully installed. If you downloaded and installed Docker Desktop for Mac, this script should not need to run again.
+CLI dependencies successfully installed. If you downloaded and installed Docker Desktop for Mac,
+this script should not need to run again.
 
 You may close this terminal.
 
