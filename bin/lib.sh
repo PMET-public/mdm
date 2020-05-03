@@ -195,18 +195,6 @@ seconds_since() {
   echo "$(( $(date +%s) - $1 ))"
 }
 
-# useful for debugging and examining state
-# by invoking this func, the script will pause until a created file is removed
-pause_while_pause_file_exists() {
-  local pause_file="/tmp/pause-$$"
-  touch "$pause_file"
-  echo "Pausing pid $$ while $pause_file exists ..."
-  while [[ -f "$pause_file" ]]; do
-    sleep 5
-  done
-  echo "Continuing ...."
-}
-
 ###
 #
 # end util functions
