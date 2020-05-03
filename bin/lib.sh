@@ -23,6 +23,7 @@ done
 #
 ###
 
+version=0.0.1
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[1;33m'
@@ -35,7 +36,7 @@ docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.j
 app_branch_to_check="develop" # when debugging
 app_branch_to_check="master" # real branch
 app_repo="https://raw.githubusercontent.com/PMET-public/magento-cloud-docker/$app_branch_to_check/dist/bin"
-app_files=(lib.sh manage-dockerized-cloud-env.sh dockerize-cloud-env.sh)
+# https://github.com/PMET-public/mdm/archive/0.0.1.tar.gz
 
 ###
 #
