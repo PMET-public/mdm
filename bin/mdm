@@ -2,17 +2,17 @@
 set -e
 
 # shellcheck source=lib.sh
-source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
 # cd to app dir containing relevant docker-compose files
 cd "$lib_dir/.." || exit
 [[ -f docker-compose.yml ]] && export_compose_project_name
 
 # shellcheck source=menu-items-handlers.sh
-source "$lib_dir/menu-items-handlers.sh"
+source "$lib_dir/menu-items-handlers.sh" || :
 
 # shellcheck source=menu-items.sh
-source "$lib_dir/menu-items.sh"
+source "$lib_dir/menu-items.sh" || :
 
 if run_without_args; then
   render_platypus_status_menu

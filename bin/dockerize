@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
+set -x
 
 # shellcheck source=lib.sh
-source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
 # this script assembles the parts needed for a magento cloud docker deployment and
 # if supported tools/icons are detected, bundles into a OSX style app
@@ -19,8 +20,8 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 # 7. the encryption key
 #
 
-app_icon_path="$lib_dir/icons/magento.icns"
-status_menu_icon_path="$lib_dir/icons/magento-logo.png"
+app_icon_path="$lib_dir/../icons/magento.icns"
+status_menu_icon_path="$lib_dir/../icons/magento-logo.png"
 http_port=$(( ( RANDOM % 10000 )  + 10000 ))
 rand_subdomain_suffix=$(LC_ALL=C tr -dc 'a-z' < /dev/random | fold -w 4 | head -n 1)
 tld="the1umastory.com"
@@ -234,7 +235,7 @@ if has_platypus; then
     -u 'Keith Bentrup' \
     --bundle-identifier 'com.magento.dockerized-magento' \
     --bundled-file "/dev/null" \
-    "$lib_dir/launcher" \
+    "$HOME/.mdm/current/launcher" \
     "$app_dir.app"
   # mv app into app bundle
   mv "$app_dir" "$app_dir.app/Contents/Resources/app"

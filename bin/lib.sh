@@ -7,7 +7,7 @@ set -e
 # its resources from $resource_dir are required to complete successfully.
 # this maximizes what can be tested generically and from a shell
 
-# iterate thru BASH_SOURCE to find this lib.sh (should work even when debugging)
+# iterate thru BASH_SOURCE to find this lib.sh (should work even when debugging in IDE)
 bs_len=${#BASH_SOURCE[@]}
 for (( index=0; index < bs_len; ((index++)) )); do
   [[ "${BASH_SOURCE[$index]}" =~ /lib.sh$ ]] && {
@@ -138,10 +138,6 @@ is_update_available() {
   # must background and disconnect STDIN & STDOUT for Platypus menu to return asynchronously
   download_latest_update > /dev/null 2>&1 &
   false
-}
-
-is_resource_dir_writeable() {
-  :
 }
 
 is_adobe_system() {
@@ -372,13 +368,14 @@ ppid_path="$(ps -p $PPID -o command=)"
 
 called_from_platypus_app && {
   resource_dir="${ppid_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
+  env_dir="$HOME/.mdm/envs/$COMPOSER_PROJECT_NAME"
 }
 
 # if developing and calling from shell, output shows in terminal in real time as expected
 # but if called from the platypus app, out to STDOUT for menu and log to a file for debugging
 [[ $resource_dir ]] && {
-  menu_log_file="$resource_dir/menu.log"
-  handler_log_file="$resource_dir/handler.log"
+  menu_log_file="$env_dir/menu.log"
+  handler_log_file="$env_dir/handler.log"
   if run_without_args; then
     cur_log_file="$menu_log_file"
   else
@@ -401,8 +398,8 @@ called_from_platypus_app && {
 [[ $debug ]] && set -x
 
 [[ $resource_dir ]] && {
-  update_dir="$resource_dir/.update"
-  quit_detection_file="$resource_dir/.$PPID-still_running"
-  status_msg_file="$resource_dir/.status"
-  hardware_uuid_file="$resource_dir/.uuid"
+  quit_detection_file="$env_dir/.$PPID-still_running"
+  status_msg_file="$env_dir/.status"
 }
+
+: # need to return true or will exit when sourced with "-e" and last test = false
