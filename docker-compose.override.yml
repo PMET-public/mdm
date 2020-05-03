@@ -1,0 +1,37 @@
+version: '2.1'
+services:
+  db:
+    labels: 
+      - com.magento.dockerized
+    environment:
+      - MYSQL_DATABASE=main
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=
+    networks: 
+      default:
+        aliases: 
+          - database.internal
+  build:
+    image: 'pmetpublic/magento-cloud-docker-php:7.3-cli-1.1'
+    environment:
+      - COMPOSER_HOME=/app/.composer
+    command: cloud-build
+  deploy:
+    image: 'pmetpublic/magento-cloud-docker-php:7.3-cli-1.1'
+    command: cloud-deploy
+    volumes:
+      - 'magento:/app:rw'
+      - 'magento-vendor:/app/vendor:rw'
+      - 'magento-generated:/app/generated:rw'
+  varnish:
+    ports:
+      - 80
+  nginx-rev-proxy-setup:
+    image: debian:stable-slim
+    command: /tmp/nginx-rev-proxy-setup.sh
+    environment: 
+      - cert_dir="$HOME/Adobe Systems Incorporated/SITeam - docker/certs/the1umastory.com"
+    volumes:
+      - /usr/local/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./bin/nginx-rev-proxy-setup.sh:/tmp/nginx-rev-proxy-setup.sh:ro
