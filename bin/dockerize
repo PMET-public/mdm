@@ -224,7 +224,6 @@ if has_platypus; then
     --status-item-kind 'Icon' \
     --status-item-icon "$status_menu_icon_path" \
     --interface-type 'Status Menu' \
-    --symlink \
     --interpreter '/usr/bin/env' \
     --interpreter-args '-P|/usr/local/bin:/bin|bash' \
     --overwrite \
@@ -233,15 +232,12 @@ if has_platypus; then
     --name "$subdomain" \
     --app-version 0.1 \
     -u 'Keith Bentrup' \
-    --bundle-identifier 'com.magento.dockerized-magento' \
+    --bundle-identifier 'com.magento.mdm' \
     --bundled-file "/dev/null" \
-    "$HOME/.mdm/current/launcher" \
+    "$HOME/.mdm/current/bin/launcher" \
     "$app_dir.app"
   # mv app into app bundle
   mv "$app_dir" "$app_dir.app/Contents/Resources/app"
-  # update symlinks with relative paths
-  cd "$app_dir.app/Contents/Resources/" || exit
-  rm null # remove empty temp symlink used for bundled-file
   msg "Successfully created $app_dir.app"
 else
   warning "Platypus not found. OSX app bundle not generated."
