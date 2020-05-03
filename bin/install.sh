@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e # stop on errors
+set -x 
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -14,7 +15,7 @@ msg() {
 }
 
 # increase the size & clear the terminal
-printf '\e[8;50;140t' && clear
+printf '\e[8;50;140t'
 
 
 # grab latest mdm and link it
@@ -28,6 +29,9 @@ latest_release_ver=$(curl -s "$repo_url/releases" | \
 curl -O "$repo_url/archive/$latest_release_ver.tar.gz"
 tar -zxf "$latest_release_ver.tar.gz" -C "$latest_release_ver"
 ln -sf "$latest_release_ver" current
+
+set +x # if we make it this far, turn off the debugging output for the rest
+clear
 
 msg "
 
