@@ -233,7 +233,7 @@ if has_platypus; then
     --app-version 0.1 \
     -u 'Keith Bentrup' \
     --bundle-identifier 'com.magento.mdm' \
-    "$HOME/.mdm/current/bin/launcher" \
+    "$mdm_path/current/bin/launcher" \
     "$app_dir.app"
   # mv app into app bundle
   mv "$app_dir" "$app_dir.app/Contents/Resources/app"

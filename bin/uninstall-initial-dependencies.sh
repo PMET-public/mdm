@@ -12,5 +12,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "Removing xcode tools"
   sudo rm -rf /Library/Developer/CommandLineTools || :
   echo "Removing docker"
-  sudo rm -rf /Applications/Docker.app || :
+  rm -rf /Applications/Docker.app || :
+  echo "Removing MDM"
+  rm -rf ~/.mdm
 fi

@@ -133,14 +133,14 @@ is_update_available() {
   if [[ -f "$mdm_path/latest-sem-ver" ]]; then
     local latest_sem_ver
     latest_sem_ver="<$mdm_path/latest-sem-ver"
-    [[ "$mdm_version" == "$latest_sem_ver" ]] && return false
+    [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using gsort -V
     [[ "$latest_sem_ver" == "$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | gsort -V | tail -1)" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
     get_latest_sem_ver > "$mdm_path/latest-sem-ver" &
   fi
-  return false
+  return 1
 }
 
 download_and_link_latest_release() {
@@ -217,14 +217,6 @@ get_host() {
   [[ -f "$resource_dir/app/docker-compose.yml" ]] &&
     perl -ne 's/.*VIRTUAL_HOST=\s*(.*)\s*/\1/ and print' "$resource_dir/app/docker-compose.yml" ||
     error "Host not found"
-}
-
-export_compose_project_name() {
-  [[ -f "$resource_dir/app/docker-compose.yml" ]] && {
-    export COMPOSE_PROJECT_NAME
-    COMPOSE_PROJECT_NAME=$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$resource_dir/app/docker-compose.yml")
-  } ||
-    error "Could not export COMPOSE_PROJECT_NAME"
 }
 
 # echos pid of script as result
@@ -317,7 +309,7 @@ render_platypus_status_menu() {
     key="${keys[$index]}"
     # no handler or link? must be a submenu heading
     [[ -z "${menu["$key-handler"]}" && -z "${menu["$key-link"]}" ]] && {
-      # if a submenu heading, was the last char a new line? if not, add one to start new submenu
+      # if a submenu heading, was the last char a newline? if not, add one to start new submenu
       [[ $menu_output =~ $'\n'$ ]] || menu_output+=$'\n'
       menu_output+="SUBMENU|$key"
       is_submenu=true
@@ -363,7 +355,11 @@ ppid_path="$(ps -p $PPID -o command=)"
 
 called_from_platypus_app && {
   resource_dir="${ppid_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
+  export COMPOSE_PROJECT_NAME
+  COMPOSE_PROJECT_NAME=$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$resource_dir/app/docker-compose.yml")
+  [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
   env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
+  mkdir -p "$env_dir"
 }
 
 # if developing and calling from shell, output shows in terminal in real time as expected

@@ -23,7 +23,7 @@ if [[
   ${BASH_VERSINFO[0]} -ge 5 && \
   -f /usr/local/bin/brew && \
   -f /usr/local/bin/realpath && \
-  -f "$HOME/.mdm/current/mdm" && \
+  -f "$HOME/.mdm/current/bin/mdm" && \
   -d /Applications/Docker.app
 
 ]]; then
@@ -36,7 +36,7 @@ if [[
   [[ "$PATH" =~ "/usr/local/bin" ]] || export PATH="/usr/local/bin:$PATH"
 
   # since the dependecies are now installed, use realpath & run current version of main script
-  source "$HOME/.mdm/current/mdm"
+  source "$HOME/.mdm/current/bin/mdm"
 
 else
 
