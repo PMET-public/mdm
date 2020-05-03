@@ -13,7 +13,7 @@ for network in $(docker network ls | grep default | grep bridge | awk '{print $2
   if [[ -n "$varnish_port" && -n "$magento_hostname" ]]; then
 
   echo "Writing nginx conf file for $magento_hostname"
-  cat << EOF > /tmp/conf.d/host-$magento_hostname.conf
+  cat << EOF > "/tmp/conf.d/host-$magento_hostname.conf"
     server {
       listen 443 ssl http2;
       server_name  $magento_hostname;

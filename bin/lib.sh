@@ -34,9 +34,6 @@ recommended_vm_mem_mb=4096
 recommended_vm_swap_mb=2048
 bytes_in_mb=1048576
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
-app_branch_to_check="develop" # when debugging
-app_branch_to_check="master" # real branch
-app_repo="https://raw.githubusercontent.com/PMET-public/mdm/$app_branch_to_check"
 repo_url="https://github.com/PMET-public/mdm"
 
 ###
@@ -149,10 +146,10 @@ is_update_available() {
 download_and_link_latest_release() {
   local ver
   ver=$(get_latest_sem_ver)
-  cd $mdm_path
+  cd "$mdm_path"
   curl -v -O "$repo_url/archive/$ver.tar.gz"
-  tar -zxf $ver.tar.gz -C $ver
-  ln -sf $ver current
+  tar -zxf "$ver.tar.gz" -C "$ver"
+  ln -sf "$ver" current
 }
 
 is_adobe_system() {
@@ -191,7 +188,7 @@ convert_secs_to_hms() {
   ((h=$1/3600))
   ((m=($1%3600)/60))
   ((s=$1%60))
-  printf "%02d:%02d:%02d" $h $m $s
+  printf "%02d:%02d:%02d" "$h" "$m" "$s"
 }
 
 seconds_since() {
@@ -366,7 +363,7 @@ ppid_path="$(ps -p $PPID -o command=)"
 
 called_from_platypus_app && {
   resource_dir="${ppid_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
-  env_dir="$mdm_path/envs/$COMPOSER_PROJECT_NAME"
+  env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
 }
 
 # if developing and calling from shell, output shows in terminal in real time as expected
