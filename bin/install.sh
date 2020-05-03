@@ -41,8 +41,10 @@ Once all requirements are installed and validated, this script will not need to 
 "
 
 # install homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-# do not install docker (which is docker toolbox) via brew; use docker for mac instead
+[[ -f /usr/local/bin/brew ]] || \
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+# do not install docker (which is docker toolbox) via homebrew; use docker for mac instead
 brew install bash coreutils
 brew upgrade bash coreutils
 
