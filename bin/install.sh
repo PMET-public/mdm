@@ -27,7 +27,7 @@ latest_release_ver=$(curl -s "$repo_url/releases" | \
   perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1')
 
 curl -sLO "$repo_url/archive/$latest_release_ver.tar.gz"
-tar -zxf "$latest_release_ver.tar.gz" -C "$latest_release_ver"
+tar -zxf "$latest_release_ver.tar.gz" --strip-components 1 -C "$latest_release_ver"
 ln -sf "$latest_release_ver" current
 
 set +x # if we make it this far, turn off the debugging output for the rest
