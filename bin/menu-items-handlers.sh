@@ -55,7 +55,7 @@ start_docker() {
   set_status_and_wait_for_exit $! "Starting Docker VM ..."
 }
 
-update_this_management_app() {
+update_mdm() {
   update_from_local_dir
 }
 
@@ -86,7 +86,7 @@ install_app() {
     #open "http://$(get_host)"
   ) >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
-  show_management_app_logs >> "$handler_log_file" 2>&1 &
+  show_mdm_logs >> "$handler_log_file" 2>&1 &
   # last b/c of blocking wait 
   # can't run in background b/c child process can't "wait" for sibling proces only descendant processes
   set_status_and_wait_for_exit $background_install_pid "Installing Magento ..."
@@ -130,7 +130,7 @@ start_shell_in_app() {
   "
 }
 
-start_management_shell() {
+start_mdm_shell() {
   local services_status
   if is_app_installed; then
     services_status="$(docker-compose ps)"
@@ -149,7 +149,7 @@ show_app_logs() {
   :
 }
 
-show_management_app_logs() {
+show_mdm_logs() {
   run_as_bash_script_in_terminal "
     cd \"$resource_dir\" || exit
     screen -c '$lib_dir/.screenrc'

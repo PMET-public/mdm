@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  pmetpublic/certbot-dns:
+    image: pmetpublic/certbot-dns
+    volumes:
+      - ".dns-config.ini:/.dns-config.ini"
+      - "/dest/path/archive:/etc/letsencrypt/archive"
+    command:
+      --dns-digitalocean
+      --dns-digitalocean-credentials /.dns-config.ini
+      --dns-digitalocean-propagation-seconds 30
+      -d "*.yourdomain.com"
+  nginx-rev-proxy-setup:
+    image: debian:stable-slim
+    command: /tmp/nginx-rev-proxy-setup.sh
+    environment: 
+      - cert_dir="$HOME/Adobe Systems Incorporated/SITeam - docker/certs/the1umastory.com"
+    volumes:
+      - /usr/local/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./bin/nginx-rev-proxy-setup.sh:/tmp/nginx-rev-proxy-setup.sh:ro

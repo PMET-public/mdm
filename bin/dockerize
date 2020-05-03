@@ -2,7 +2,7 @@
 set -e
 
 # shellcheck source=lib.sh
-source "$(dirname "$(python -c "import os; import sys; print(os.path.realpath(sys.argv[1]))" "${BASH_SOURCE[0]}")")/lib.sh"
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
 # this script assembles the parts needed for a magento cloud docker deployment and
 # if supported tools/icons are detected, bundles into a OSX style app
@@ -19,7 +19,6 @@ source "$(dirname "$(python -c "import os; import sys; print(os.path.realpath(sy
 # 7. the encryption key
 #
 
-startup_script="start-up.sh"
 app_icon_path="$lib_dir/icons/magento.icns"
 status_menu_icon_path="$lib_dir/icons/magento-logo.png"
 http_port=$(( ( RANDOM % 10000 )  + 10000 ))
@@ -235,13 +234,12 @@ if has_platypus; then
     -u 'Keith Bentrup' \
     --bundle-identifier 'com.magento.dockerized-magento' \
     --bundled-file "/dev/null" \
-    "$app_dir/bin/$startup_script" \
+    "$lib_dir/launcher" \
     "$app_dir.app"
   # mv app into app bundle
   mv "$app_dir" "$app_dir.app/Contents/Resources/app"
   # update symlinks with relative paths
   cd "$app_dir.app/Contents/Resources/" || exit
-  ln -sf "./app/bin/$startup_script" "script"
   rm null # remove empty temp symlink used for bundled-file
   msg "Successfully created $app_dir.app"
 else

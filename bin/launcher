@@ -20,18 +20,20 @@ if [[
   ${BASH_VERSINFO[0]} -ge 5 && \
   -f /usr/local/bin/brew && \
   -f /usr/local/bin/realpath && \
+  -f "$HOME/.mdm/current/mdm" && \
   -d /Applications/Docker.app
 
 ]]; then
 
-  # N.B. the script is invoked by `/usr/bin/env -P "/usr/local/bin:/bin" bash "/path/to/script"`
-  # using the upgraded bash if found or /bin/bash. however, -P does not export the path, just sets it for `env`.
+  # N.B. the script is invoked as
+  # `/usr/bin/env -P "/usr/local/bin:/bin" bash "/path/to/osx.app/Content/Resoources/name-of-this-script"`
+  # using the upgraded /usr/local/bin/bash if found or /bin/bash.
+  # however, -P does not export the path, just sets it for `env`.
   # so export PATH if necessary after tools are installed
   [[ "$PATH" =~ "/usr/local/bin" ]] || export PATH="/usr/local/bin:$PATH"
 
-  # since the dependecies passed, use realpath & run main app
-  # shellcheck source=manage-dockerized-cloud-env.sh
-  source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/manage-dockerized-cloud-env.sh"
+  # since the dependecies are now installed, use realpath & run current version of main script
+  source "$HOME/.mdm/current/mdm"
 
 else
 

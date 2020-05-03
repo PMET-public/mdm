@@ -39,9 +39,9 @@ is_docker_suboptimal && {
 }
 
 is_update_available && {
-  key="Update this managing app"
+  key="Update MDM"
   keys+=("$key")
-  menu["$key-handler"]="update_this_management_app"
+  menu["$key-handler"]="update_mdm"
   menu["$key-icon"]="ic_system_update_alt_${icon_color}_48dp.png"
 }
 
@@ -128,9 +128,9 @@ is_app_running && {
 #
 ###
 
-key="Start management app shell"
+key="Start MDM shell"
 keys+=("$key")
-menu["$key-handler"]="start_management_shell"
+menu["$key-handler"]="start_mdm_shell"
 menu["$key-icon"]="ic_code_${icon_color}_48dp.png"
 
 is_app_installed && {
@@ -140,9 +140,9 @@ is_app_installed && {
   menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
 }
 
-key="Show this managing app logs"
+key="Show MDM logs"
 keys+=("$key")
-menu["$key-handler"]="show_management_app_logs"
+menu["$key-handler"]="show_mdm_logs"
 menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
 
 is_app_installed && {
