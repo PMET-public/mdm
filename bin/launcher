@@ -3,17 +3,20 @@
 set -e # stop on errors
 # set -x # turn on debugging
 
-# the Platypus status menu app will initially run this script without arguments
-# and display each line of STDOUT as an option
-# so it's critical to complete ASAP when run w/o args to reduce perceived latency
+# understanding the Platypus UX:
 #
-# when a menu item is selected, this script is run again in the background w/ the menu item text passed as an arg
-# the Platyplus app does not wait for the background run to complete before the menu can be rendered again
+# when clicked in the status bar, a Platypus status menu app runs (without arguments) to completion
+# and displays each line of STDOUT as an option, so it's critical to complete ASAP to reduce perceived latency
 #
-
-
-# check dependencies
-# has to be run every time because app could be copied to new computer or user may uninstall dep(s)
+# then when a menu item is selected, this script runs again in the background w/ the menu item text passed as an arg
+# this time Platyplus app will not wait for the background run to complete before the menu can be rendered again
+#
+# understanding this script:
+#
+# check dependencies and if passing, source the main mdm functionality
+# otherwise offer a single option to install dependencies when selected
+#
+# the depedency check should run every time in case its copied to new computer
 
 if [[
 
@@ -37,8 +40,7 @@ if [[
 
 else
 
-  # some dependency is missing
-  # if called without args, prompt user to install
+  # some dependency is missing and this script was called without args, so prompt user to install
 
   if [[ ${#BASH_ARGV[@]} -eq 0 ]]; then
 
@@ -46,13 +48,10 @@ else
 
   else
 
-    # due to symlinking, cd to right dir to execute script
-    cd "$(dirname "${BASH_SOURCE[0]}")" || exit
-    link="$(readlink "${BASH_SOURCE[0]}")"
-    [[ -n "$link" ]] && {
-      cd "$(dirname "$link")" || exit
-    }
-    open -a Terminal install-initial-dependencies.sh
+    installer=$(mktemp)
+    curl -sL https://raw.githubusercontent.com/PMET-public/mdm/master/bin/install.sh
+    chmod +x $installer
+    open -a Terminal "$installer"
 
   fi
 

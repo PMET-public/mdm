@@ -32,6 +32,10 @@ install_additional_tools() {
     etc=/Applications/Docker.app/Contents/Resources/etc
     ln -s \$etc/docker.bash-completion \$(brew --prefix)/etc/bash_completion.d/docker
     ln -s \$etc/docker-compose.bash-completion \$(brew --prefix)/etc/bash_completion.d/docker-compose
+    msg \"Install Platypus \"
+    brew cask install platypus
+    gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
+    chmod +x /usr/local/bin/platypus
   "
 }
 
@@ -56,7 +60,7 @@ start_docker() {
 }
 
 update_mdm() {
-  update_from_local_dir
+  download_and_link_latest_release
 }
 
 install_app() {

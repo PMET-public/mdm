@@ -36,7 +36,7 @@ is_valid_git_url() {
 }
 
 is_existing_cloud_env() {
-  [[ "$env_is_existing_cloud" == "true" ]]
+  [[ $env_is_existing_cloud ]]
 }
 
 print_usage() {
@@ -80,7 +80,7 @@ done
 {
   { # pid and env are not empty but other related opts are
     [[ ! -z "$pid" ]] && [[ ! -z "$env" ]] && [[ -z "$git_url" ]] && [[ -z "$branch" ]] && [[ -z "$tag" ]] && \
-      env_is_existing_cloud="true"
+      env_is_existing_cloud=true
   } ||
   { # git url and branch are not empty but other related opts are
     [[ ! -z "$git_url" ]] && [[ ! -z "$branch" ]] && [[ -z "$tag" ]] && [[ -z "$pid" ]] && [[ -z "$env" ]]
@@ -233,16 +233,9 @@ if has_platypus; then
     --app-version 0.1 \
     -u 'Keith Bentrup' \
     --bundle-identifier 'com.magento.mdm' \
-    --bundled-file "/dev/null" \
     "$HOME/.mdm/current/bin/launcher" \
     "$app_dir.app"
   # mv app into app bundle
   mv "$app_dir" "$app_dir.app/Contents/Resources/app"
   msg "Successfully created $app_dir.app"
-else
-  warning "Platypus not found. OSX app bundle not generated."
-  echo "Install Platypus with:"
-  warning "brew cask install platypus"
-  echo "Then install the CLI with these instructions:"
-  warning "https://github.com/sveinbjornt/Platypus/blob/master/Documentation/Documentation.md#show-shell-command"
 fi

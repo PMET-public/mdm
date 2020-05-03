@@ -101,6 +101,10 @@ is_app_running && {
   keys+=("$key")
   menu["$key-handler"]="start_shell_in_app"
 
+  key="Magento CLI reference"
+  keys+=("$key")
+  menu["$key-link"]="https://www.google.com"
+
   key="Unlock admin account"
   keys+=("$key")
   menu["$key-handler"]="unlock_admin"

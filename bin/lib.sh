@@ -24,6 +24,7 @@ done
 ###
 
 mdm_version=0.0.1
+mdm_path="$HOME/.mdm"
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[1;33m'
@@ -36,7 +37,7 @@ docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.j
 app_branch_to_check="develop" # when debugging
 app_branch_to_check="master" # real branch
 app_repo="https://raw.githubusercontent.com/PMET-public/mdm/$app_branch_to_check"
-releases_url="https://github.com/PMET-public/mdm/archive/mdm-"
+repo_url="https://github.com/PMET-public/mdm"
 
 ###
 #
@@ -126,19 +127,32 @@ called_from_platypus_app() {
   [[ "$ppid_path" =~ .app/Contents/MacOS/ ]]
 }
 
+get_latest_sem_ver() {
+  curl -s "$repo_url/releases" | \
+    perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1'
+}
+
 is_update_available() {
-  [[ -f "$update_dir/.downloading" ]] && return # still downloading? update not available
-  [[ $(find "$update_dir" -type f 2> /dev/null | wc -l) -eq 0 ]] && {
-    # must background and disconnect STDIN & STDOUT for Platypus menu to return asynchronously
-    download_latest_update > /dev/null 2>&1 &
-    false; return
-  }
-  for i in "${app_files[@]}"; do
-    diff "$update_dir/$i" "$lib_dir/$i" > /dev/null || return 0 # found a diff? update available
-  done
-  # must background and disconnect STDIN & STDOUT for Platypus menu to return asynchronously
-  download_latest_update > /dev/null 2>&1 &
-  false
+  if [[ -f "$mdm_path/latest-sem-ver" ]]; then
+    local latest_sem_ver
+    latest_sem_ver="<$mdm_path/latest-sem-ver"
+    [[ "$mdm_version" == "$latest_sem_ver" ]] && return false
+    # verify latest is more recent using gsort -V
+    [[ "$latest_sem_ver" == "$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | gsort -V | tail -1)" ]] && return
+  else
+    # get info in the background to prevent latency in menu rendering
+    get_latest_sem_ver > "$mdm_path/latest-sem-ver" &
+  fi
+  return false
+}
+
+download_and_link_latest_release() {
+  local ver
+  ver=$(get_latest_sem_ver)
+  cd $mdm_path
+  curl -v -O "$repo_url/archive/$ver.tar.gz"
+  tar -zxf $ver.tar.gz -C $ver
+  ln -sf $ver current
 }
 
 is_adobe_system() {
@@ -295,23 +309,6 @@ restart_docker_and_wait() {
   done
 }
 
-download_latest_update() {
-  mkdir -p "$update_dir"
-  cd "$update_dir"
-  touch .downloading # simple flag to prevent race condition when downloads may be ongoing
-  curl_list="$(IFS=,; echo "${app_files[*]}")"
-  curl -v -O "$app_repo/{$curl_list}" 2>&1 |
-    grep '< HTTP/1.1 ' |
-    grep -q -v 200 && { 
-      rm "${app_files[@]}" || : # delete downloaded files unless all return HTTP 200 response
-    }
-  rm .downloading
-}
-
-update_from_local_dir() {
-  cd "$update_dir" && mv ./* "$lib_dir)/"
-}
-
 render_platypus_status_menu() {
   key_length=${#keys[@]}
   menu_output=""
@@ -369,7 +366,7 @@ ppid_path="$(ps -p $PPID -o command=)"
 
 called_from_platypus_app && {
   resource_dir="${ppid_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
-  env_dir="$HOME/.mdm/envs/$COMPOSER_PROJECT_NAME"
+  env_dir="$mdm_path/envs/$COMPOSER_PROJECT_NAME"
 }
 
 # if developing and calling from shell, output shows in terminal in real time as expected
