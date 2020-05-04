@@ -6,7 +6,7 @@ set -e
 # using the upgraded /usr/local/bin/bash if found or /bin/bash.
 # however, -P does not export the path, just sets it for `env` command.
 # so export PATH if necessary
-# [[ "$PATH" =~ "/usr/local/bin" ]] || export PATH="/usr/local/bin:$PATH"
+[[ "$PATH" =~ "/usr/local/bin" ]] || export PATH="/usr/local/bin:$PATH"
 
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
