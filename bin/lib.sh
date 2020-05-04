@@ -73,6 +73,10 @@ can_optimize_vm_swap() {
   [[ swap_for_vm -lt recommended_vm_swap_mb ]]
 }
 
+is_docker_installed() {
+  [[ -f "$docker_settings_file" ]]
+}
+
 is_docker_suboptimal() {
   can_optimize_vm_cpus || can_optimize_vm_mem || can_optimize_vm_swap
 }

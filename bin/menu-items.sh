@@ -10,6 +10,15 @@ icon_color=$(is_dark_mode && echo "white" || echo "black")
 
 declare -A menu
 
+! is_docker_installed && {
+  key="Complete Docker installation by running for first time"
+  keys+=("$key")
+  menu["$key-handler"]="start_docker"
+  menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+  return
+}
+
+
 has_status_msg && {
   key="$(show_status)"
   keys+=("$key")
