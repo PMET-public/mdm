@@ -23,7 +23,8 @@ has_status_msg && {
   key="$(show_status)"
   keys+=("$key")
   menu["$key-handler"]="clear_status"
-  menu["$key-icon"]="ic_check_${icon_color}_48dp.png"
+  # if status is not disabled b/c still running, show completed check mark
+  [[ "$key" =~ ^DISABLED ]] || menu["$key-icon"]="ic_check_${icon_color}_48dp.png"
 }
 
 ! has_additional_tools && {

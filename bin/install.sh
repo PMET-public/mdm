@@ -19,6 +19,8 @@ printf '\e[8;50;140t'
 
 
 # grab latest mdm and link it
+# this code should closely mirror download_and_link_latest_release func in lib.sh
+# but must also exist here to bootstrap mdm
 repo_url="https://github.com/PMET-public/mdm"
 mdm_path="$HOME/.mdm"
 mkdir -p "$mdm_path"
@@ -28,6 +30,7 @@ latest_release_ver=$(curl -s "$repo_url/releases" | \
 curl -svLO "$repo_url/archive/$latest_release_ver.tar.gz"
 mkdir -p "$latest_release_ver"
 tar -zxf "$latest_release_ver.tar.gz" --strip-components 1 -C "$latest_release_ver"
+rm "$latest_release_ver.tar.gz" current || : # cleanup and remove old link
 ln -sf "$latest_release_ver" current
 
 set +x # if we make it this far, turn off the debugging output for the rest

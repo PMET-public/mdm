@@ -142,9 +142,18 @@ start_mdm_shell() {
     services_status="$(warning Magento app not installed yet.)"
   fi
   run_as_bash_script_in_terminal "
-    cd \"$$resource_dir/app\" || exit
+    cd \"$resource_dir/app\" || exit
     msg Running $COMPOSE_PROJECT_NAME from $(pwd)
-    echo -e \"\\n$services_status\\n\"
+    echo -e \"\\n\\n$services_status\"
+    msg \"
+
+You can run docker-compose cmds here, but it's recommend to use the MDM app to (un)install or
+start/stop the Magento app to ensure the proper application state.
+
+Magento docker-compose reference: https://devdocs.magento.com/cloud/docker/docker-quick-reference.html
+Full docker-compose reference: https://docs.docker.com/compose/reference/overview/
+
+    \"
     bash -l
   "
 }
@@ -156,7 +165,7 @@ show_app_logs() {
 show_mdm_logs() {
   run_as_bash_script_in_terminal "
     cd \"$resource_dir\" || exit
-    screen -c '$lib_dir/.screenrc'
+    screen -c '$lib_dir/../.screenrc'
     exit
   "
 }

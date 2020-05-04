@@ -23,7 +23,7 @@ done
 #
 ###
 
-mdm_version=0.0.1
+mdm_version=0.0.4
 mdm_path="$HOME/.mdm"
 red='\033[0;31m'
 green='\033[0;32m'
@@ -140,27 +140,31 @@ get_latest_sem_ver() {
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local ver_file="$mdm_path/latest-sem-ver"
+  local ver_file more_recent_of_two
+  ver_file="$mdm_path/latest-sem-ver"
   if [[ -f "$ver_file" && "$(( $(date +%s) - $(stat -f%c "$ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
-    latest_sem_ver="<$mdm_path/latest-sem-ver"
+    latest_sem_ver="$(<"$mdm_path/latest-sem-ver")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using gsort -V
-    [[ "$latest_sem_ver" == "$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | gsort -V | tail -1)" ]] && return
+    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | gsort -V | tail -1)"
+    [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
-    get_latest_sem_ver > "$ver_file" &
+    get_latest_sem_ver > "$ver_file" 2>/dev/null &
   fi
   return 1
 }
 
 download_and_link_latest_release() {
-  local ver
-  ver=$(get_latest_sem_ver)
+  local latest_release_ver
+  latest_release_ver=$(get_latest_sem_ver)
   cd "$mdm_path"
-  curl -svLO "$repo_url/archive/$ver.tar.gz"
-  tar -zxf "$ver.tar.gz" -C "$ver"
-  ln -sf "$ver" current
+  curl -svLO "$repo_url/archive/$latest_release_ver.tar.gz"
+  mkdir -p "$latest_release_ver"
+  tar -zxf "$latest_release_ver.tar.gz" --strip-components 1 -C "$latest_release_ver"
+  rm "$latest_release_ver.tar.gz" current || : # cleanup and remove old link
+  ln -sf "$latest_release_ver" current
 }
 
 is_adobe_system() {
@@ -321,6 +325,8 @@ render_platypus_status_menu() {
         menu_output+=$'\n'
       }
       menu_output+="MENUITEMICON|$lib_dir/../icons/${menu["$key-icon"]}|$key"$'\n'
+    elif [[ "$key" =~ ^DISABLED ]]; then
+      menu_output+="$key"
     else
       menu_output+="|$key"
     fi
@@ -337,11 +343,17 @@ handle_menu_selection() {
 
   # a func?
   key="$menu_selection-handler"
-  [[ -n "${menu[$key]}" ]] && "${menu[$key]}"
+  [[ -n "${menu[$key]}" ]] && {
+    "${menu[$key]}"
+    exit
+  }
 
   # a link?
   key="$menu_selection-link"
-  [[ -n "${menu[$key]}" ]] && open "${menu[$key]}"
+  [[ -n "${menu[$key]}" ]] && {
+    open "${menu[$key]}"
+    exit
+  }
 
 }
 
