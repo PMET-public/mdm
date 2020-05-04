@@ -121,20 +121,27 @@ are_other_magento_apps_running() {
 }
 
 run_without_args() {
+  # for debugging. bash vscode debugger changes normal invocation, so check for a special var 
+  [[ "$vsc_debugger_arg" == "n/a" ]] && return
+  [[ -n "$vsc_debugger_arg" ]] &&
+    menu_selection="$vsc_debugger_arg" ||
+    menu_selection="${BASH_ARGV[-1]}"
   return "${BASH_ARGC[-1]}" # BASH_ARGC tracks number of parameters in call stack; last index is original script
 }
 
 called_from_platypus_app() {
-  [[ "$ppid_path" =~ .app/Contents/MacOS/ ]]
+  [[ "$parent_pids_path" =~ .app/Contents/MacOS/ ]]
 }
 
 get_latest_sem_ver() {
-  curl -s "$repo_url/releases" | \
+  curl -svL "$repo_url/releases" | \
     perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1'
 }
 
 is_update_available() {
-  if [[ -f "$mdm_path/latest-sem-ver" ]]; then
+  # check for a new version once a day (86400 secs)
+  local ver_file="$mdm_path/latest-sem-ver"
+  if [[ -f "$ver_file" && "$(( $(date +%s) - $(stat -f%c "$ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="<$mdm_path/latest-sem-ver"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
@@ -142,7 +149,7 @@ is_update_available() {
     [[ "$latest_sem_ver" == "$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | gsort -V | tail -1)" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
-    get_latest_sem_ver > "$mdm_path/latest-sem-ver" &
+    get_latest_sem_ver > "$ver_file" &
   fi
   return 1
 }
@@ -151,7 +158,7 @@ download_and_link_latest_release() {
   local ver
   ver=$(get_latest_sem_ver)
   cd "$mdm_path"
-  curl -v -O "$repo_url/archive/$ver.tar.gz"
+  curl -svLO "$repo_url/archive/$ver.tar.gz"
   tar -zxf "$ver.tar.gz" -C "$ver"
   ln -sf "$ver" current
 }
@@ -313,7 +320,7 @@ render_platypus_status_menu() {
         is_submenu=false
         menu_output+=$'\n'
       }
-      menu_output+="MENUITEMICON|$lib_dir/icons/${menu["$key-icon"]}|$key"$'\n'
+      menu_output+="MENUITEMICON|$lib_dir/../icons/${menu["$key-icon"]}|$key"$'\n'
     else
       menu_output+="|$key"
     fi
@@ -322,17 +329,18 @@ render_platypus_status_menu() {
 }
 
 handle_menu_selection() {
+
   # if selected menu item matches an exit timer, clear exit timer status and exit
-  [[ "${BASH_ARGV[-1]}" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
+  [[ "$menu_selection" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
   
   # otherwise check what type of menu item was selected
 
   # a func?
-  key="${BASH_ARGV[-1]}-handler"
+  key="$menu_selection-handler"
   [[ -n "${menu[$key]}" ]] && "${menu[$key]}"
 
   # a link?
-  key="${BASH_ARGV[-1]}-link"
+  key="$menu_selection-link"
   [[ -n "${menu[$key]}" ]] && open "${menu[$key]}"
 
 }
@@ -343,12 +351,15 @@ handle_menu_selection() {
 #
 ##
 
-ppid_path="$(ps -p $PPID -o command=)"
+# allow parent_pids_path to be set by the env to debug a specific instance
+# otherwise grab the actual expect path of the osx platypus app
+parent_pids_path="${parent_pids_path:-$(ps -p $PPID -o command=)}"
 
 called_from_platypus_app && {
-  resource_dir="${ppid_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
+  resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
+  cd "$resource_dir/app" || exit
   export COMPOSE_PROJECT_NAME
-  COMPOSE_PROJECT_NAME=$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$resource_dir/app/docker-compose.yml")
+  COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$resource_dir/app/docker-compose.yml")"
   [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
   env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
   mkdir -p "$env_dir"
@@ -370,7 +381,7 @@ called_from_platypus_app && {
     # exec 2> >(tee -ia "$cur_log_file")
     exec 2>> "$cur_log_file"
     if run_without_args; then
-      timestamp_msg "Script called" >&2
+      timestamp_msg "Script called without args" >&2
     else 
       timestamp_msg "Script called with ${BASH_ARGV[-1]}" >&2
     fi

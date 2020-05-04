@@ -11,7 +11,7 @@ clear_status() {
 
 show_status() {
   local status
-  status=$(<"$status_msg_file")
+  status="$(<"$status_msg_file")"
   # if status already has time, process completed
   if [[ "$status" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]]; then
     echo "$status"
@@ -27,7 +27,7 @@ install_additional_tools() {
     msg \"Installing composer\"
     brew install composer
     msg \"Installing magento-cloud CLI\"
-    curl -sS https://accounts.magento.cloud/cli/installer | php
+    curl -sLS https://accounts.magento.cloud/cli/installer | php
     msg \"Installing shell completion support for Docker\"
     etc=/Applications/Docker.app/Contents/Resources/etc
     ln -s \$etc/docker.bash-completion \$(brew --prefix)/etc/bash_completion.d/docker

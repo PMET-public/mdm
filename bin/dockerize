@@ -101,7 +101,7 @@ You must provide either:
 
 if is_existing_cloud_env; then
   magento-cloud -q || error "The magento-cloud CLI was not found. To install, run
-  curl -sS https://accounts.magento.cloud/cli/installer | php"
+  curl -svLS https://accounts.magento.cloud/cli/installer | php"
   app_name="$pid-$env"
 else
   is_valid_git_url "$git_url" || error "Please check your git url."

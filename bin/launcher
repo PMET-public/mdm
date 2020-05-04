@@ -28,16 +28,10 @@ if [[
 
 ]]; then
 
-  # N.B. the script is invoked as
-  # `/usr/bin/env -P "/usr/local/bin:/bin" bash "/path/to/osx.app/Content/Resoources/name-of-this-script"`
-  # using the upgraded /usr/local/bin/bash if found or /bin/bash.
-  # however, -P does not export the path, just sets it for `env`.
-  # so export PATH if necessary after tools are installed
-  [[ "$PATH" =~ "/usr/local/bin" ]] || export PATH="/usr/local/bin:$PATH"
-
-  # since the dependecies are now installed, use realpath & run current version of main script
+  # allow mdm_script_path to be set by the env for debugging
+  mdm_script_path="${mdm_script_path:-$HOME/.mdm/current/bin/mdm}"
   # shellcheck source=mdm
-  source "$HOME/.mdm/current/bin/mdm"
+  source "$mdm_script_path"
 
 else
 
@@ -50,7 +44,7 @@ else
   else
 
     installer=$(mktemp)
-    curl -sL https://raw.githubusercontent.com/PMET-public/mdm/master/bin/install.sh > "$installer"
+    curl -svL https://raw.githubusercontent.com/PMET-public/mdm/master/bin/install.sh > "$installer"
     chmod +x "$installer"
     open -a Terminal "$installer"
 

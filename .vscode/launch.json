@@ -7,12 +7,31 @@
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "start-up.sh",
+      "name": "launcher with menu selection arg",
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/dist/bin/start-up.sh",
+      "program": "${workspaceFolder}/bin/launcher",
+      "env": {
+        "debug": true,
+        "vsc_debugger_arg": "Update MDM",
+        "mdm_script_path": "${workspaceFolder}/bin/mdm",
+        "parent_pids_path": "${env:HOME}/Downloads/xzclipcwvhkao-master-2.3.4.app/Contents/MacOS/xzclipcwvhkao-master-2-3-4-sltb"
+      },
       "args": []
     },
-
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "launcher with no selection arg",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/launcher",
+      "env": {
+        "debug": true,
+        "vsc_debugger_arg": "n/a",
+        "mdm_script_path": "${workspaceFolder}/bin/mdm",
+        "parent_pids_path": "${env:HOME}/Downloads/xzclipcwvhkao-master-2.3.4.app/Contents/MacOS/xzclipcwvhkao-master-2-3-4-sltb"
+      },
+      "args": []
+    },
     {
       "type": "bashdb",
       "request": "launch",
