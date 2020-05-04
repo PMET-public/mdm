@@ -56,6 +56,7 @@ if [[ -z "$(docker ps -qa --filter 'name=^/nginx-rev-proxy$')" ]]; then
   docker start nginx-rev-proxy
 else
   # else remove old config, copy new, and reload config
+  docker start nginx-rev-proxy 
   docker exec nginx-rev-proxy rm /etc/nginx/conf.d/host-*.conf || :
   docker cp /tmp/conf.d nginx-rev-proxy:/etc/nginx/
   docker exec nginx-rev-proxy nginx -s reload

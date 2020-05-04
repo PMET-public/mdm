@@ -94,6 +94,10 @@ is_docker_ready && formatted_cached_docker_ps_output="$(
     perl -pe 's/ (Up|Exited) .*/ \1/'
 )"
 
+is_onedrive_linked() {
+  [[ -d "$HOME/Adobe Systems Incorporated/SITeam - docker" ]]
+}
+
 is_app_installed() {
   # grep once and store result in var
   [[ -n "$app_is_installed" ]] ||

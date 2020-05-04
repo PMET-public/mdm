@@ -79,13 +79,14 @@ install_app() {
     [[ -f media.tar.gz ]] && extract_tar_to_docker media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
     docker-compose up build
-    docker-compose run deploy cloud-deploy
-    docker-compose run deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
-    docker-compose run deploy magento-command setup:config:set --http-cache-hosts=varnish
-    docker-compose run deploy magento-command cache:clean
+    docker-compose run --rm deploy cloud-deploy
+    docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
+    docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
+    docker-compose run --rm deploy magento-command cache:clean
     # varnish brings up web -> brings up fpm
     docker-compose up -d varnish
-    docker-compose run deploy cloud-post-deploy
+    docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
+    docker-compose run --rm deploy cloud-post-deploy
     #docker-compose up -d
     #open "http://$(get_host)"
   ) >> "$handler_log_file" 2>&1 &
@@ -130,9 +131,38 @@ clone_app() {
 start_shell_in_app() {
   run_as_bash_script_in_terminal "
     cd \"$resource_dir/app\" || exit
-    docker-compose run deploy bash
+    docker-compose run --rm deploy bash
   "
 }
+
+run_as_bash_cmds_in_app() {
+  run_as_bash_script_in_terminal "
+    cd \"$resource_dir/app\" || exit
+    echo 'Running in Magento app:'
+    msg '
+    $1
+    
+    '
+    docker-compose run --rm deploy bash -c '$1' 2> /dev/null
+  "
+}
+
+reindex() {
+  run_as_bash_cmds_in_app "/app/bin/magento indexer:reindex"
+}
+
+flush_cache() {
+  run_as_bash_cmds_in_app "/app/bin/magento cache:flush; rm -rf /app/var/cache/* /app/var/page_cache/*"
+}
+
+switch_to_production_mode() {
+  run_as_bash_cmds_in_app "/app/bin/magento deploy:mode:set production"
+}
+
+switch_to_developer_mode() {
+  run_as_bash_cmds_in_app "/app/bin/magento deploy:mode:set developer"
+}
+
 
 start_mdm_shell() {
   local services_status

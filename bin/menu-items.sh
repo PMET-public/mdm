@@ -13,16 +13,15 @@ declare -A menu
 ! is_docker_installed && {
   key="Complete Docker installation by running for first time"
   keys+=("$key")
-  menu["$key-handler"]="start_docker"
+  menu["$key-handler"]=start_docker
   menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
   return
 }
 
-
 has_status_msg && {
   key="$(show_status)"
   keys+=("$key")
-  menu["$key-handler"]="clear_status"
+  menu["$key-handler"]=clear_status
   # if status is not disabled b/c still running, show completed check mark
   [[ "$key" =~ ^DISABLED ]] || menu["$key-icon"]="ic_check_${icon_color}_48dp.png"
 }
@@ -30,36 +29,43 @@ has_status_msg && {
 ! has_additional_tools && {
   key="Install additional tools for additional features"
   keys+=("$key")
-  menu["$key-handler"]="install_additional_tools"
+  menu["$key-handler"]=install_additional_tools
   menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
+}
+
+is_adobe_system && ! is_onedrive_linked && {
+  key="Setup OneDrive -> Click 'Sync' button"
+  keys+=("$key")
+  menu["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/Shared%20Documents/adobe-internal/docker"
+  menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
 }
 
 is_docker_suboptimal && {
   key="Optimize Docker for better performance"
   keys+=("$key")
   menu["$key-display-condition"]=""
-  menu["$key-handler"]="optimize_docker"
+  menu["$key-handler"]=optimize_docker
   menu["$key-icon"]="baseline_speed_${icon_color}_48dp.png"
 }
 
 ! is_docker_running && {
   key="Start Docker to continue"
   keys+=("$key")
-  menu["$key-handler"]="start_docker"
+  menu["$key-handler"]=start_docker
   menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
 }
 
 is_update_available && {
   key="Update MDM"
   keys+=("$key")
-  menu["$key-handler"]="update_mdm"
+  menu["$key-handler"]=update_mdm
   menu["$key-icon"]="ic_system_update_alt_${icon_color}_48dp.png"
 }
 
 ! is_app_installed && {
   key="Install & open Magento app in browser"
   keys+=("$key")
-  menu["$key-handler"]="install_app"
+  menu["$key-handler"]=install_app
   menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
   # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
 }
@@ -67,34 +73,34 @@ is_update_available && {
 is_app_running && {
   key="Open Magento app in browser"
   keys+=("$key")
-  menu["$key-handler"]="open_app"
+  menu["$key-handler"]=open_app
   menu["$key-icon"]="ic_launch_${icon_color}_48dp.png"
 }
 
 is_app_installed && is_app_running && {
   key="Stop Magento app"
   keys+=("$key")
-  menu["$key-handler"]="stop_app"
+  menu["$key-handler"]=stop_app
   menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
 }
 
 is_app_installed && ! is_app_running && {
   key="Restart Magento app"
   keys+=("$key")
-  menu["$key-handler"]="restart_app"
+  menu["$key-handler"]=restart_app
   menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
 }
 
 ! is_app_installed && {
   key="TODO Sync Magento app to remote env"
   keys+=("$key")
-  menu["$key-handler"]="sync_app_to_remote"
+  menu["$key-handler"]=sync_app_to_remote
   menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
 }
 
 key="TODO Clone to new Magento app"
 keys+=("$key")
-menu["$key-handler"]="clone_app"
+menu["$key-handler"]=clone_app
 menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
 
 
@@ -110,31 +116,28 @@ is_app_running && {
 
   key="Start shell in Magento app"
   keys+=("$key")
-  menu["$key-handler"]="start_shell_in_app"
+  menu["$key-handler"]=start_shell_in_app
 
   key="Magento CLI reference"
   keys+=("$key")
-  menu["$key-link"]="https://www.google.com"
-
-  key="Unlock admin account"
-  keys+=("$key")
-  menu["$key-handler"]="unlock_admin"
+  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
 
   key="Reindex"
   keys+=("$key")
-  menu["$key-handler"]="reindex"
-
-  key="Switch to production mode"
-  keys+=("$key")
-  menu["$key-handler"]="switch_to_production_mode"
-
-  key="Switch to developer mode"
-  keys+=("$key")
-  menu["$key-handler"]="switch_to_developer_mode"
+  menu["$key-handler"]=reindex
 
   key="Flush Cache"
   keys+=("$key")
-  menu["$key-handler"]="flush_cache"
+  menu["$key-handler"]=flush_cache
+
+  key="Switch to production mode"
+  keys+=("$key")
+  menu["$key-handler"]=switch_to_production_mode
+
+  key="Switch to developer mode"
+  keys+=("$key")
+  menu["$key-handler"]=switch_to_developer_mode
+
 }
 
 ###
@@ -145,32 +148,32 @@ is_app_running && {
 
 key="Start MDM shell"
 keys+=("$key")
-menu["$key-handler"]="start_mdm_shell"
+menu["$key-handler"]=start_mdm_shell
 menu["$key-icon"]="ic_code_${icon_color}_48dp.png"
 
 is_app_installed && {
   key="Show Magento app logs"
   keys+=("$key")
-  menu["$key-handler"]="show_app_logs"
+  menu["$key-handler"]=show_app_logs
   menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
 }
 
 key="Show MDM logs"
 keys+=("$key")
-menu["$key-handler"]="show_mdm_logs"
+menu["$key-handler"]=show_mdm_logs
 menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
 
 is_app_installed && {
   key="Uninstall this Magento app"
   keys+=("$key")
-  menu["$key-handler"]="uninstall_app"
+  menu["$key-handler"]=uninstall_app
   menu["$key-icon"]="ic_delete_${icon_color}_48dp.png"
 }
 
 are_other_magento_apps_running && {
   key="Stop all other Magento apps"
   keys+=("$key")
-  menu["$key-handler"]="stop_other_apps"
+  menu["$key-handler"]=stop_other_apps
   menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
 }
 
