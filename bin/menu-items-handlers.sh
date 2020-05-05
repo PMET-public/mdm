@@ -83,6 +83,15 @@ install_app() {
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
     # this command causes indexer to be set in app/etc/env.php but without the expected values for host/username
     docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
+    # TODO remove this hack that fixes this bug https://github.com/magento/magento2/issues/2852
+    docker-compose run --rm deploy perl -i -pe \
+      "s/'model' => 'mysql4',/
+      'username' => 'user', 
+      'host' => 'database.internal',
+      'dbname' => 'main',
+      'password' => '',
+      'model' => 'mysql4',/" /app/app/etc/env.php
+    docker-compose run --rm deploy magento-command indexer:reindex
     docker-compose run --rm deploy magento-command cache:clean
     # varnish brings up web -> brings up fpm
     docker-compose up -d varnish
@@ -116,6 +125,7 @@ restart_app() {
   {
     timestamp_msg "${FUNCNAME[0]}"
     # build and deploy restarts may be interfering
+    # TODO find way to start up all appropiate services without enumerating
     docker-compose start rabbitmq db fpm web varnish elasticsearch redis
     docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
     open "https://$(get_host)"
