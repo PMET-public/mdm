@@ -81,6 +81,7 @@ install_app() {
     docker-compose up build
     docker-compose run --rm deploy cloud-deploy
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
+    # this command causes indexer to be set in app/etc/env.php but without the expected values for host/username
     docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
     docker-compose run --rm deploy magento-command cache:clean
     # varnish brings up web -> brings up fpm
@@ -184,9 +185,8 @@ start/stop the Magento app to ensure the proper application state.
 Magento docker-compose reference: https://devdocs.magento.com/cloud/docker/docker-quick-reference.html
 Full docker-compose reference: https://docs.docker.com/compose/reference/overview/
 
-    \"
-    bash -l
-  "
+\"
+    bash -l"
 }
 
 show_app_logs() {
