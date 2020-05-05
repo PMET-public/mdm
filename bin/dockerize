@@ -187,7 +187,7 @@ env COMPOSER_HOME=.composer composer require magento/magento-cloud-docker:dev-de
 # create the docker configuration with the modified magento cloud docker
 ./vendor/bin/ece-docker build:compose --host="$host" --port="$http_port"
 mv docker-compose*.yml .docker "$app_dir"
-cp ~/.mdm/current/mcd.override.yml "$app_dir/docker-compose.override.yml"
+cp ~/.mdm/current/docker-files/mcd.override.yml "$app_dir/docker-compose.override.yml"
 # restore the original composer files for use in the build container later
 mv composer.json.bak composer.json
 mv composer.lock.bak composer.lock
@@ -204,8 +204,10 @@ cd "$app_dir" || exit
 rm -rf "$tmp_app_dir"
 
 # if cloning existing env, extract the DB into the expected dir
-is_existing_cloud_env &&
-  magento-cloud db:dump -p "$pid" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d/"
+is_existing_cloud_env && {
+  mkdir -p "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
+  magento-cloud db:dump -p "$pid" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
+}
 
 # if cloning existing env, grab only the encryption key from the env's app/etc/env.php
 is_existing_cloud_env && {
