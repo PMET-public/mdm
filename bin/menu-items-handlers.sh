@@ -89,7 +89,7 @@ install_app() {
     docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
     docker-compose run --rm deploy cloud-post-deploy
     #docker-compose up -d
-    #open "http://$(get_host)"
+    open "https://$(get_host)"
   ) >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
   show_mdm_logs >> "$handler_log_file" 2>&1 &
@@ -115,9 +115,10 @@ stop_app() {
 restart_app() {
   {
     timestamp_msg "${FUNCNAME[0]}"
-    docker-compose start
+    # build and deploy restarts may be interfering
+    docker-compose start rabbitmq db fpm web varnish elasticsearch redis
     docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
-    # TODO could check for HTTP 200
+    open "https://$(get_host)"
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Starting Magento application ..."
 }

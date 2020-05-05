@@ -187,7 +187,7 @@ key="Useful resources"
 keys+=("$key")
 
 is_adobe_system && {
-  key="About this project"
+  key="About MDM (ver. $mdm_version)"
   keys+=("$key")
   menu["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/SitePages/local-demo-solution-using-docker.aspx"
 

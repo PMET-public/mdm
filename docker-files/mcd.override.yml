@@ -7,9 +7,9 @@ services:
       - MYSQL_DATABASE=main
       - MYSQL_USER=user
       - MYSQL_PASSWORD=
-    networks: 
+    networks:
       default:
-        aliases: 
+        aliases:
           - database.internal
   build:
     image: 'pmetpublic/magento-cloud-docker-php:7.3-cli-1.1'
@@ -26,3 +26,8 @@ services:
   varnish:
     ports:
       - 80
+  elasticsearch:
+    networks:
+      default:
+        aliases:
+          - elasticsearch.internal
