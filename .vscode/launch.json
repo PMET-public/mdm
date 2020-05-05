@@ -12,7 +12,7 @@
       "program": "${workspaceFolder}/bin/launcher",
       "env": {
         "debug": true,
-        "vsc_debugger_arg": "Update MDM",
+        "vsc_debugger_arg": "Install & open Magento app in browser",
         "mdm_script_path": "${workspaceFolder}/bin/mdm",
         "parent_pids_path": "${env:HOME}/Downloads/xzclipcwvhkao-master-2.3.4.app/Contents/MacOS/xzclipcwvhkao-master-2-3-4-sltb"
       },
