@@ -306,6 +306,7 @@ restart_docker_and_wait() {
 }
 
 render_platypus_status_menu() {
+  local key key_length menu_output is_submenu
   key_length=${#keys[@]}
   menu_output=""
   is_submenu=false
@@ -329,8 +330,9 @@ render_platypus_status_menu() {
         menu_output+=$'\n'
       }
       menu_output+="MENUITEMICON|$lib_dir/../icons/${menu["$key-icon"]}|$key"$'\n'
-    elif [[ "$key" =~ ^DISABLED ]]; then
-      menu_output+="$key"
+    # status menu at top of menu case - needs newline
+    elif [[ "$key" =~ ^DISABLED && "$key" =~ ---$ ]]; then
+      menu_output+="$key"$'\n'
     else
       menu_output+="|$key"
     fi
@@ -339,7 +341,7 @@ render_platypus_status_menu() {
 }
 
 handle_menu_selection() {
-
+  local key
   # if selected menu item matches an exit timer, clear exit timer status and exit
   [[ "$menu_selection" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
   
