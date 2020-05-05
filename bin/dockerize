@@ -187,6 +187,7 @@ env COMPOSER_HOME=.composer composer require magento/magento-cloud-docker:dev-de
 # create the docker configuration with the modified magento cloud docker
 ./vendor/bin/ece-docker build:compose --host="$host" --port="$http_port"
 mv docker-compose*.yml .docker "$app_dir"
+cp ~/.mdm/current/mcd.override.yml "$app_dir/docker-compose.override.yml"
 # restore the original composer files for use in the build container later
 mv composer.json.bak composer.json
 mv composer.lock.bak composer.lock

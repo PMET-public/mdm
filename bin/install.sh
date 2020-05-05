@@ -18,7 +18,7 @@ msg() {
 printf '\e[8;50;140t'
 
 
-# grab latest mdm and link it
+# grab latest mdm release and link it
 # this code should closely mirror download_and_link_latest_release func in lib.sh
 # but must also exist here to bootstrap mdm
 repo_url="https://github.com/PMET-public/mdm"
@@ -51,21 +51,20 @@ Once all requirements are installed and validated, this script will not need to 
 brew install bash coreutils
 brew upgrade bash coreutils
 
-msg "
+[[ -d /Applications/Docker.app ]] || {
+  msg "
 
 Press ANY key to continue to the Docker Desktop For Mac download page. Then download and install that app.
 
 https://hub.docker.com/editions/community/docker-ce-desktop-mac/
 
 "
-
-read -n 1 -s -r -p ""
-
-# open docker for mac installation page
-open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
+  read -n 1 -s -r -p ""
+  # open docker for mac installation page
+  open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
+}
 
 msg "
-
 CLI dependencies successfully installed. If you downloaded and installed Docker Desktop for Mac,
 this script should not need to run again.
 

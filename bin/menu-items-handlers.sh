@@ -44,8 +44,8 @@ optimize_docker() {
     timestamp_msg "${FUNCNAME[0]}"
     cp "$docker_settings_file" "$docker_settings_file.bak"
     can_optimize_vm_cpus && perl -i -pe 's/("cpus"\s*:\s*)\d+/${1}4/' "$docker_settings_file"
-    can_optimize_vm_mem && perl -i -pe 's/("swapMiB"\s*:\s*)\d+/${1}2048/' "$docker_settings_file"
-    can_optimize_vm_swap && perl -i -pe 's/("memoryMiB"\s*:\s*)\d+/${1}4096/' "$docker_settings_file"
+    can_optimize_vm_swap && perl -i -pe 's/("swapMiB"\s*:\s*)\d+/${1}2048/' "$docker_settings_file"
+    can_optimize_vm_mem && perl -i -pe 's/("memoryMiB"\s*:\s*)\d+/${1}4096/' "$docker_settings_file"
     restart_docker_and_wait
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Optimizing Docker VM ..."
@@ -115,6 +115,7 @@ restart_app() {
   {
     timestamp_msg "${FUNCNAME[0]}"
     docker-compose start
+    docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
     # TODO could check for HTTP 200
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Starting Magento application ..."
@@ -152,7 +153,7 @@ reindex() {
 }
 
 flush_cache() {
-  run_as_bash_cmds_in_app "/app/bin/magento cache:flush; rm -rf /app/var/cache/* /app/var/page_cache/*"
+  run_as_bash_cmds_in_app "/app/bin/magento cache:flush"
 }
 
 switch_to_production_mode() {

@@ -130,13 +130,13 @@ is_app_running && {
   keys+=("$key")
   menu["$key-handler"]=flush_cache
 
-  key="Switch to production mode"
-  keys+=("$key")
-  menu["$key-handler"]=switch_to_production_mode
+  # key="Switch to production mode"
+  # keys+=("$key")
+  # menu["$key-handler"]=switch_to_production_mode
 
-  key="Switch to developer mode"
-  keys+=("$key")
-  menu["$key-handler"]=switch_to_developer_mode
+  # key="Switch to developer mode"
+  # keys+=("$key")
+  # menu["$key-handler"]=switch_to_developer_mode
 
 }
 

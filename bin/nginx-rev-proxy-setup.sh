@@ -8,7 +8,7 @@ mkdir -p /tmp/conf.d
 for network in $(docker network ls | grep default | grep bridge | awk '{print $2}'); do
 
   varnish_port=$(docker ps -a --filter "network=$network" --filter "label=com.docker.compose.service=varnish" --format "{{.Ports}}" | sed 's/.*://;s/-.*//')
-  magento_hostname=$(docker ps -a --filter "network=$network" --filter "label=com.docker.compose.service=web" --format "{{.Names}}")
+  magento_hostname=$(docker ps -a --filter "network=$network" --filter "label=com.docker.compose.service=web" --format "{{.Names}}" | sed 's/_web_.*//')
 
   if [[ -n "$varnish_port" && -n "$magento_hostname" ]]; then
 
@@ -16,7 +16,7 @@ for network in $(docker network ls | grep default | grep bridge | awk '{print $2
   cat << EOF > "/tmp/conf.d/host-$magento_hostname.conf"
     server {
       listen 443 ssl http2;
-      server_name  $magento_hostname;
+      server_name  $magento_hostname.*;
       ssl_certificate /etc/letsencrypt/fullchain1.pem;
       ssl_certificate_key /etc/letsencrypt/privkey1.pem;
       location / {
@@ -27,7 +27,7 @@ for network in $(docker network ls | grep default | grep bridge | awk '{print $2
     }
     server {
       listen 80;
-      server_name  $magento_hostname;
+      server_name  $magento_hostname.*;
       location / {
         proxy_pass http://host.docker.internal:$varnish_port;
         proxy_set_header Host \$host;
