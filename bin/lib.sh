@@ -101,7 +101,12 @@ is_onedrive_linked() {
 }
 
 get_onedrive_cert_dir() {
-  find $HOME/Adobe $HOME/Adobe\ Systems\ Incorporated -type d -path "*/certs/the1umastory.com" 2> /dev/null
+  # search multiple paths including ones that may not exist causing a non-zero exit status
+  find \
+    $HOME/Adobe \
+    $HOME/Adobe\ Systems\ Incorporated \
+    -type d -path "*/certs/the1umastory.com" 2> /dev/null
+  return 0
 }
 
 is_app_installed() {

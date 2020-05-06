@@ -138,9 +138,9 @@ restart_app() {
     # build and deploy restarts may be interfering
     # TODO find way to start up all appropiate services without enumerating
     docker-compose start rabbitmq db fpm web varnish elasticsearch redis
-    # TODO another apparent bug where any cache has to be cleaned with a restart
-    docker-compose run --rm deploy magento-command cache:clean config_webservice
     docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
+    # TODO another BUG where a cache has to be cleaned with a restart AND after a time delay. RACE CONDITION?!
+    docker-compose run --rm deploy magento-command cache:clean config_webservice
     open "https://$(get_host)"
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Starting Magento application ..."

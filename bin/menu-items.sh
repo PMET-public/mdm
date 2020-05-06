@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# N.B. be wary of colliding (repeating) keys where one is a top level menu item and another is a submenu
+
 # icons from https://material.io/resources/icons/
 
 is_dark_mode() {
@@ -124,9 +126,16 @@ is_advanced_mode && ! is_app_running && {
   menu["$key-disabled"]=true
 }
 
+is_app_installed && {
+  key="Uninstall this Magento app"
+  keys+=("$key")
+  menu["$key-handler"]=uninstall_app
+  menu["$key-icon"]="ic_delete_${icon_color}_48dp.png"
+}
+
 ###
 #
-# Start Magento commands submenu
+# start Magento commands submenu
 #
 ###
 
@@ -143,11 +152,6 @@ is_app_installed && {
   key="Start shell in Magento app"
   keys+=("$key")
   menu["$key-handler"]=start_shell_in_app
-
-
-  key="Magento CLI reference"
-  keys+=("$key")
-  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
 
   is_app_running && {
     key="Reindex"
@@ -195,32 +199,22 @@ is_app_installed && {
 
 ###
 #
-# End Magento commands submenu
+# end Magento commands submenu
 #
 ###
 
-key="Start MDM shell"
-keys+=("$key")
-menu["$key-handler"]=start_mdm_shell
-menu["$key-icon"]="ic_code_${icon_color}_48dp.png"
-
-is_app_installed && is_advanced_mode && {
-  key="Show Magento app logs"
+is_advanced_mode && {
+  key="Start MDM shell"
   keys+=("$key")
-  menu["$key-handler"]=show_app_logs
-  menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
+  menu["$key-handler"]=start_mdm_shell
+  menu["$key-icon"]="ic_code_${icon_color}_48dp.png"
 }
 
-key="Show MDM logs"
-keys+=("$key")
-menu["$key-handler"]=show_mdm_logs
-menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
-
-is_app_installed && {
-  key="Uninstall this Magento app"
+! is_advanced_mode && {
+  key="Show MDM logs"
   keys+=("$key")
-  menu["$key-handler"]=uninstall_app
-  menu["$key-icon"]="ic_delete_${icon_color}_48dp.png"
+  menu["$key-handler"]=show_mdm_logs
+  menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
 }
 
 are_other_magento_apps_running && {
@@ -233,7 +227,7 @@ are_other_magento_apps_running && {
 
 ###
 #
-# Start Help / Support submenu
+# start Help / Support submenu
 #
 ###
 
@@ -260,13 +254,13 @@ menu["$key-link"]="https://support.magento.com/hc/en-us/requests"
 
 ###
 #
-# End Help/Support submenu
+# end Help/Support submenu
 #
 ###
 
 ###
 #
-# Start Useful resources submenu
+# start Useful resources submenu
 #
 ###
 
@@ -312,9 +306,85 @@ is_adobe_system && {
 
 ###
 #
-# End Useful resources submenu
+# end Useful resources submenu
 #
 ###
+
+###
+#
+# start CLI references
+#
+###
+
+is_advanced_mode && {
+
+  key="CLI refences"
+  keys+=("$key")
+
+  key="Magento CLI reference"
+  keys+=("$key")
+  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
+
+  key="Magento Cloud CLI reference"
+  keys+=("$key")
+  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
+
+  key="Docker CLI reference"
+  keys+=("$key")
+  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
+
+  key="Docker-compose CLI reference"
+  keys+=("$key")
+  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
+
+}
+
+###
+#
+# end cli references
+#
+###
+
+###
+#
+# start logs submenu
+#
+###
+
+is_advanced_mode && {
+
+  key="Logs"
+  keys+=("$key")
+
+  key="Show advanced MDM logs"
+  keys+=("$key")
+  menu["$key-handler"]=show_mdm_logs
+
+  is_app_installed && {
+    key="Show Magento app logs"
+    keys+=("$key")
+    menu["$key-handler"]=show_app_logs
+  }
+
+  key="Show docker-compose logs"
+  keys+=("$key")
+  menu["$key-handler"]=show_mdm_logs
+
+}
+
+###
+#
+# end logs submenu
+#
+###
+
+is_advanced_mode && {
+  key="TODO Restart MDM with debugging enabled"
+  keys+=("$key")
+  menu["$key-handler"]=sync_app_to_remote
+  menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
+  menu["$key-disabled"]=true
+}
 
 is_advanced_mode && {
   key="Advanced mode is ON"
