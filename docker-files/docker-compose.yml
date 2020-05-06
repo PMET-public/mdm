@@ -14,7 +14,7 @@ services:
     command: /tmp/nginx-rev-proxy-setup.sh
     image: debian:stable-slim
     environment: 
-      - cert_dir="$HOME/Adobe Systems Incorporated/SITeam - docker/certs/the1umastory.com"
+      - cert_dir="$mdm_cert_dir"
     volumes:
       - /usr/local/bin/docker:/usr/bin/docker
       - /var/run/docker.sock:/var/run/docker.sock

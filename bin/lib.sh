@@ -96,7 +96,12 @@ is_docker_ready && formatted_cached_docker_ps_output="$(
 )"
 
 is_onedrive_linked() {
-  [[ -d "$HOME/Adobe Systems Incorporated/SITeam - docker" ]]
+  [[ -d "$HOME/Adobe Systems Incorporated/SITeam - docker" ]] ||
+    [[ -d "$HOME/Adobe/SITeam - docker" ]]
+}
+
+get_onedrive_cert_dir() {
+  find $HOME/Adobe $HOME/Adobe\ Systems\ Incorporated -type d -path "*/certs/the1umastory.com" 2> /dev/null
 }
 
 is_app_installed() {
@@ -116,6 +121,25 @@ is_app_running() {
     app_is_running=$?
   }
   return "$app_is_running"
+}
+
+are_required_ports_free() {
+  ! nc -z 127.0.0.1 80 && ! nc -z 127.0.0.1 443
+  return
+}
+
+is_nginx_rev_proxy_running() {
+  container_id=$(docker ps -q --filter 'name=^nginx-rev-proxy$')
+  [[ -n "$container_id" ]]
+}
+
+is_network_state_ok() {
+  # check once and store result in var
+  [[ -n "$network_state_is_ok" ]] || {
+    are_required_ports_free || is_nginx_rev_proxy_running
+    network_state_is_ok=$?
+  }
+  return "$network_state_is_ok"
 }
 
 are_other_magento_apps_running() {
@@ -334,6 +358,7 @@ render_platypus_status_menu() {
         is_submenu=false
         menu_output+=$'\n'
       }
+      [[ ${menu["$key-disabled"]} ]] && menu_output+="DISABLED|"
       menu_output+="MENUITEMICON|$lib_dir/../icons/${menu["$key-icon"]}|$key"$'\n'
     # status menu at top of menu case - needs newline
     elif [[ "$key" =~ ^DISABLED && "$key" =~ ---$ ]]; then

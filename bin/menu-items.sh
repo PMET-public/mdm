@@ -63,11 +63,20 @@ is_update_available && {
 }
 
 ! is_app_installed && {
-  key="Install & open Magento app in browser"
-  keys+=("$key")
-  menu["$key-handler"]=install_app
-  menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
-  # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
+  if is_network_state_ok; then
+    key="Install & open Magento app in browser"
+    keys+=("$key")
+    menu["$key-handler"]=install_app
+    menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
+    # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
+  else
+    key="Can't install. Local ports in use."
+    keys+=("$key")
+    menu["$key-handler"]=no_op
+    menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
+    # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
+    menu["$key-disabled"]=true
+  fi
 }
 
 is_app_running && {
@@ -85,10 +94,18 @@ is_app_installed && is_app_running && {
 }
 
 is_app_installed && ! is_app_running && {
-  key="Restart Magento app"
-  keys+=("$key")
-  menu["$key-handler"]=restart_app
-  menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+  if is_network_state_ok; then
+    key="Restart Magento app"
+    keys+=("$key")
+    menu["$key-handler"]=restart_app
+    menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+  else 
+    key="Can't restart Magento app. Local ports in use."
+    keys+=("$key")
+    menu["$key-handler"]=no_op
+    menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+    menu["$key-disabled"]=true
+  fi
 }
 
 is_advanced_mode && ! is_app_running && {
@@ -96,6 +113,7 @@ is_advanced_mode && ! is_app_running && {
   keys+=("$key")
   menu["$key-handler"]=sync_app_to_remote
   menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
+  menu["$key-disabled"]=true
 }
 
 is_advanced_mode && ! is_app_running && {
@@ -103,6 +121,7 @@ is_advanced_mode && ! is_app_running && {
   keys+=("$key")
   menu["$key-handler"]=clone_app
   menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
+  menu["$key-disabled"]=true
 }
 
 ###
@@ -185,7 +204,7 @@ keys+=("$key")
 menu["$key-handler"]=start_mdm_shell
 menu["$key-icon"]="ic_code_${icon_color}_48dp.png"
 
-is_app_installed && {
+is_app_installed && is_advanced_mode && {
   key="Show Magento app logs"
   keys+=("$key")
   menu["$key-handler"]=show_app_logs
@@ -211,6 +230,40 @@ are_other_magento_apps_running && {
   menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
 }
 
+
+###
+#
+# Start Help / Support submenu
+#
+###
+
+key="Help / Support"
+keys+=("$key")
+
+is_adobe_system && {
+  key="#m2-demo-support (Magento Org Slack)"
+  keys+=("$key")
+  menu["$key-link"]="slack://channel?team=T025FJ55H&id=C0MQZ62DV"
+}
+
+key="#cloud-docker (Magento Community Slack)"
+keys+=("$key")
+menu["$key-link"]="slack://channel?team=T4YUW69CM&id=CJ6F3F8NS"
+
+key="Offical Cloud Support"
+keys+=("$key")
+menu["$key-link"]="https://support.magento.com/hc/en-us/requests"
+
+# key=""
+# keys+=("$key")
+# menu["$key-link"]=""
+
+###
+#
+# End Help/Support submenu
+#
+###
+
 ###
 #
 # Start Useful resources submenu
@@ -221,6 +274,7 @@ key="Useful resources"
 keys+=("$key")
 
 is_adobe_system && {
+
   key="About MDM (ver. $mdm_version)"
   keys+=("$key")
   menu["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/SitePages/local-demo-solution-using-docker.aspx"
@@ -259,39 +313,6 @@ is_adobe_system && {
 ###
 #
 # End Useful resources submenu
-#
-###
-
-###
-#
-# Start Help/Support submenu
-#
-###
-
-key="Help/Support"
-keys+=("$key")
-
-is_adobe_system && {
-  key="#m2-demo-support (Magento Org Slack)"
-  keys+=("$key")
-  menu["$key-link"]="slack://channel?team=T025FJ55H&id=C0MQZ62DV"
-}
-
-key="#cloud-docker (Magento Community Slack)"
-keys+=("$key")
-menu["$key-link"]="slack://channel?team=T4YUW69CM&id=CJ6F3F8NS"
-
-key="Offical Cloud Support"
-keys+=("$key")
-menu["$key-link"]="https://support.magento.com/hc/en-us/requests"
-
-# key=""
-# keys+=("$key")
-# menu["$key-link"]=""
-
-###
-#
-# End Help/Support submenu
 #
 ###
 

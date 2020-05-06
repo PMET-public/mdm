@@ -92,9 +92,15 @@ install_app() {
       'password' => '',
       'model' => 'mysql4',/" /app/app/etc/env.php
     docker-compose run --rm deploy magento-command indexer:reindex
-    docker-compose run --rm deploy magento-command cache:clean
+    docker-compose run --rm deploy magento-command cache:clean config_webservice
     # varnish brings up web -> brings up fpm
     docker-compose up -d varnish
+    mdm_cert_dir="$(get_onedrive_cert_dir)"
+    [[ -n $mdm_cert_dir ]] &&
+      export mdm_cert_dir ||
+      error "Could not find certs in expected OneDrive location."
+    [[ -r "$mdm_cert_dir/cert1.pem" ]] ||
+      error "Can't read TLS certificates from OneDrive."
     docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
     # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
     docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | \
@@ -132,6 +138,8 @@ restart_app() {
     # build and deploy restarts may be interfering
     # TODO find way to start up all appropiate services without enumerating
     docker-compose start rabbitmq db fpm web varnish elasticsearch redis
+    # TODO another apparent bug where any cache has to be cleaned with a restart
+    docker-compose run --rm deploy magento-command cache:clean config_webservice
     docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
     open "https://$(get_host)"
   } >> "$handler_log_file" 2>&1 &
