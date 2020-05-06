@@ -97,7 +97,10 @@ install_app() {
     docker-compose up -d varnish
     docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
     # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
-    docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | perl -pe 's/ .*/ $(get_host)/' >> /etc/hosts; cloud-post-deploy"
+    docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | \
+      perl -pe 's/ .*/ $(get_host)/' >> /etc/hosts;
+      /app/bin/magento cache:enable
+      cloud-post-deploy"
     # docker-compose run --rm deploy cloud-post-deploy
     # DO NOT RUN -> docker-compose up -d
     open "https://$(get_host)"
@@ -164,6 +167,18 @@ run_as_bash_cmds_in_app() {
 
 reindex() {
   run_as_bash_cmds_in_app "/app/bin/magento indexer:reindex"
+}
+
+enable_all_except_cms_cache() {
+  run_as_bash_cmds_in_app "/app/bin/magento cache:enable; /app/bin/magento cache:disable layout block_html full_page"
+}
+
+enable_all_caches() {
+  run_as_bash_cmds_in_app "/app/bin/magento cache:enable"
+}
+
+disable_all_caches() {
+  run_as_bash_cmds_in_app "/app/bin/magento cache:disable"
 }
 
 flush_cache() {

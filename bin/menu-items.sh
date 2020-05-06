@@ -126,6 +126,18 @@ is_app_running && {
   keys+=("$key")
   menu["$key-handler"]=reindex
 
+  key="Enable all except cms cache"
+  keys+=("$key")
+  menu["$key-handler"]=enable_all_except_cms_cache
+
+  key="Enable all caches"
+  keys+=("$key")
+  menu["$key-handler"]=enable_all_caches
+
+  key="Disable most caches"
+  keys+=("$key")
+  menu["$key-handler"]=disable_most_caches
+
   key="Flush Cache"
   keys+=("$key")
   menu["$key-handler"]=flush_cache
