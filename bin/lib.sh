@@ -23,7 +23,7 @@ done
 #
 ###
 
-mdm_version=0.0.14
+mdm_version=0.0.15
 mdm_path="$HOME/.mdm"
 red='\033[0;31m'
 green='\033[0;32m'
