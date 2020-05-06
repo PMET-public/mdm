@@ -35,6 +35,39 @@
     {
       "type": "bashdb",
       "request": "launch",
+      "name": "Dockerize a sample ref cloud env with complete media cache",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": ["-p", "xzclipcwvhkao", "-e", "master", "-n", "ref", "-m", "-i", "~/.mdm/current/icons/b2b.icns"]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Dockerize a sample demo cloud env with complete media cache",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": ["-p", "34gqyvr5hijbu", "-e", "master", "-n", "demo", "-m", "-i", "~/.mdm/current/icons/demo.icns"]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Dockerize a sample b2b cloud env with complete media cache",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": ["-p", "q72xoca5xcysq", "-e", "master", "-n", "b2b", "-m", "-i", "~/.mdm/current/icons/b2b.icns"]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
       "name": "Bash-Debug (simplest configuration)",
       "program": "${file}"
     }

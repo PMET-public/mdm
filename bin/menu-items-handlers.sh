@@ -96,8 +96,10 @@ install_app() {
     # varnish brings up web -> brings up fpm
     docker-compose up -d varnish
     docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
-    docker-compose run --rm deploy cloud-post-deploy
-    #docker-compose up -d
+    # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
+    docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | perl -pe 's/ .*/ $(get_host)/' >> /etc/hosts; cloud-post-deploy"
+    # docker-compose run --rm deploy cloud-post-deploy
+    # DO NOT RUN -> docker-compose up -d
     open "https://$(get_host)"
   ) >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
@@ -166,6 +168,14 @@ reindex() {
 
 flush_cache() {
   run_as_bash_cmds_in_app "/app/bin/magento cache:flush"
+}
+
+run_cron() {
+  run_as_bash_cmds_in_app "/app/bin/magento cron:run"
+}
+
+resize_images() {
+  run_as_bash_cmds_in_app "/app/bin/magento catalog:images:resize"
 }
 
 switch_to_production_mode() {

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-set -x
+[[ $debug ]] && set -x
 
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
@@ -52,13 +52,15 @@ Options:
   -g git url                Git repository to install from
   -b branch                 Git branch for install (HEAD commit of branch will be used)
   -t tag                    Git tag for install (not compatible with '-b')
+  -n name                   A descriptive name for the specific Magento app (e.g. autoparts-b2b or fashion-b2c)
   -a /path/to/auth.json     Optional path to auth.json file if required by composer
   -i /path/to/file.icns     Optional path to icon for Platyplus OSX app bundle (Apple .icns file preferred)
+  -m                        Include complete media cache (larger size and longer time to run but image resizing already done)
 "
 }
 
 # parse options
-while getopts "b:e:g:hp:t:a:i:" opt || [[ $# -eq 0 ]]; do
+while getopts "b:e:g:hp:t:n:a:i:" opt || [[ $# -eq 0 ]]; do
   case "$opt" in
     h ) print_usage; exit 0 ;;
     p ) pid="$OPTARG" ;;
@@ -66,6 +68,8 @@ while getopts "b:e:g:hp:t:a:i:" opt || [[ $# -eq 0 ]]; do
     g ) git_url="$OPTARG" ;;
     b ) branch="$OPTARG" ;;
     t ) tag="$OPTARG" ;;
+    m ) media_cache=true ;;
+    n ) app_name="$OPTARG" ;;
     a ) auth_json_path="$OPTARG" ;;
     i ) app_icon_path="$OPTARG" ;;
     \? )
@@ -98,16 +102,18 @@ You must provide either:
 [[ -n "$auth_json_path" && ! -f "$auth_json_path" ]] && error "Composer auth file not found: $auth_json_path"
 [[ ! -f "$app_icon_path" ]] && error "App icon not found: $app_icon_path"
 
-
-if is_existing_cloud_env; then
-  magento-cloud -q || error "The magento-cloud CLI was not found. To install, run
-  curl -svLS https://accounts.magento.cloud/cli/installer | php"
-  app_name="$pid-$env"
-else
-  is_valid_git_url "$git_url" || error "Please check your git url."
-  git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/\1/')
-  app_name="$git_repo-$branch$tag"
-fi
+# if an app_name is provided, use it. otherwise, determine one based on other input.
+[[ $app_name ]] || {
+  if is_existing_cloud_env; then
+    magento-cloud -q || error "The magento-cloud CLI was not found. To install, run
+    curl -svLS https://accounts.magento.cloud/cli/installer | php"
+    app_name="$pid-$env"
+  else
+    is_valid_git_url "$git_url" || error "Please check your git url."
+    git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/\1/')
+    app_name="$git_repo-$branch$tag"
+  fi
+}
 
 # clone and then remove unwanted files from the git repo
 tmp_app_dir="$HOME/Downloads/$app_name"
@@ -140,7 +146,12 @@ cp -R "$lib_dir" "$app_dir"
 # this will cause significant redundancy of images until can be deduped
 is_existing_cloud_env && {
     mkdir -p "$tmp_app_dir/pub/media"
-    magento-cloud mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" --exclude=cache
+    if [[ $media_cache ]]; then
+      magento-cloud ssh -y -p "$pid" -e "$env" "/app/bin/magento catalog:images:resize"
+    else
+      media_cache_option="--exclude=cache"
+    fi
+    magento-cloud mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" $media_cache_option
     tar -C "$tmp_app_dir" -zcf "$app_dir/media.tar.gz" "pub/media"
 }
 
@@ -204,10 +215,8 @@ cd "$app_dir" || exit
 rm -rf "$tmp_app_dir"
 
 # if cloning existing env, extract the DB into the expected dir
-is_existing_cloud_env && {
-  mkdir -p "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
+is_existing_cloud_env &&
   magento-cloud db:dump -p "$pid" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
-}
 
 # if cloning existing env, grab only the encryption key from the env's app/etc/env.php
 is_existing_cloud_env && {

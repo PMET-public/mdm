@@ -130,6 +130,14 @@ is_app_running && {
   keys+=("$key")
   menu["$key-handler"]=flush_cache
 
+  key="Run cron jobs"
+  keys+=("$key")
+  menu["$key-handler"]=run_cron
+
+  key="Pre-generate resized catalog images"
+  keys+=("$key")
+  menu["$key-handler"]=resize_images
+
   # key="Switch to production mode"
   # keys+=("$key")
   # menu["$key-handler"]=switch_to_production_mode
