@@ -60,7 +60,7 @@ Options:
 }
 
 # parse options
-while getopts "b:e:g:hp:t:n:a:i:" opt || [[ $# -eq 0 ]]; do
+while getopts "b:e:g:hp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
   case "$opt" in
     h ) print_usage; exit 0 ;;
     p ) pid="$OPTARG" ;;
