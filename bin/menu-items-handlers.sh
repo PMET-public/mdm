@@ -169,6 +169,10 @@ reindex() {
   run_as_bash_cmds_in_app "/app/bin/magento indexer:reindex"
 }
 
+run_cron() {
+  run_as_bash_cmds_in_app "/app/bin/magento cron:run"
+}
+
 enable_all_except_cms_cache() {
   run_as_bash_cmds_in_app "/app/bin/magento cache:enable; /app/bin/magento cache:disable layout block_html full_page"
 }
@@ -185,8 +189,22 @@ flush_cache() {
   run_as_bash_cmds_in_app "/app/bin/magento cache:flush"
 }
 
-run_cron() {
-  run_as_bash_cmds_in_app "/app/bin/magento cron:run"
+warm_cache() {
+  # compare to chrome extenstion function (keep the funcs synced)
+  domain=$(get_host)
+  run_as_bash_script_in_terminal "
+    set -x
+    domain=$domain
+    url=\"https://\$domain\"
+    tmp_file=$(mktemp)
+
+    msg Warming cache ...
+
+    # recursively get admin and store front
+    wget -nv -O \$tmp_file -H --domains=\$domain \$url/admin
+    wget -nv -r -X static,media -l 1 -O \$tmp_file -H --domains=\$domain \$url
+    rm \$tmp_file
+  "
 }
 
 resize_images() {

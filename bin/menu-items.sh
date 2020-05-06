@@ -126,6 +126,10 @@ is_app_running && {
   keys+=("$key")
   menu["$key-handler"]=reindex
 
+  key="Run cron jobs"
+  keys+=("$key")
+  menu["$key-handler"]=run_cron
+
   key="Enable all except cms cache"
   keys+=("$key")
   menu["$key-handler"]=enable_all_except_cms_cache
@@ -142,9 +146,9 @@ is_app_running && {
   keys+=("$key")
   menu["$key-handler"]=flush_cache
 
-  key="Run cron jobs"
+  key="Warm Cache"
   keys+=("$key")
-  menu["$key-handler"]=run_cron
+  menu["$key-handler"]=warm_cache
 
   key="Pre-generate resized catalog images"
   keys+=("$key")
