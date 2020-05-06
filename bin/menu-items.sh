@@ -111,45 +111,54 @@ is_advanced_mode && ! is_app_running && {
 #
 ###
 
-is_app_running && {
+is_app_installed && {
   key="Magento commands"
   keys+=("$key")
+
+  ! is_app_running && {
+    key="Warning: 🛑 App is stopped."
+    keys+=("$key")
+    menu["$key-handler"]=no_op
+  }
 
   key="Start shell in Magento app"
   keys+=("$key")
   menu["$key-handler"]=start_shell_in_app
 
+
   key="Magento CLI reference"
   keys+=("$key")
   menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
 
-  key="Reindex"
-  keys+=("$key")
-  menu["$key-handler"]=reindex
+  is_app_running && {
+    key="Reindex"
+    keys+=("$key")
+    menu["$key-handler"]=reindex
 
-  key="Run cron jobs"
-  keys+=("$key")
-  menu["$key-handler"]=run_cron
+    key="Run cron jobs"
+    keys+=("$key")
+    menu["$key-handler"]=run_cron
 
-  key="Enable all except cms cache"
-  keys+=("$key")
-  menu["$key-handler"]=enable_all_except_cms_cache
+    key="Enable all except cms cache"
+    keys+=("$key")
+    menu["$key-handler"]=enable_all_except_cms_cache
 
-  key="Enable all caches"
-  keys+=("$key")
-  menu["$key-handler"]=enable_all_caches
+    key="Enable all caches"
+    keys+=("$key")
+    menu["$key-handler"]=enable_all_caches
 
-  key="Disable most caches"
-  keys+=("$key")
-  menu["$key-handler"]=disable_most_caches
+    key="Disable most caches"
+    keys+=("$key")
+    menu["$key-handler"]=disable_most_caches
 
-  key="Flush Cache"
-  keys+=("$key")
-  menu["$key-handler"]=flush_cache
+    key="Flush Cache"
+    keys+=("$key")
+    menu["$key-handler"]=flush_cache
 
-  key="Warm Cache"
-  keys+=("$key")
-  menu["$key-handler"]=warm_cache
+    key="Warm Cache"
+    keys+=("$key")
+    menu["$key-handler"]=warm_cache
+  }
 
   key="Pre-generate resized catalog images"
   keys+=("$key")
@@ -287,14 +296,14 @@ menu["$key-link"]="https://support.magento.com/hc/en-us/requests"
 ###
 
 is_advanced_mode && {
-  key="Advanced mode ON"
+  key="Advanced mode is ON"
   keys+=("$key")
   menu["$key-handler"]=toggle_advanced_mode
   menu["$key-icon"]="outline_toggle_on_${icon_color}_48dp.png"
 }
 
 ! is_advanced_mode && {
-  key="Advanced mode OFF"
+  key="Advanced mode is OFF"
   keys+=("$key")
   menu["$key-handler"]=toggle_advanced_mode
   menu["$key-icon"]="outline_toggle_off_${icon_color}_48dp.png"

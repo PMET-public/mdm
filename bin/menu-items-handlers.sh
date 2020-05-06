@@ -146,6 +146,10 @@ clone_app() {
   :
 }
 
+no_op() {
+  :
+}
+
 start_shell_in_app() {
   run_as_bash_script_in_terminal "
     cd \"$resource_dir/app\" || exit
