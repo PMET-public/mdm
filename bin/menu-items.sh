@@ -91,18 +91,19 @@ is_app_installed && ! is_app_running && {
   menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
 }
 
-! is_app_installed && {
+is_advanced_mode && ! is_app_running && {
   key="TODO Sync Magento app to remote env"
   keys+=("$key")
   menu["$key-handler"]=sync_app_to_remote
   menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
 }
 
-key="TODO Clone to new Magento app"
-keys+=("$key")
-menu["$key-handler"]=clone_app
-menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
-
+is_advanced_mode && ! is_app_running && {
+  key="TODO Clone to new Magento app"
+  keys+=("$key")
+  menu["$key-handler"]=clone_app
+  menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
+}
 
 ###
 #
@@ -275,14 +276,28 @@ key="Offical Cloud Support"
 keys+=("$key")
 menu["$key-link"]="https://support.magento.com/hc/en-us/requests"
 
+# key=""
+# keys+=("$key")
+# menu["$key-link"]=""
+
 ###
 #
 # End Help/Support submenu
 #
 ###
 
-# key=""
-# keys+=("$key")
-# menu["$key-link"]=""
+is_advanced_mode && {
+  key="Advanced mode ON"
+  keys+=("$key")
+  menu["$key-handler"]=toggle_advanced_mode
+  menu["$key-icon"]="outline_toggle_on_${icon_color}_48dp.png"
+}
+
+! is_advanced_mode && {
+  key="Advanced mode OFF"
+  keys+=("$key")
+  menu["$key-handler"]=toggle_advanced_mode
+  menu["$key-icon"]="outline_toggle_off_${icon_color}_48dp.png"
+}
 
 : # need to return true or will exit when sourced with "-e" and last test = false

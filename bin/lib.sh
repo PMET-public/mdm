@@ -23,7 +23,7 @@ done
 #
 ###
 
-mdm_version=0.0.13
+mdm_version=0.0.14
 mdm_path="$HOME/.mdm"
 red='\033[0;31m'
 green='\033[0;32m'
@@ -35,6 +35,7 @@ recommended_vm_swap_mb=2048
 bytes_in_mb=1048576
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 repo_url="https://github.com/PMET-public/mdm"
+advanced_mode_flag_file="$mdm_path/advanced_mode_on"
 
 ###
 #
@@ -173,6 +174,10 @@ download_and_link_latest_release() {
 
 is_adobe_system() {
   [[ -d /Applications/Adobe\ Hub.app ]]
+}
+
+is_advanced_mode() {
+  [[ -f "$advanced_mode_flag_file" ]]
 }
 
 ###

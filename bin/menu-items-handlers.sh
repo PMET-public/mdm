@@ -287,3 +287,11 @@ stop_other_apps() {
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Stopping other apps ..."
 }
+
+toggle_advanced_mode() {
+  if [[ -f "$advanced_mode_flag_file" ]]; then
+    rm "$advanced_mode_flag_file"
+  else
+    touch "$advanced_mode_flag_file"
+  fi
+}
