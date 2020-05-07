@@ -282,6 +282,10 @@ is_adobe_system && {
   menu["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/SitePages/home.aspx"
 }
 
+key="MDM @ GitHub"
+keys+=("$key")
+menu["$key-link"]="https://github.com/pmet-public/mdm"
+
 key="Docker development @ devdocs"
 keys+=("$key")
 menu["$key-link"]="https://devdocs.magento.com/cloud/docker/docker-development.html"
@@ -321,19 +325,19 @@ is_advanced_mode && {
   key="CLI refences"
   keys+=("$key")
 
-  key="Magento CLI reference"
+  key="Magento CLI commands"
   keys+=("$key")
   menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
 
-  key="Magento Cloud CLI reference"
+  key="Magento Cloud CLI commands"
   keys+=("$key")
   menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
 
-  key="Docker CLI reference"
+  key="Docker CLI commands"
   keys+=("$key")
   menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
 
-  key="Docker-compose CLI reference"
+  key="Docker-compose CLI commands"
   keys+=("$key")
   menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
 

@@ -129,7 +129,7 @@ is_app_running() {
 }
 
 are_required_ports_free() {
-  ! nc -z 127.0.0.1 80 && ! nc -z 127.0.0.1 443
+  { ! nc -z 127.0.0.1 80 && ! nc -z 127.0.0.1 443; } > /dev/null 2>&1
   return
 }
 

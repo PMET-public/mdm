@@ -136,7 +136,7 @@ ee_version=$(
 app_dir="$tmp_app_dir-$ee_version"
 rm -rf "$app_dir" || :
 cp -a "$tmp_app_dir" "$app_dir"
-subdomain=$(echo "$app_name-$ee_version-$rand_subdomain_suffix" | perl -pe 's/\./-/g')
+subdomain=$(echo "$app_name-$ee_version-$rand_subdomain_suffix" | perl -pe 's/\./-/g' | tr '[:upper:]' '[:lower:]')
 host="$subdomain.$tld"
 
 # include the lib dir assets in app's bin dir
