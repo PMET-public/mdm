@@ -1,15 +1,21 @@
 #!/bin/bash
 
 set -e # stop on errors
-set -x 
+set -x
 
 red='\033[0;31m'
+yellow='\033[1;33m'
 green='\033[0;32m'
 no_color='\033[0m'
 
 error() {
   printf "\n%b%s%b\n\n" "$red" "$*" "$no_color" 1>&2 && exit 1
 }
+
+warning() {
+  printf "%b%s%b" "$yellow" "$*" "$no_color"
+}
+
 msg() {
   printf "%b%s%b\n" "$green" "$*" "$no_color"
 }
@@ -39,13 +45,24 @@ clear
 msg "
 
 Once all requirements are installed and validated, this script will not need to run again.
-(This script will require an admin account.)
-
 "
 
 # install homebrew
-[[ -f /usr/local/bin/brew ]] || \
+[[ -f /usr/local/bin/brew ]] || {
+  warning "This script installs Homebrew, which may require your password. If you're
+skeptical about entering your password here, you can install Homebrew (https://brew.sh/)
+independently first. Then you will NOT be prompted for your password by this script.
+"
+  msg "
+Alternatively, you can allow this script to install Homebrew by pressing ANY key to continue.
+"
+
+  read -n 1 -s -r -p ""
+
+  clear
+
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+}
 
 # do not install docker (which is docker toolbox) via homebrew; use docker for mac instead
 brew install bash coreutils
