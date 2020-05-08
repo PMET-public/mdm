@@ -267,11 +267,11 @@ menu["$key-link"]="https://support.magento.com/hc/en-us/requests"
 key="Useful resources"
 keys+=("$key")
 
-is_adobe_system && {
+key="About MDM (ver. $mdm_version)"
+keys+=("$key")
+menu["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/SitePages/local-demo-solution-using-docker.aspx"
 
-  key="About MDM (ver. $mdm_version)"
-  keys+=("$key")
-  menu["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/SitePages/local-demo-solution-using-docker.aspx"
+is_adobe_system && {
 
   key="Docker Folder (OneDrive)"
   keys+=("$key")
