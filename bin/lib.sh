@@ -100,13 +100,17 @@ is_onedrive_linked() {
     [[ -d "$HOME/Adobe/SITeam - docker" ]]
 }
 
-get_onedrive_cert_dir() {
+verify_mdm_cert_dir() {
   # search multiple paths including ones that may not exist causing a non-zero exit status
-  find \
+  mdm_cert_dir="$(find \
     $HOME/Adobe \
     $HOME/Adobe\ Systems\ Incorporated \
-    -type d -path "*/certs/the1umastory.com" 2> /dev/null
-  return 0
+    -type d -path "*/certs/the1umastory.com" 2> /dev/null || :)"
+  [[ -n $mdm_cert_dir ]] &&
+    export mdm_cert_dir ||
+    error "Could not find certs in expected location."
+  [[ -r "$mdm_cert_dir/cert1.pem" ]] ||
+    error "Can't read TLS certificates: $mdm_cert_dir/cert1.pem."
 }
 
 is_app_installed() {
