@@ -331,15 +331,15 @@ is_advanced_mode && {
 
   key="Magento Cloud CLI commands"
   keys+=("$key")
-  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
+  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cloud-cli-reference.html"
 
   key="Docker CLI commands"
   keys+=("$key")
-  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
+  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/docker-cli-reference.html"
 
   key="Docker-compose CLI commands"
   keys+=("$key")
-  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
+  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/docker-compose-cli-reference.html"
 
 }
 
