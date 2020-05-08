@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-## if a selected menu item task:
-#   1. would complete immediately, just run it
-#   2. would require user interaction (including long term monitoring of output), run in terminal
+# if a selected menu item task:
+#   1. completes immediately, just run it
+#   2. requires user interaction (including long term monitoring of output), run in terminal
 #   3. should be completed in the background, run as child process and set non-blocking status
 
 clear_status() {
