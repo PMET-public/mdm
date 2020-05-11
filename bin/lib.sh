@@ -138,7 +138,7 @@ are_required_ports_free() {
 }
 
 is_nginx_rev_proxy_running() {
-  container_id=$(docker ps -q --filter 'name=^nginx-rev-proxy$')
+  container_id=$(docker ps -q --filter 'label=mdm-nginx-rev-proxy')
   [[ -n "$container_id" ]]
 }
 

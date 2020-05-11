@@ -41,23 +41,16 @@ EOF
 
 done
 
-# if running nginx proxy does not exist, create it, copy over conf, and start it
-if [[ -z "$(docker ps -qa --filter 'name=^/nginx-rev-proxy$')" ]]; then
-  # N.B. after some testing, docker -v can NOT be quoted and must have spaces escaped (\ )
-  # so a string is constructed by escaping and then removing the bash expansion quotes
-  echo "docker create --name nginx-rev-proxy \
-    --hostname nginx-rev-proxy \
-    -v $(echo "$cert_dir" | perl -pe 's/ /\\ /g'):/etc/letsencrypt \
-    -p 443:443 \
-    -p 80:80 \
-    -e hi=there \
-    pmetpublic/nginx" | perl -pe 's/"//g' | bash
-  docker cp /tmp/conf.d nginx-rev-proxy:/etc/nginx/
-  docker start nginx-rev-proxy
-else
-  # else remove old config, copy new, and reload config
-  docker start nginx-rev-proxy 
-  docker exec nginx-rev-proxy rm /etc/nginx/conf.d/host-*.conf || :
-  docker cp /tmp/conf.d nginx-rev-proxy:/etc/nginx/
-  docker exec nginx-rev-proxy nginx -s reload
-fi
+# N.B. after some testing, docker -v can NOT be quoted and must have spaces escaped (\ )
+# so a string is constructed by escaping and then removing the bash expansion quotes
+cid=$(echo "docker create \
+  --label mdm-nginx-rev-proxy \
+  -v $(echo "$cert_dir" | perl -pe 's/ /\\ /g'):/etc/letsencrypt \
+  -p 443:443 \
+  -p 80:80 \
+  nginx:stable" | perl -pe 's/"//g' | bash)
+docker cp /tmp/conf.d $cid:/etc/nginx/
+old_cid="$(docker ps -q --filter 'label=mdm-nginx-rev-proxy')"
+[[ $old_cid ]] && docker rm -f $old_cid
+docker start $cid
+
