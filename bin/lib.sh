@@ -252,6 +252,18 @@ seconds_since() {
   echo "$(( $(date +%s) - $1 ))"
 }
 
+confirm_or_exit() {
+  warning "
+
+ARE YOU SURE?! (y/n)
+
+"
+  read -p ''
+  [[ $REPLY =~ ^[Yy]$ ]] || {
+    msg "Exiting unchanged." && exit
+  }
+}
+
 ###
 #
 # end util functions
