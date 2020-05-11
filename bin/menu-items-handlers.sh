@@ -124,7 +124,7 @@ stop_app() {
   } >> "$handler_log_file" 2>&1 &
   # if stopped indirectly (by quitting the app), don't bother to set the status and wait
   run_without_args ||
-    set_status_and_wait_for_exit $! "Stopping Magento application ..."
+    set_status_and_wait_for_exit $! "Stopping Magento ..."
 }
 
 restart_app() {
@@ -139,7 +139,7 @@ restart_app() {
     docker-compose run --rm deploy magento-command cache:clean config_webservice
     open "https://$(get_host)"
   } >> "$handler_log_file" 2>&1 &
-  set_status_and_wait_for_exit $! "Starting Magento application ..."
+  set_status_and_wait_for_exit $! "Starting Magento ..."
 }
 
 sync_app_to_remote() {
