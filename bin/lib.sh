@@ -409,7 +409,7 @@ handle_menu_selection() {
 ##
 
 # allow parent_pids_path to be set by the env to debug a specific instance
-# otherwise grab the actual expect path of the osx platypus app
+# otherwise grab the actual exact path of the osx platypus app
 parent_pids_path="${parent_pids_path:-$(ps -p $PPID -o command=)}"
 
 called_from_platypus_app && {
