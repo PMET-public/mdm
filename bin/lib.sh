@@ -36,6 +36,7 @@ bytes_in_mb=1048576
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 repo_url="https://github.com/PMET-public/mdm"
 advanced_mode_flag_file="$mdm_path/advanced_mode_on"
+mdm_ver_file="$mdm_path/latest-sem-ver"
 
 ###
 #
@@ -178,18 +179,18 @@ get_latest_sem_ver() {
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local ver_file more_recent_of_two
-  ver_file="$mdm_path/latest-sem-ver"
-  if [[ -f "$ver_file" && "$(( $(date +%s) - $(stat -f%c "$ver_file") ))" -lt 86400 ]]; then
+  local mdm_ver_file more_recent_of_two
+  mdm_ver_file="$mdm_path/latest-sem-ver"
+  if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $(stat -f%c "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
-    latest_sem_ver="$(<"$mdm_path/latest-sem-ver")"
+    latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using gsort -V
     more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | gsort -V | tail -1)"
     [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
-    get_latest_sem_ver > "$ver_file" 2>/dev/null &
+    get_latest_sem_ver > "$mdm_ver_file" 2>/dev/null &
   fi
   return 1
 }

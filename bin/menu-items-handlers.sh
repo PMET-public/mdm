@@ -146,9 +146,16 @@ sync_app_to_remote() {
   :
 }
 
+force_check_mdm_ver() {
+  rm "$mdm_ver_file" || :
+  is_update_available
+}
+
 revert_to_prev_mdm() {
   :
 }
+
+
 
 toggle_mdm_debug_mode() {
   local app="${parent_pids_path/.app\/Contents\/MacOS\/*/.app}"

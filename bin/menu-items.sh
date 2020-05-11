@@ -267,7 +267,7 @@ menu["$key-link"]="https://support.magento.com/hc/en-us/requests"
 key="Useful resources"
 keys+=("$key")
 
-key="About MDM (ver. $mdm_version)"
+key="About MDM (v. $mdm_version)"
 keys+=("$key")
 menu["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/SitePages/local-demo-solution-using-docker.aspx"
 
@@ -403,9 +403,13 @@ is_advanced_mode && {
     menu["$key-handler"]=toggle_mdm_debug_mode
   fi
 
-  key="Revert to previous MDM"
+  key="Force check for new MDM versioon"
   keys+=("$key")
-  menu["$key-handler"]=revert_to_prev_mdm
+  menu["$key-handler"]=force_check_mdm_ver
+
+  # key="Revert to previous MDM"
+  # keys+=("$key")
+  # menu["$key-handler"]=revert_to_prev_mdm
 
   key="⚠️ Remove Magento images (breaks stopped apps)"
   keys+=("$key")
