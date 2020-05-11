@@ -382,26 +382,62 @@ is_advanced_mode && {
 #
 ###
 
-is_advanced_mode && {
-  key="TODO Restart MDM with debugging enabled"
-  keys+=("$key")
-  menu["$key-handler"]=sync_app_to_remote
-  menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
-  menu["$key-disabled"]=true
-}
+###
+#
+# start maintenance submenu
+#
+###
 
 is_advanced_mode && {
+
+  key="Maintenance"
+  keys+=("$key")
+
+  if [[ $debug ]]; then
+    key="Turn off MDM debugging (stops app)"
+    keys+=("$key")
+    menu["$key-handler"]=toggle_mdm_debug_mode
+  else
+    key="Turn on MDM debugging (stops app)"
+    keys+=("$key")
+    menu["$key-handler"]=toggle_mdm_debug_mode
+  fi
+
+  key="Revert to previous MDM"
+  keys+=("$key")
+  menu["$key-handler"]=revert_to_prev_mdm
+
+  key="⚠️ Remove Magento images (breaks stopped apps)"
+  keys+=("$key")
+  menu["$key-handler"]=rm_magento_docker_images
+
+  key="⚠️ Reset Docker (keeps only images)"
+  keys+=("$key")
+  menu["$key-handler"]=reset_docker
+
+  key="💥 Nuke Docker (removes everything!!)"
+  keys+=("$key")
+  menu["$key-handler"]=nuke_docker
+
+
+}
+
+###
+#
+# end maintenance submenu
+#
+###
+
+if is_advanced_mode; then
   key="Advanced mode is ON"
   keys+=("$key")
   menu["$key-handler"]=toggle_advanced_mode
   menu["$key-icon"]="outline_toggle_on_${icon_color}_48dp.png"
-}
-
-! is_advanced_mode && {
+else
   key="Advanced mode is OFF"
   keys+=("$key")
   menu["$key-handler"]=toggle_advanced_mode
   menu["$key-icon"]="outline_toggle_off_${icon_color}_48dp.png"
-}
+fi
 
 : # need to return true or will exit when sourced with "-e" and last test = false

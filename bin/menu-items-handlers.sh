@@ -146,6 +146,54 @@ sync_app_to_remote() {
   :
 }
 
+revert_to_prev_mdm() {
+  :
+}
+
+toggle_mdm_debug_mode() {
+  local app="${parent_pids_path/.app\/Contents\/MacOS\/*/.app}"
+  kill $PPID
+  if [[ $debug ]]; then
+    unset debug
+    open "$app"
+  else
+    debug=1 open "$app"
+  fi
+}
+
+rm_magento_docker_images() {
+  run_as_bash_script_in_terminal "
+    warning \"This will delete all Magento images to force the download of the latest versions. 
+If a Magento app is stopped, it will NOT be preserved.\"
+    confirm_or_exit
+    docker images | grep -E '^(magento|pmetpublic)/' | awk '{print \$3}' | xargs docker rmi -f
+  "
+}
+
+reset_docker() {
+  run_as_bash_script_in_terminal "
+    warning \"This will delete all docker containers, volumes, and networks.
+Docker images will be preserved to avoid downloading all images from scratch.\"
+    confirm_or_exit
+    docker stop \$(docker ps -qa)
+    docker rm -fv \$(docker ps -qa)
+    docker volume rm -f \$(docker volume ls -q)
+    docker network prune -f
+  "
+}
+
+nuke_docker() {
+  run_as_bash_script_in_terminal "
+    warning \"This will delete ALL local docker artifacts - containers, images, volumes, and networks!\"
+    confirm_or_exit
+    docker stop \$(docker ps -qa)
+    docker rm -fv \$(docker ps -qa)
+    docker volume rm -f \$(docker volume ls -q)
+    docker network prune -f
+    docker rmi -f \$(docker images -qa)
+  "
+}
+
 clone_app() {
   :
 }
@@ -270,8 +318,8 @@ uninstall_app() {
     exec 2> >(tee -ia \"$handler_log_file\" >&2)
     warning THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!
     confirm_or_exit
-      cd \"$resource_dir/app\" || exit
-      docker-compose down -v
+    cd \"$resource_dir/app\" || exit
+    docker-compose down -v
   "
 }
 
