@@ -139,9 +139,6 @@ cp -a "$tmp_app_dir" "$app_dir"
 subdomain=$(echo "$app_name-$ee_version-$rand_subdomain_suffix" | perl -pe 's/\./-/g' | tr '[:upper:]' '[:lower:]')
 host="$subdomain.$tld"
 
-# include the lib dir assets in app's bin dir
-cp -R "$lib_dir" "$app_dir"
-
 # if cloning existing env, download the media dir minus the cache
 # this will cause significant redundancy of images until can be deduped
 is_existing_cloud_env && {
