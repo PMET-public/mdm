@@ -269,13 +269,9 @@ uninstall_app() {
     exec > >(tee -ia \"$handler_log_file\")
     exec 2> >(tee -ia \"$handler_log_file\" >&2)
     warning THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!
-    read -p ' ARE YOU SURE?? (y/n) '
-    if [[ \$REPLY =~ ^[Yy]\$ ]]; then
+    confirm_or_exit
       cd \"$resource_dir/app\" || exit
       docker-compose down -v
-    else
-      echo -e '\nNothing changed.'
-    fi
   "
 }
 
