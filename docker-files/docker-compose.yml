@@ -12,7 +12,7 @@ services:
       -d "*.yourdomain.com" '
   nginx-rev-proxy-setup:
     command: /tmp/nginx-rev-proxy-setup.sh
-    image: debian:stable-slim
+    image: nginx:stable # same image used by proxy (1 fewer download)
     environment: 
       - cert_dir="$mdm_cert_dir"
     volumes:
