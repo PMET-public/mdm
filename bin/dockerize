@@ -12,12 +12,12 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 # 1. the app from an existing env or git repo + branch
 # 2. any added media files (such as pub/media including styles.css from m2 sample data install)
 #   - req before compose cache bundling for catalog media dedup if from existing
-# 3. the script to manage the stack
-# 4. the composer cache
-# 5. the docker-compose conf
+# 3. the composer cache
+# 4. the docker-compose conf
 #   - req after unique subdomain determined based on install source + version + random nonce
-# 6. the database
-# 7. the encryption key
+# 5. the database
+# 6. the encryption key
+# 7. the launching script to install or use MDM
 #
 
 app_icon_path="$lib_dir/../icons/magento.icns"
