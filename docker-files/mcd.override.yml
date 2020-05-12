@@ -36,3 +36,5 @@ services:
           - elasticsearch.internal
   web:
     image: 'pmetpublic/magento-cloud-docker-nginx'
+    ports:
+      - 80 # just expose port 80; don't map it to local 80; let docker decide

@@ -22,7 +22,7 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
 app_icon_path="$lib_dir/../icons/magento.icns"
 status_menu_icon_path="$lib_dir/../icons/magento-logo.png"
-http_port=$(( ( RANDOM % 10000 )  + 10000 ))
+# http_port=$(( ( RANDOM % 10000 )  + 10000 ))
 rand_subdomain_suffix=$(LC_ALL=C tr -dc 'a-z' < /dev/random | fold -w 4 | head -n 1)
 tld="the1umastory.com"
 
@@ -193,7 +193,7 @@ grep -q 'pmet-public/magento-cloud-docker' composer.json ||
   env COMPOSER_HOME=.composer composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
 env COMPOSER_HOME=.composer composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
 # create the docker configuration with the modified magento cloud docker
-./vendor/bin/ece-docker build:compose --host="$host" --port="$http_port"
+./vendor/bin/ece-docker build:compose --host="$host" # --port="$http_port"
 mv docker-compose*.yml .docker "$app_dir"
 cp ~/.mdm/current/docker-files/mcd.override.yml "$app_dir/docker-compose.override.yml"
 # restore the original composer files for use in the build container later
