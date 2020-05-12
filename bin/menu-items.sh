@@ -419,7 +419,7 @@ is_advanced_mode && {
   keys+=("$key")
   menu["$key-handler"]=reset_docker
 
-  key="💥 Nuke Docker (removes everything!!)"
+  key="🚨 Wipe Docker (removes everything!!!)"
   keys+=("$key")
   menu["$key-handler"]=nuke_docker
 
