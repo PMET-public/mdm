@@ -92,7 +92,7 @@ is_docker_ready() {
 }
 
 is_docker_ready && formatted_cached_docker_ps_output="$(
-  docker ps -a -f "label=com.magento.dockerized" --format "{{.Names}} {{.Status}}" | \
+  docker ps -a -f "label=com.docker.compose.service=db" --format "{{.Names}} {{.Status}}" | \
     perl -pe 's/ (Up|Exited) .*/ \1/'
 )"
 

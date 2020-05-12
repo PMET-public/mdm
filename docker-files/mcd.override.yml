@@ -1,8 +1,6 @@
 version: '2.1'
 services:
   db:
-    labels: 
-      - com.magento.dockerized
     environment:
       - MYSQL_DATABASE=main
       - MYSQL_USER=user

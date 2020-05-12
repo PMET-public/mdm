@@ -331,9 +331,8 @@ uninstall_app() {
 stop_other_apps() {
   {
     timestamp_msg "${FUNCNAME[0]}"
-    # relies on db service having label=label=com.magento.dockerized
     compose_project_names="$(
-      docker ps -f "label=com.magento.dockerized" --format="{{ .Names  }}" | \
+      docker ps -f "label=com.docker.compose.service=db" --format="{{ .Names  }}" | \
       perl -pe 's/_db_1$//' | \
       grep -v "^${COMPOSE_PROJECT_NAME}\$"
     )"
