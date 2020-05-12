@@ -101,6 +101,11 @@ is_onedrive_linked() {
     [[ -d "$HOME/Adobe/SITeam - docker" ]]
 }
 
+reload_rev_proxy() {
+  verify_mdm_cert_dir
+  docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
+}
+
 verify_mdm_cert_dir() {
   # search multiple paths including ones that may not exist causing a non-zero exit status
   mdm_cert_dir="$(find \

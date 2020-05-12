@@ -411,6 +411,10 @@ is_advanced_mode && {
   # keys+=("$key")
   # menu["$key-handler"]=revert_to_prev_mdm
 
+  key="Reload reverse proxy"
+  keys+=("$key")
+  menu["$key-handler"]=reload_rev_proxy
+
   key="⚠️ Remove Magento images (breaks stopped apps)"
   keys+=("$key")
   menu["$key-handler"]=rm_magento_docker_images
