@@ -79,8 +79,13 @@ install_app() {
     extract_tar_to_docker .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -f media.tar.gz ]] && extract_tar_to_docker media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
+    # 2 options to start build & deploy
+    # option 1 relies on default cmds in image or set by docker-compose.override.yml file
     docker-compose up build
-    docker-compose run --rm deploy cloud-deploy
+    docker-compose up deploy
+    # option 2 creates containers (when *_1 already exist) but doesn't have reliance on default cmds
+    # docker-compose run --rm build cloud-build
+    # docker-compose run --rm deploy cloud-deploy
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
     # this command causes indexer to be set in app/etc/env.php but without the expected values for host/username
     docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
