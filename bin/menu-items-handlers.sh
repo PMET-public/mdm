@@ -66,6 +66,7 @@ update_mdm() {
 install_app() {
   (
     timestamp_msg "${FUNCNAME[0]}"
+    docker-compose pull # check for new versions
     # create containers but do not start
     docker-compose up --no-start
     # copy db files to db container & start it up
