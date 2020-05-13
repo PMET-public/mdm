@@ -448,7 +448,7 @@ called_from_platypus_app && {
 }
 
 # if developing and calling from shell, output shows in terminal in real time as expected
-# but if called from the platypus app, out to STDOUT for menu and log to a file for debugging
+# but if called from the platypus app, send output to STDOUT for menu and log to a file for debugging
 [[ $resource_dir ]] && {
   menu_log_file="$env_dir/menu.log"
   handler_log_file="$env_dir/handler.log"
