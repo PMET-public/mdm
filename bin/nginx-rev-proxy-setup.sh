@@ -3,9 +3,9 @@
 set -e # stop on errors
 set -x # turn on debugging
 
-mkdir -p /tmp/conf.d
+tmp_dir=$(mktemp -d)
 
-for network in $(docker network ls | grep default | grep bridge | awk '{print $2}'); do
+for network in $(docker network ls -q --filter 'driver=bridge' --filter 'name=_default'); do
 
   varnish_port=$(docker ps -a --filter "network=$network" --filter "label=com.docker.compose.service=varnish" --format "{{.Ports}}" | sed 's/.*://;s/-.*//')
   magento_hostname=$(docker ps -a --filter "network=$network" --filter "label=com.docker.compose.service=web" --format "{{.Names}}" | sed 's/_web_.*//')
@@ -13,7 +13,7 @@ for network in $(docker network ls | grep default | grep bridge | awk '{print $2
   if [[ -n "$varnish_port" && -n "$magento_hostname" ]]; then
 
   echo "Writing nginx conf file for $magento_hostname"
-  cat << EOF > "/tmp/conf.d/host-$magento_hostname.conf"
+  cat << EOF > "$tmp_dir/host-$magento_hostname.conf"
     server {
       listen 80;
       listen 443 ssl http2;
@@ -33,15 +33,9 @@ EOF
 
 done
 
-# N.B. after some testing, docker -v can NOT be quoted and must have spaces escaped (\ )
-# so a string is constructed by escaping and then removing the bash expansion quotes
-cid=$(echo "docker create \
-  --label mdm-nginx-rev-proxy \
-  -v $(echo "$cert_dir" | perl -pe 's/ /\\ /g'):/etc/letsencrypt \
-  -p 443:443 \
-  -p 80:80 \
-  nginx:stable" | perl -pe 's/"//g' | bash)
-docker cp /tmp/conf.d $cid:/etc/nginx/
+cid=$(docker create --label mdm-nginx-rev-proxy -v "$mdm_cert_dir":/etc/letsencrypt -p 443:443 -p 80:80 nginx:stable)
+docker cp $tmp_dir $cid:/etc/nginx/conf.d/
+rm -rf $tmp_dir
 old_cid="$(docker ps -q --filter 'label=mdm-nginx-rev-proxy')"
 [[ $old_cid ]] && docker rm -f $old_cid
 docker start $cid

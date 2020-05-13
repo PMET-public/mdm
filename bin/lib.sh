@@ -103,7 +103,7 @@ is_onedrive_linked() {
 
 reload_rev_proxy() {
   verify_mdm_cert_dir
-  docker-compose -f ~/.mdm/current/docker-files/docker-compose.yml run --rm nginx-rev-proxy-setup
+  source "$lib_dir/nginx-rev-proxy-setup.sh"
 }
 
 verify_mdm_cert_dir() {
