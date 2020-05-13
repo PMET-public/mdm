@@ -22,7 +22,7 @@
         //"vsc_debugger_arg": "Install & open Magento app in browser",
         "vsc_debugger_arg": "Restart Magento app",
         "mdm_script_path": "${workspaceFolder}/bin/mdm",
-        "parent_pids_path": "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/ref-2-3-4-mlrv"
+        "parent_pids_path": "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/this-part-is-ignored"
       },
       "args": []
     },
@@ -36,14 +36,31 @@
         "debug": true,
         "vsc_debugger_arg": "n/a",
         "mdm_script_path": "${workspaceFolder}/bin/mdm",
-        "parent_pids_path": "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/ref-2-3-4-mlrv"
+        "parent_pids_path": "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/this-part-is-ignored"
       },
       "args": []
     },
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "Dockerize from ref git branch",
+      "name": "Dockerize from product's magento-cloud master git branch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": [
+        "-g", "git@github.com:magento/magento-cloud.git",
+        "-b", "master",
+        "-n", "mc",
+        "-a", "${env:HOME}/.composer/auth.json",
+        "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
+      ]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Dockerize from current ref git branch (manually update branch in this conf)",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/dockerize",
       "env": {
@@ -53,6 +70,40 @@
         "-g", "git@github.com:pmet-public/magento-cloud.git",
         "-b", "pmet-2.3.5-ref",
         "-n", "ref",
+        "-a", "${env:HOME}/.composer/auth.json",
+        "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
+      ]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Dockerize from current demo git branch (manually update branch in this conf)",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": [
+        "-g", "git@github.com:pmet-public/magento-cloud.git",
+        "-b", "pmet-2.3.5-demo",
+        "-n", "demo",
+        "-a", "${env:HOME}/.composer/auth.json",
+        "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
+      ]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Dockerize from current b2b git branch (manually update branch in this conf)",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": [
+        "-g", "git@github.com:pmet-public/magento-cloud.git",
+        "-b", "pmet-2.3.5-b2b",
+        "-n", "b2b",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
       ]
