@@ -200,17 +200,6 @@ is_update_available() {
   return 1
 }
 
-download_and_link_latest_release() {
-  local latest_release_ver
-  latest_release_ver=$(get_latest_sem_ver)
-  cd "$mdm_path"
-  curl -svLO "$repo_url/archive/$latest_release_ver.tar.gz"
-  mkdir -p "$latest_release_ver"
-  tar -zxf "$latest_release_ver.tar.gz" --strip-components 1 -C "$latest_release_ver"
-  rm "$latest_release_ver.tar.gz" current || : # cleanup and remove old link
-  ln -sf "$latest_release_ver" current
-}
-
 is_adobe_system() {
   [[ -d /Applications/Adobe\ Hub.app ]]
 }
@@ -359,6 +348,17 @@ restart_docker_and_wait() {
   while ! is_docker_ready; do
     sleep 5
   done
+}
+
+download_and_link_latest_release() {
+  local latest_release_ver
+  latest_release_ver=$(get_latest_sem_ver)
+  cd "$mdm_path"
+  curl -svLO "$repo_url/archive/$latest_release_ver.tar.gz"
+  mkdir -p "$latest_release_ver"
+  tar -zxf "$latest_release_ver.tar.gz" --strip-components 1 -C "$latest_release_ver"
+  rm "$latest_release_ver.tar.gz" current || : # cleanup and remove old link
+  ln -sf "$latest_release_ver" current
 }
 
 render_platypus_status_menu() {
