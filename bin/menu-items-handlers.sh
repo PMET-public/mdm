@@ -93,16 +93,14 @@ install_app() {
       'model' => 'mysql4',/" /app/app/etc/env.php
     docker-compose run --rm deploy magento-command indexer:reindex
     docker-compose run --rm deploy magento-command cache:clean config_webservice
-    # varnish brings up web -> brings up fpm
-    docker-compose up -d varnish
+    services="$(get_docker_compose_runtime_services)"
+    docker-compose up -d $services
     reload_rev_proxy
     # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
     docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | \
       perl -pe 's/ .*/ $(get_host)/' >> /etc/hosts;
       /app/bin/magento cache:enable
       cloud-post-deploy"
-    # docker-compose run --rm deploy cloud-post-deploy
-    # DO NOT RUN -> docker-compose up -d
     open "https://$(get_host)"
   ) >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
@@ -129,9 +127,8 @@ stop_app() {
 restart_app() {
   {
     timestamp_msg "${FUNCNAME[0]}"
-    # build and deploy restarts may be interfering
-    # TODO find way to start up all appropiate services without enumerating
-    docker-compose start rabbitmq db fpm web varnish elasticsearch redis
+    services="$(get_docker_compose_runtime_services)"
+    docker-compose start $services
     reload_rev_proxy
     # TODO another BUG where a cache has to be cleaned with a restart AND after a time delay. RACE CONDITION?!
     docker-compose run --rm deploy magento-command cache:clean config_webservice

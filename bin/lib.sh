@@ -361,6 +361,13 @@ download_and_link_latest_release() {
   ln -sf "$latest_release_ver" current
 }
 
+get_docker_compose_runtime_services() {
+  # get only runtime services build and deploy restarts may be interfering; tls and generic are unused
+  docker-compose config |
+    python -c "import sys, yaml; data=yaml.load(sys.stdin); print(' '.join(data['services'].keys()))" |
+    perl -pe 's/build|deploy|generic|tls//g'
+}
+
 render_platypus_status_menu() {
   local key key_length menu_output is_submenu
   key_length=${#keys[@]}
