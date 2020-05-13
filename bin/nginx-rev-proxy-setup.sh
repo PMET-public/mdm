@@ -15,19 +15,11 @@ for network in $(docker network ls | grep default | grep bridge | awk '{print $2
   echo "Writing nginx conf file for $magento_hostname"
   cat << EOF > "/tmp/conf.d/host-$magento_hostname.conf"
     server {
+      listen 80;
       listen 443 ssl http2;
-      server_name  $magento_hostname.*;
+      server_name $magento_hostname.*;
       ssl_certificate /etc/letsencrypt/fullchain1.pem;
       ssl_certificate_key /etc/letsencrypt/privkey1.pem;
-      location / {
-        proxy_pass http://host.docker.internal:$varnish_port;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-      }
-    }
-    server {
-      listen 80;
-      server_name  $magento_hostname.*;
       location / {
         proxy_pass http://host.docker.internal:$varnish_port;
         proxy_set_header Host \$host;
