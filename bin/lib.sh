@@ -361,24 +361,21 @@ download_and_link_latest_release() {
   ln -sf "$latest_release_ver" current
 }
 
-set_docker_compose_cmd() {
-  docker_compose_cmd=(docker-compose -f docker-compose.yml)
-  docker_compose_cmd_as_string="docker-compose -f docker-compose.yml"
+export_compose_file() {
+  export COMPOSE_FILE="docker-compose.yml"
   # check for a CWD override file
   [[ -f docker-compose.override.yml ]] && {
-    docker_compose_cmd+=(-f docker-compose.override.yml)
-    docker_compose_cmd_as_string+=" -f docker-compose.override.yml"
+    COMPOSE_FILE+=":docker-compose.override.yml"
   }
-  # also use global override file included with MDM
-  [[ -f "$mdm_path/current/docker-files/mcd.override.yml" ]] && {
-    docker_compose_cmd+=(-f "$mdm_path/current/docker-files/mcd.override.yml")
-    docker_compose_cmd_as_string+=" -f \"$mdm_path/current/docker-files/mcd.override.yml\""
+  # also use the global override file included with MDM
+  [[  -f "$mdm_path/current/docker-files/mcd.override.yml" ]] && {
+    COMPOSE_FILE+=":$mdm_path/current/docker-files/mcd.override.yml"
   }
 }
 
 get_docker_compose_runtime_services() {
   # get only runtime services build and deploy restarts may be interfering; tls and generic are unused
-  "${docker_compose_cmd[@]}" config |
+  docker-compose config |
     python -c "import sys, yaml; data=yaml.load(sys.stdin); print(' '.join(data['services'].keys()))" |
     perl -pe 's/build|deploy|generic|tls//g'
 }

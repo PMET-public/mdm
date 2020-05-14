@@ -66,12 +66,12 @@ update_mdm() {
 install_app() {
   (
     timestamp_msg "${FUNCNAME[0]}"
-    "${docker_compose_cmd[@]}" pull # check for new versions
+    docker-compose pull # check for new versions
     # create containers but do not start
-    "${docker_compose_cmd[@]}" up --no-start
+    docker-compose up --no-start
     # copy db files to db container & start it up
     docker cp .docker/mysql/docker-entrypoint-initdb.d "${COMPOSE_PROJECT_NAME}_db_1":/
-    "${docker_compose_cmd[@]}" up -d db
+    docker-compose up -d db
     # copy over most files in local app dir to build container
     tar -cf - --exclude .docker --exclude .composer.tar.gz --exclude media.tar.gz . | \
       docker cp - "${COMPOSE_PROJECT_NAME}_build_1":/app
@@ -81,29 +81,29 @@ install_app() {
     docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
     # 2 options to start build & deploy
     # option 1 relies on default cmds in image or set by docker-compose.override.yml file
-    "${docker_compose_cmd[@]}" up build
-    "${docker_compose_cmd[@]}" up deploy
+    docker-compose up build
+    docker-compose up deploy
     # option 2 creates containers (when *_1 already exist) but doesn't have reliance on default cmds
-    # "${docker_compose_cmd[@]}" run --rm build cloud-build
-    # "${docker_compose_cmd[@]}" run --rm deploy cloud-deploy
-    "${docker_compose_cmd[@]}" run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
+    # docker-compose run --rm build cloud-build
+    # docker-compose run --rm deploy cloud-deploy
+    docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
     # this command causes indexer to be set in app/etc/env.php but without the expected values for host/username
-    "${docker_compose_cmd[@]}" run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
+    docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
     # TODO remove this hack that fixes this bug https://github.com/magento/magento2/issues/2852
-    "${docker_compose_cmd[@]}" run --rm deploy perl -i -pe \
+    docker-compose run --rm deploy perl -i -pe \
       "s/'model' => 'mysql4',/
       'username' => 'user', 
       'host' => 'database.internal',
       'dbname' => 'main',
       'password' => '',
       'model' => 'mysql4',/" /app/app/etc/env.php
-    "${docker_compose_cmd[@]}" run --rm deploy magento-command indexer:reindex
-    "${docker_compose_cmd[@]}" run --rm deploy magento-command cache:clean config_webservice
+    docker-compose run --rm deploy magento-command indexer:reindex
+    docker-compose run --rm deploy magento-command cache:clean config_webservice
     services="$(get_docker_compose_runtime_services)"
-    "${docker_compose_cmd[@]}" up -d $services
+    docker-compose up -d $services
     reload_rev_proxy
     # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
-    "${docker_compose_cmd[@]}" run --rm deploy bash -c "getent hosts host.docker.internal | \
+    docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | \
       perl -pe 's/ .*/ $(get_host)/' >> /etc/hosts;
       /app/bin/magento cache:enable
       cloud-post-deploy"
@@ -123,7 +123,7 @@ open_app() {
 stop_app() {
   {
     timestamp_msg "${FUNCNAME[0]}"
-    "${docker_compose_cmd[@]}" stop
+    docker-compose stop
   } >> "$handler_log_file" 2>&1 &
   # if stopped indirectly (by quitting the app), don't bother to set the status and wait
   run_without_args ||
@@ -134,10 +134,10 @@ restart_app() {
   {
     timestamp_msg "${FUNCNAME[0]}"
     services="$(get_docker_compose_runtime_services)"
-    "${docker_compose_cmd[@]}" start $services
+    docker-compose start $services
     reload_rev_proxy
     # TODO another BUG where a cache has to be cleaned with a restart AND after a time delay. RACE CONDITION?!
-    "${docker_compose_cmd[@]}" run --rm deploy magento-command cache:clean config_webservice
+    docker-compose run --rm deploy magento-command cache:clean config_webservice
     open "https://$(get_host)"
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Starting Magento ..."
@@ -213,7 +213,7 @@ no_op() {
 start_shell_in_app() {
   run_as_bash_script_in_terminal "
     cd \"$resource_dir/app\" || exit
-    $docker_compose_cmd_as_string run --rm deploy bash
+    docker-compose run --rm deploy bash
   "
 }
 
@@ -225,7 +225,7 @@ run_as_bash_cmds_in_app() {
     $1
     
     '
-    $docker_compose_cmd_as_string run --rm deploy bash -c '$1' 2> /dev/null
+    docker-compose run --rm deploy bash -c '$1' 2> /dev/null
   "
 }
 
@@ -287,14 +287,14 @@ switch_to_developer_mode() {
 start_mdm_shell() {
   local services_status
   if is_app_installed; then
-    services_status="$("${docker_compose_cmd[@]}" ps)"
+    services_status="$(docker-compose ps)"
   else
     services_status="$(warning Magento app not installed yet.)"
   fi
   run_as_bash_script_in_terminal "
     cd \"$resource_dir/app\" || exit
     msg Running $COMPOSE_PROJECT_NAME from $(pwd)
-    echo -e \"\\n\\n$services_status\nDocker-compose command: $docker_compose_cmd_as_string\"
+    echo -e \"\\n\\n$services_status\"
     msg \"
 
 You can run docker-compose cmds here, but it's recommend to use the MDM app to (un)install or
@@ -327,7 +327,7 @@ uninstall_app() {
     warning THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!
     confirm_or_exit
     cd \"$resource_dir/app\" || exit
-    $docker_compose_cmd_as_string down -v
+    docker-compose down -v
   "
 }
 
