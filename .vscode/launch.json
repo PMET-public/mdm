@@ -13,7 +13,8 @@
     {
       "type": "bashdb",
       "request": "launch",
-      // N.B. For this configuration to work, the contextual menu must be in a state were the arg is a valid selection!!
+      // N.B. For this configuration to work, the contextual menu for a specific app must be in a state 
+      // where the arg is a valid selection!!
       "name": "launcher with menu selection arg",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/launcher",
@@ -22,7 +23,8 @@
         //"vsc_debugger_arg": "Install & open Magento app in browser",
         "vsc_debugger_arg": "Restart Magento app",
         "mdm_script_path": "${workspaceFolder}/bin/mdm",
-        "parent_pids_path": "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/this-part-is-ignored"
+        "parent_pids_path": 
+          "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
       },
       "args": []
     },
@@ -36,7 +38,8 @@
         "debug": true,
         "vsc_debugger_arg": "n/a",
         "mdm_script_path": "${workspaceFolder}/bin/mdm",
-        "parent_pids_path": "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/this-part-is-ignored"
+        "parent_pids_path": 
+        "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
       },
       "args": []
     },
