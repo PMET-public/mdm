@@ -190,7 +190,7 @@ Docker images will be preserved to avoid downloading all images from scratch.\"
   "
 }
 
-nuke_docker() {
+wipe_docker() {
   run_as_bash_script_in_terminal "
     warning \"This will delete ALL local docker artifacts - containers, images, volumes, and networks!\"
     confirm_or_exit
@@ -199,6 +199,8 @@ nuke_docker() {
     docker volume rm -f \$(docker volume ls -q)
     docker network prune -f
     docker rmi -f \$(docker images -qa)
+    # also clean up envs artifacts
+    rm -rf \"$mdm_path/envs/*\"
   "
 }
 
