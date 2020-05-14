@@ -10,12 +10,12 @@ services:
         aliases:
           - database.internal
   build:
-    image: 'pmetpublic/magento-cloud-docker-php:7.3-cli-1.1'
+    image: $php_cli_docker_image
     environment:
       - COMPOSER_HOME=/app/.composer
     command: cloud-build
   deploy:
-    image: 'pmetpublic/magento-cloud-docker-php:7.3-cli-1.1'
+    image: $php_cli_docker_image
     command: cloud-deploy
     volumes:
       - 'magento:/app:rw'
