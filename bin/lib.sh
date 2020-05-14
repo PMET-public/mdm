@@ -173,10 +173,6 @@ run_without_args() {
   return "${BASH_ARGC[-1]}" # BASH_ARGC tracks number of parameters in call stack; last index is original script
 }
 
-called_from_platypus_app() {
-  [[ "$parent_pids_path" =~ .app/Contents/MacOS/ ]]
-}
-
 get_latest_sem_ver() {
   curl -svL "$repo_url/releases" | \
     perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1'
@@ -362,6 +358,11 @@ download_and_link_latest_release() {
   ln -sf "$latest_release_ver" current
 }
 
+export_compose_project_name() {
+  export COMPOSE_PROJECT_NAME
+  COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$resource_dir/app/docker-compose.yml")"
+}
+
 export_compose_file() {
   export COMPOSE_FILE="docker-compose.yml"
   # check for a CWD override file
@@ -372,6 +373,10 @@ export_compose_file() {
   [[  -f "$mdm_path/current/docker-files/mcd.override.yml" ]] && {
     COMPOSE_FILE+=":$mdm_path/current/docker-files/mcd.override.yml"
   }
+}
+
+export_image_vars_for_override_yml() {
+  export php_cli_docker_image="pmetpublic/magento-cloud-docker-php:7.3-cli-1.1"
 }
 
 get_docker_compose_runtime_services() {
@@ -440,31 +445,24 @@ handle_menu_selection() {
 
 }
 
-###
-#
-# initialization logic
-#
-##
-
-# allow parent_pids_path to be set by the env to debug a specific instance
-# otherwise grab the actual exact path of the osx platypus app
-parent_pids_path="${parent_pids_path:-$(ps -p $PPID -o command=)}"
-
-called_from_platypus_app && {
+init_app_specific_vars() {
+  # allow parent_pids_path to be set by the env to debug a specific instance
+  # otherwise grab the actual exact path of the osx platypus app
+  parent_pids_path="${parent_pids_path:-$(ps -p $PPID -o command=)}"
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
   cd "$resource_dir/app" || exit
-  export COMPOSE_PROJECT_NAME
-  COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$resource_dir/app/docker-compose.yml")"
+  # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
+  export_compose_project_name
+  export_compose_file
+  export_image_vars_for_override_yml
   [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
   env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
   mkdir -p "$env_dir"
+  quit_detection_file="$env_dir/.$PPID-still_running"
+  status_msg_file="$env_dir/.status"
 }
 
-set_docker_compose_cmd
-
-# if developing and calling from shell, output shows in terminal in real time as expected
-# but if called from the platypus app, send output to STDOUT for menu and log to a file for debugging
-[[ $resource_dir ]] && {
+init_logging() {
   menu_log_file="$env_dir/menu.log"
   handler_log_file="$env_dir/handler.log"
   if run_without_args; then
@@ -472,25 +470,26 @@ set_docker_compose_cmd
   else
     cur_log_file="$handler_log_file"
   fi
-  [[ $debug ]] && {
-    # log stdout to log file, too
-    exec > >(tee -ia "$cur_log_file")
-    # exec 2> >(tee -ia "$cur_log_file")
-    exec 2>> "$cur_log_file"
-    if run_without_args; then
-      timestamp_msg "Script called without args" >&2
-    else 
-      timestamp_msg "Script called with ${BASH_ARGV[-1]}" >&2
-    fi
-  }
+  # log stdout to log file, too
+  exec > >(tee -ia "$cur_log_file")
+  # exec 2> >(tee -ia "$cur_log_file")
+  exec 2>> "$cur_log_file"
+  if run_without_args; then
+    timestamp_msg "Script called without args" >&2
+  else 
+    timestamp_msg "Script called with ${BASH_ARGV[-1]}" >&2
+  fi
+  # before this point, enabling debugging could cause debug info in menu output
+  set -x
 }
 
-# before this point, only variable & function definitions and trivial ops, now enable debugging
-[[ $debug ]] && set -x
+###
+#
+# initialization logic
+#
+##
 
-[[ $resource_dir ]] && {
-  quit_detection_file="$env_dir/.$PPID-still_running"
-  status_msg_file="$env_dir/.status"
-}
+init_app_specific_vars
+[[ $debug ]] && init_logging
 
 : # need to return true or will exit when sourced with "-e" and last test = false
