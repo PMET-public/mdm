@@ -32,6 +32,7 @@ no_color='\033[0m'
 recommended_vm_cpu=4
 recommended_vm_mem_mb=4096
 recommended_vm_swap_mb=2048
+recommended_vm_disk_mb=64000
 bytes_in_mb=1048576
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 repo_url="https://github.com/PMET-public/mdm"
@@ -75,12 +76,17 @@ can_optimize_vm_swap() {
   [[ swap_for_vm -lt recommended_vm_swap_mb ]]
 }
 
+can_optimize_vm_disk() {
+  disk_for_vm=$(grep '"diskSizeMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
+  [[ disk_for_vm -lt recommended_vm_disk_mb ]]
+}
+
 is_docker_installed() {
   [[ -f "$docker_settings_file" ]]
 }
 
 is_docker_suboptimal() {
-  can_optimize_vm_cpus || can_optimize_vm_mem || can_optimize_vm_swap
+  can_optimize_vm_cpus || can_optimize_vm_mem || can_optimize_vm_swap || can_optimize_vm_disk
 }
 
 is_docker_running() {

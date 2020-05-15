@@ -43,9 +43,13 @@ optimize_docker() {
   {
     timestamp_msg "${FUNCNAME[0]}"
     cp "$docker_settings_file" "$docker_settings_file.bak"
-    can_optimize_vm_cpus && perl -i -pe 's/("cpus"\s*:\s*)\d+/${1}4/' "$docker_settings_file"
-    can_optimize_vm_swap && perl -i -pe 's/("swapMiB"\s*:\s*)\d+/${1}2048/' "$docker_settings_file"
-    can_optimize_vm_mem && perl -i -pe 's/("memoryMiB"\s*:\s*)\d+/${1}4096/' "$docker_settings_file"
+    can_optimize_vm_cpus && perl -i -pe "s/(\"cpus\"\s*:\s*)\d+/\${1}$recommended_vm_cpu/" "$docker_settings_file"
+    can_optimize_vm_swap && perl -i -pe "s/(\"swapMiB\"\s*:\s*)\d+/\${1}$recommended_vm_swap_mb/" "$docker_settings_file"
+    can_optimize_vm_mem && perl -i -pe "s/(\"memoryMiB\"\s*:\s*)\d+/\${1}$recommended_vm_mem_mb/" "$docker_settings_file"
+    can_optimize_vm_disk && perl -i -pe "s/(\"diskSizeMiB\"\s*:\s*)\d+/\${1}$recommended_vm_disk_mb/" "$docker_settings_file"
+    perl -i -pe "s/(\"autoStart\"\s*:\s*).*/\${1}false,/" "$docker_settings_file"
+    perl -i -pe "s/(\"displayedTutorial\"\s*:\s*).*/\${1}true,/" "$docker_settings_file"
+    perl -i -pe "s/(\"analyticsEnabled\"\s*:\s*).*/\${1}false,/" "$docker_settings_file"
     restart_docker_and_wait
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Optimizing Docker VM ..."
