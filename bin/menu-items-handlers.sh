@@ -194,13 +194,13 @@ wipe_docker() {
   run_as_bash_script_in_terminal "
     warning \"This will delete ALL local docker artifacts - containers, images, volumes, and networks!\"
     confirm_or_exit
-    docker stop \$(docker ps -qa)
-    docker rm -fv \$(docker ps -qa)
-    docker volume rm -f \$(docker volume ls -q)
-    docker network prune -f
-    docker rmi -f \$(docker images -qa)
+    docker stop \$(docker ps -qa) || :
+    docker rm -fv \$(docker ps -qa) || :
+    docker volume rm -f \$(docker volume ls -q) || :
+    docker network prune -f || :
+    docker rmi -f \$(docker images -qa) || :
     # also clean up envs artifacts
-    rm -rf \"$mdm_path/envs/*\"
+    rm -rf \"$mdm_path/envs/*\" || :
   "
 }
 
