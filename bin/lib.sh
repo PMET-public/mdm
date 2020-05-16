@@ -179,6 +179,14 @@ run_without_args() {
   return "${BASH_ARGC[-1]}" # BASH_ARGC tracks number of parameters in call stack; last index is original script
 }
 
+# need way to distinguish being called from app or other script sourcing this lib (e.g. dockerize script)
+called_from_platypus_app() {
+  # allow parent_pids_path to be set by the env to debug a specific instance
+  # otherwise grab the actual exact path of the osx platypus app
+  parent_pids_path="${parent_pids_path:-$(ps -p $PPID -o command=)}"
+  [[ "$parent_pids_path" =~ .app/Contents/MacOS/ ]]
+}
+
 get_latest_sem_ver() {
   curl -svL "$repo_url/releases" | \
     perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1'
@@ -382,6 +390,7 @@ export_compose_file() {
 }
 
 export_image_vars_for_override_yml() {
+  #TODO - properly derive this value by examining config
   export php_cli_docker_image="pmetpublic/magento-cloud-docker-php:7.3-cli-1.1"
 }
 
@@ -452,9 +461,6 @@ handle_menu_selection() {
 }
 
 init_app_specific_vars() {
-  # allow parent_pids_path to be set by the env to debug a specific instance
-  # otherwise grab the actual exact path of the osx platypus app
-  parent_pids_path="${parent_pids_path:-$(ps -p $PPID -o command=)}"
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
   cd "$resource_dir/app" || exit
   # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
@@ -495,7 +501,9 @@ init_logging() {
 #
 ##
 
-init_app_specific_vars
-[[ $debug ]] && init_logging
+called_from_platypus_app && {
+  init_app_specific_vars
+  [[ $debug ]] && init_logging
+}
 
 : # need to return true or will exit when sourced with "-e" and last test = false
