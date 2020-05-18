@@ -181,10 +181,15 @@ cd "$tmp_app_dir" || exit
 # backup for later restore
 cp composer.json composer.json.bak
 cp composer.lock composer.lock.bak
-env COMPOSER_HOME=.composer composer global require hirak/prestissimo --no-interaction # parallelize downloads (much faster)
-# install with original composer.lock (but with composer.json scripts skipped if they exist) so exact versions needed for build in cache
+# install with original composer.lock (but with composer.json scripts skipped if they exist) 
+# so exact versions needed for build in cache
 python -c "import sys, json; data = json.load(sys.stdin); data.pop('scripts', 0); print(json.dumps(data))" \
   < composer.json.bak > composer.json
+# run composer operations inside a version specific php container
+script_for_tmp_php_container=$(mktemp)
+cat << EOF > "$script_for_tmp_php_container"
+#!/bin/bash
+env COMPOSER_HOME=.composer composer global require hirak/prestissimo --no-interaction # parallelize downloads (much faster)
 env COMPOSER_HOME=.composer composer install --no-suggest --no-ansi --no-interaction --no-progress --prefer-dist
 # require (or replace if already required) the official magento cloud docker module with ours
 # also note that a few envs may have a composer repo entry that needs to be updated
@@ -192,10 +197,20 @@ perl -i -pe 's/magento\/magento-cloud-docker.git/pmet-public\/magento-cloud-dock
 grep -q 'pmet-public/magento-cloud-docker' composer.json ||
   env COMPOSER_HOME=.composer composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
 env COMPOSER_HOME=.composer composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
-# create the docker configuration with the modified magento cloud docker
-./vendor/bin/ece-docker build:compose --host="$host" # --port="$http_port"
-mv docker-compose*.yml .docker "$app_dir"
-cp ~/.mdm/current/docker-files/mcd.override.yml "$app_dir/docker-compose.override.yml"
+./vendor/bin/ece-docker build:compose --host="$host"
+EOF
+chmod +x "$script_for_tmp_php_container"
+# get php version of app
+app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml)
+SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
+ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
+  --mount type=bind,src=$HOME/.ssh/known_hosts,target=/root/.ssh/known_hosts"
+cid=$(docker create $ssh_auth_opts -it -v "$PWD:/app:delegated" \
+  pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1 /tmp/script_for_php_container)
+docker cp "$script_for_tmp_php_container" $cid:/tmp/script_for_php_container
+docker start -ai $cid
+rm "$script_for_tmp_php_container"
+cp -r docker-compose*.yml .docker "$app_dir"
 # restore the original composer files for use in the build container later
 mv composer.json.bak composer.json
 mv composer.lock.bak composer.lock
@@ -210,20 +225,6 @@ tar -zcf "$app_dir/.composer.tar.gz" .composer
 # del tmp dir
 cd "$app_dir" || exit
 rm -rf "$tmp_app_dir"
-
-# if cloning existing env, extract the DB into the expected dir
-is_existing_cloud_env &&
-  magento-cloud db:dump -p "$pid" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
-
-# if cloning existing env, grab only the encryption key from the env's app/etc/env.php
-is_existing_cloud_env && {
-  mkdir -p "$app_dir/app/etc"
-  magento-cloud ssh -p "$pid" -e "$env" "
-    php -r '\$a = require_once(\"app/etc/env.php\");
-    echo \"<?php return array ( \\\"crypt\\\"  => \";
-    var_export(\$a[\"crypt\"]); echo \");\";'
-  " > "$app_dir/app/etc/env.php"
-}
 
 # bundle with Platypus
 if has_platypus; then
