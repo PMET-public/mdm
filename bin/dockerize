@@ -10,19 +10,18 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 # order of stpes matter because some operations depend on the results of others
 #
 # 1. the app from an existing env or git repo + branch
-# 2. any added media files (such as pub/media including styles.css from m2 sample data install)
+# 2. the database
+# 3. the encryption key
+# 4. any added media files (such as pub/media including styles.css from m2 sample data install)
 #   - req before compose cache bundling for catalog media dedup if from existing
-# 3. the composer cache
-# 4. the docker-compose conf
+# 5. the composer cache
+# 6. the docker-compose conf
 #   - req after unique subdomain determined based on install source + version + random nonce
-# 5. the database
-# 6. the encryption key
 # 7. the launching script to install or use MDM
 #
 
 app_icon_path="$lib_dir/../icons/magento.icns"
 status_menu_icon_path="$lib_dir/../icons/magento-logo.png"
-# http_port=$(( ( RANDOM % 10000 )  + 10000 ))
 rand_subdomain_suffix=$(LC_ALL=C tr -dc 'a-z' < /dev/random | fold -w 4 | head -n 1)
 tld="the1umastory.com"
 
@@ -142,14 +141,29 @@ host="$subdomain.$tld"
 # if cloning existing env, download the media dir minus the cache
 # this will cause significant redundancy of images until can be deduped
 is_existing_cloud_env && {
-    mkdir -p "$tmp_app_dir/pub/media"
-    if [[ $media_cache ]]; then
-      magento-cloud ssh -y -p "$pid" -e "$env" "/app/bin/magento catalog:images:resize"
-    else
-      media_cache_option="--exclude=cache"
-    fi
-    magento-cloud mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" $media_cache_option
-    tar -C "$tmp_app_dir" -zcf "$app_dir/media.tar.gz" "pub/media"
+
+  # extract current env DB into the expected dir
+  mkdir -p "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
+  magento-cloud db:dump -p "$pid" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
+
+  # extract only the encryption key from the env's app/etc/env.php
+  mkdir -p "$app_dir/app/etc"
+  magento-cloud ssh -p "$pid" -e "$env" "
+    php -r '\$a = require_once(\"app/etc/env.php\");
+    echo \"<?php return array ( \\\"crypt\\\"  => \";
+    var_export(\$a[\"crypt\"]); echo \");\";'
+  " > "$app_dir/app/etc/env.php"
+
+  # get the env's media
+  mkdir -p "$tmp_app_dir/pub/media"
+  if [[ $media_cache ]]; then
+    magento-cloud ssh -y -p "$pid" -e "$env" "/app/bin/magento catalog:images:resize"
+  else
+    media_cache_option="--exclude=cache"
+  fi
+  magento-cloud mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" $media_cache_option
+  tar -C "$tmp_app_dir" -zcf "$app_dir/media.tar.gz" "pub/media"
+
 }
 
 # use default cloud integration env database configuration, so ece-tools deploy will work the same for docker and cloud
