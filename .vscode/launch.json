@@ -20,9 +20,10 @@
       "program": "${workspaceFolder}/bin/launcher",
       "env": {
         "debug": true,
+        "vsc_debugger_arg": "Optimize Docker for better performance",
         //"vsc_debugger_arg": "Install & open Magento app in browser",
         //"vsc_debugger_arg": "Restart Magento app",
-        "vsc_debugger_arg": "Start MDM shell",
+        //"vsc_debugger_arg": "Start MDM shell",
         "mdm_script_path": "${workspaceFolder}/bin/mdm",
         "parent_pids_path": 
           "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
@@ -40,7 +41,8 @@
         "vsc_debugger_arg": "n/a",
         "mdm_script_path": "${workspaceFolder}/bin/mdm",
         "parent_pids_path": 
-        "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
+        //"${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
+        "${env:HOME}/Downloads/ref-2.3.5-p1.app/Contents/Resources/script"
       },
       "args": []
     },
