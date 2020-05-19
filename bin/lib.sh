@@ -470,13 +470,13 @@ init_app_specific_vars() {
   [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
   env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
   mkdir -p "$env_dir"
+  menu_log_file="$env_dir/menu.log"
+  handler_log_file="$env_dir/handler.log"
   quit_detection_file="$env_dir/.$PPID-still_running"
   status_msg_file="$env_dir/.status"
 }
 
 init_logging() {
-  menu_log_file="$env_dir/menu.log"
-  handler_log_file="$env_dir/handler.log"
   if run_without_args; then
     cur_log_file="$menu_log_file"
   else
