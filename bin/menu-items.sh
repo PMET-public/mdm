@@ -43,11 +43,12 @@ is_adobe_system && ! is_onedrive_linked && {
 }
 
 is_docker_suboptimal && {
-  key="Optimize Docker for better performance"
+  key="Adjust Docker for minimum requirements"
   keys+=("$key")
   menu["$key-display-condition"]=""
   menu["$key-handler"]=optimize_docker
   menu["$key-icon"]="baseline_speed_${icon_color}_48dp.png"
+  return
 }
 
 ! is_docker_running && {
