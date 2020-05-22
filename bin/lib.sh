@@ -16,7 +16,6 @@ for (( index=0; index < bs_len; ((index++)) )); do
   }
 done
 
-
 ###
 #
 # start constants
@@ -187,7 +186,7 @@ called_from_platypus_app() {
   [[ "$parent_pids_path" =~ .app/Contents/MacOS/ ]]
 }
 
-get_latest_sem_ver() {
+lookup_latest_remote_sem_ver() {
   curl -svL "$repo_url/releases" | \
     perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1'
 }
@@ -205,7 +204,7 @@ is_update_available() {
     [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
-    get_latest_sem_ver > "$mdm_ver_file" 2>/dev/null &
+    lookup_latest_remote_sem_ver > "$mdm_ver_file" 2>/dev/null &
   fi
   return 1
 }
@@ -363,7 +362,7 @@ restart_docker_and_wait() {
 
 download_and_link_latest_release() {
   local latest_release_ver
-  latest_release_ver=$(get_latest_sem_ver)
+  latest_release_ver=$(lookup_latest_remote_sem_ver)
   cd "$mdm_path"
   curl -svLO "$repo_url/archive/$latest_release_ver.tar.gz"
   mkdir -p "$latest_release_ver"
