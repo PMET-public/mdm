@@ -22,10 +22,3 @@ if run_without_args; then
 else
   handle_menu_selection
 fi
-
-[[ $resource_dir ]] && {
-  # if quit_detection_file does not exist, start monitoring for quit
-  if [[ ! -f "$quit_detection_file" ]]; then
-    detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
-  fi
-}

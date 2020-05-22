@@ -315,7 +315,6 @@ ${*}
 }
 
 detect_quit_and_stop_app() {
-  touch "$quit_detection_file"
   # run the loop in a subshell so it doesn't fill the log with loop output
   ( 
     set +x
@@ -476,7 +475,12 @@ init_app_specific_vars() {
   mkdir -p "$env_dir"
   status_msg_file="$env_dir/.status"
   quit_detection_file="$env_dir/.$PPID-still_running"
-  status_msg_file="$env_dir/.status"
+  # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
+  # also ensure log files exist
+  [[ ! -f "$quit_detection_file" ]] && {
+    touch "$quit_detection_file"
+    detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
+  }
 }
 
 init_logging() {
