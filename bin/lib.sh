@@ -357,7 +357,7 @@ restart_docker_and_wait() {
   osascript -e 'quit app "Docker"'
   open --background -a Docker
   while ! is_docker_ready; do
-    sleep 5
+    sleep 2
   done
 }
 
