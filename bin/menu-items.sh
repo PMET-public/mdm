@@ -56,7 +56,10 @@ is_docker_suboptimal && {
   keys+=("$key")
   menu["$key-handler"]=start_docker
   menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+  return
 }
+
+! is_docker_ready && return
 
 is_update_available && {
   key="Update MDM"
