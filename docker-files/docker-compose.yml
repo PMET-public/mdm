@@ -3,10 +3,18 @@ services:
   cert-generator:
     image: pmetpublic/certbot-dns
     volumes:
-      - ".dns-config.ini:/.dns-config.ini"
+      - "./certbot-dns/.dns-config.ini:/.dns-config.ini"
       - "/dest/path/archive:/etc/letsencrypt/archive"
     command: '
       --dns-digitalocean \
       --dns-digitalocean-credentials /.dns-config.ini \
       --dns-digitalocean-propagation-seconds 30 \
       -d "*.yourdomain.com" '
+  storystore-pwa:
+    image: pmetpublic/storystore-pwa:${VERSION:-1.0}
+    environment:
+      - MAGENTO_URL=${MAGENTO_URL:-https://venia.magento.com/graphql}
+      - NEXT_TELEMETRY_DISABLED=1
+      - DEMO_MODE=${DEMO_MODE:-false}
+    ports:
+      - 3000:3000

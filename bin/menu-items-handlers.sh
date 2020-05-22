@@ -353,6 +353,31 @@ stop_other_apps() {
   set_status_and_wait_for_exit $! "Stopping other apps ..."
 }
 
+start_pwa_with_cloud() {
+  MAGENTO_URL="" \
+    COMPOSE_PROJECT_NAME="" \
+    DEMO_MODE="true" \
+    docker-compose -f "$mdm_path/current/docker-files/docker-compose.yml" restart storystore-pwa
+  ! is_nginx_rev_proxy_running && {
+    reload_rev_proxy
+    sleep 2 #TODO need better method to wait for ready state
+  }
+  open https://pwa.the1umastory.com/settings
+}
+
+start_pwa_with_app() {
+  MAGENTO_URL=https://$(get_host) \
+    COMPOSE_PROJECT_NAME="" \
+    DEMO_MODE="false" \
+    STORYSTORE_PWA_VERSION=$(get_host_version) \
+    docker-compose -f "$mdm_path/current/docker-files/docker-compose.yml" restart storystore-pwa
+  ! is_nginx_rev_proxy_running && {
+    reload_rev_proxy
+    sleep 2 #TODO need better method to wait for ready state
+  }
+  open https://pwa.the1umastory.com
+}
+
 toggle_advanced_mode() {
   if [[ -f "$advanced_mode_flag_file" ]]; then
     rm "$advanced_mode_flag_file"

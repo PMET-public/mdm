@@ -225,6 +225,35 @@ are_other_magento_apps_running && {
   menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
 }
 
+###
+#
+# start PWA submenu
+#
+###
+
+key="PWA"
+keys+=("$key")
+
+key="PWA using cloud env"
+keys+=("$key")
+menu["$key-handler"]="start_pwa_with_cloud"
+
+is_app_running && {
+  key="PWA using this Magento app"
+  keys+=("$key")
+  menu["$key-handler"]="start_pwa_with_app"
+}
+
+# the pwa github repo
+key="Storystore PWA @ GitHub - Docs, Issues, etc."
+keys+=("$key")
+menu["$key-link"]="https://github.com/PMET-public/storystore-pwa"
+
+###
+#
+# end PWA subemenu
+#
+###
 
 ###
 #

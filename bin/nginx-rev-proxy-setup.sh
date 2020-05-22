@@ -35,8 +35,9 @@ done
 
 cid=$(docker create --label mdm-nginx-rev-proxy -v "$mdm_cert_dir":/etc/letsencrypt -p 443:443 -p 80:80 nginx:stable)
 docker cp $tmp_dir/. $cid:/etc/nginx/conf.d
+# include pwa config too
+docker cp "$mdm_path/current/etc/nginx/conf.d/pwa.nginx.conf" $cid:/etc/nginx/conf.d
 rm -rf $tmp_dir
-old_cid="$(docker ps -q --filter 'label=mdm-nginx-rev-proxy')"
+old_cid="$(docker ps -qa --filter 'label=mdm-nginx-rev-proxy')"
 [[ $old_cid ]] && docker rm -f $old_cid
 docker start $cid
-
