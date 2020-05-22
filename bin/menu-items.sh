@@ -427,9 +427,9 @@ is_advanced_mode && {
   keys+=("$key")
 
   if [[ $debug ]]; then
-    key="Turn OFF MDM debugging"
+    key="MDM debugging is ON"
   else
-    key="Turn ON MDM debugging"
+    key="MDM debugging is OFF"
   fi
   is_app_running && {
     key+=" (stops running app)"
