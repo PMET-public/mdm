@@ -353,18 +353,6 @@ stop_other_apps() {
   set_status_and_wait_for_exit $! "Stopping other apps ..."
 }
 
-start_pwa_with_cloud() {
-  MAGENTO_URL="" \
-    COMPOSE_PROJECT_NAME="" \
-    DEMO_MODE="true" \
-    docker-compose -f "$mdm_path/current/docker-files/docker-compose.yml" restart storystore-pwa
-  ! is_nginx_rev_proxy_running && {
-    reload_rev_proxy
-    sleep 2 #TODO need better method to wait for ready state
-  }
-  open https://pwa.the1umastory.com/settings
-}
-
 start_pwa_with_app() {
   MAGENTO_URL=https://$(get_host) \
     COMPOSE_PROJECT_NAME="" \
@@ -376,6 +364,18 @@ start_pwa_with_app() {
     sleep 2 #TODO need better method to wait for ready state
   }
   open https://pwa.the1umastory.com
+}
+
+start_pwa_with_cloud() {
+  MAGENTO_URL="" \
+    COMPOSE_PROJECT_NAME="" \
+    DEMO_MODE="true" \
+    docker-compose -f "$mdm_path/current/docker-files/docker-compose.yml" restart storystore-pwa
+  ! is_nginx_rev_proxy_running && {
+    reload_rev_proxy
+    sleep 2 #TODO need better method to wait for ready state
+  }
+  open https://pwa.the1umastory.com/settings
 }
 
 toggle_advanced_mode() {
