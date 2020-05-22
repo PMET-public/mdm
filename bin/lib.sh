@@ -24,6 +24,11 @@ done
 
 mdm_version=0.0.21
 mdm_path="$HOME/.mdm"
+menu_log_file="$mdm_path/current/menu.log"
+handler_log_file="$mdm_path/current/handler.log"
+[[ ! -f "$menu_log_file" || ! -f "$handler_log_file" ]] && {
+    touch "$menu_log_file" "$handler_log_file"
+}
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[1;33m'
@@ -469,8 +474,7 @@ init_app_specific_vars() {
   [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
   env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
   mkdir -p "$env_dir"
-  menu_log_file="$env_dir/menu.log"
-  handler_log_file="$env_dir/handler.log"
+  status_msg_file="$env_dir/.status"
   quit_detection_file="$env_dir/.$PPID-still_running"
   status_msg_file="$env_dir/.status"
 }
