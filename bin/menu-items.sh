@@ -383,13 +383,9 @@ is_advanced_mode && {
   keys+=("$key")
   menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cloud-cli-reference.html"
 
-  key="Docker CLI commands"
+  key="Docker Reference"
   keys+=("$key")
-  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/docker-cli-reference.html"
-
-  key="Docker-compose CLI commands"
-  keys+=("$key")
-  menu["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/docker-compose-cli-reference.html"
+  menu["$key-link"]="https://docs.docker.com/reference/"
 
 }
 
