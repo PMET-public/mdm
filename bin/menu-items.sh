@@ -85,7 +85,7 @@ is_update_available && {
   fi
 }
 
-is_app_running && {
+is_app_running && is_network_state_ok && {
   key="Open Magento app in browser"
   keys+=("$key")
   menu["$key-handler"]=open_app
@@ -148,7 +148,7 @@ is_app_installed && {
   keys+=("$key")
 
   ! is_app_running && {
-    key="Warning: 🛑 App is stopped."
+    key="🛑 App stopped. Many cmds N/A"
     keys+=("$key")
     menu["$key-handler"]=no_op
   }
@@ -158,6 +158,7 @@ is_app_installed && {
   menu["$key-handler"]=start_shell_in_app
 
   is_app_running && {
+
     key="Reindex"
     keys+=("$key")
     menu["$key-handler"]=reindex
@@ -185,6 +186,7 @@ is_app_installed && {
     key="Warm Cache"
     keys+=("$key")
     menu["$key-handler"]=warm_cache
+
   }
 
   key="Pre-generate resized catalog images"
@@ -234,23 +236,38 @@ are_other_magento_apps_running && {
 #
 ###
 
+
+if is_network_state_ok; then
+
 key="PWA"
 keys+=("$key")
 
-is_app_running && {
-  key="PWA using this Magento app"
+  if is_app_running; then
+    key="Start PWA using this Magento app"
+  else
+    key="🛑 App stopped. Start PWA offline"
+  fi
   keys+=("$key")
   menu["$key-handler"]="start_pwa_with_app"
-}
 
-key="PWA using cloud env"
+  key="Start PWA using a different backend"
 keys+=("$key")
-menu["$key-handler"]="start_pwa_with_cloud"
+  menu["$key-handler"]="start_pwa_with_diff"
 
 # the pwa github repo
 key="Storystore PWA @ GitHub - Docs, Issues, etc."
 keys+=("$key")
-menu["$key-link"]="https://github.com/PMET-public/storystore-pwa"
+  menu["$key-link"]="https://github.com/PMET-public/storystore-pwa/blob/master/README.md"
+
+else
+
+  key="Can't run PWA. Local ports in use."
+  keys+=("$key")
+  menu["$key-handler"]=no_op
+  menu["$key-icon"]="ic_warning_${icon_color}_48dp.png"
+  menu["$key-disabled"]=true
+
+fi
 
 ###
 #
