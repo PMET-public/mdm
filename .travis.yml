@@ -1,0 +1,3 @@
+language: osx
+
+script: ./bin/launcher
