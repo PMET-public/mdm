@@ -354,27 +354,29 @@ stop_other_apps() {
 }
 
 start_pwa_with_app() {
-  MAGENTO_URL=https://$(get_host) \
+  export MAGENTO_URL=https://$(get_host) \
     COMPOSE_PROJECT_NAME="" \
+    COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
     DEMO_MODE="false" \
-    STORYSTORE_PWA_VERSION=$(get_host_version) \
-    docker-compose -f "$mdm_path/current/docker-files/docker-compose.yml" restart storystore-pwa
-  ! is_nginx_rev_proxy_running && {
-    reload_rev_proxy
-    sleep 2 #TODO need better method to wait for ready state
-  }
+    STORYSTORE_PWA_VERSION=$(get_host_version)
+  docker-compose rm -sfv storystore-pwa
+  docker-compose up -d storystore-pwa
+  ! is_nginx_rev_proxy_running && reload_rev_proxy
+  local index=1
+  until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
   open https://pwa.the1umastory.com
 }
 
-start_pwa_with_cloud() {
-  MAGENTO_URL="" \
+start_pwa_with_diff() {
+  export MAGENTO_URL="" \
     COMPOSE_PROJECT_NAME="" \
-    DEMO_MODE="true" \
-    docker-compose -f "$mdm_path/current/docker-files/docker-compose.yml" restart storystore-pwa
-  ! is_nginx_rev_proxy_running && {
-    reload_rev_proxy
-    sleep 2 #TODO need better method to wait for ready state
-  }
+    COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
+    DEMO_MODE="true"
+  docker-compose rm -sfv storystore-pwa
+  docker-compose up -d storystore-pwa
+  ! is_nginx_rev_proxy_running && reload_rev_proxy
+  local index=1
+  until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
   open https://pwa.the1umastory.com/settings
 }
 
