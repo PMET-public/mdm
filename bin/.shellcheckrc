@@ -1,2 +1,4 @@
+# SC2236 Use -n instead of ! -z.
 disable=SC2236
+# SC2152 Can only return 0-255. Other data should be written to stdout.
 disable=SC2152

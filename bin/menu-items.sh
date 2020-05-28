@@ -68,166 +68,170 @@ is_update_available && {
   menu["$key-icon"]="ic_system_update_alt_${icon_color}_48dp.png"
 }
 
-! is_app_installed && {
-  if is_network_state_ok; then
-    key="Install & open Magento app in browser"
-    keys+=("$key")
-    menu["$key-handler"]=install_app
-    menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
-    # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
-  else
-    key="Can't install. Local ports in use."
-    keys+=("$key")
-    menu["$key-handler"]=no_op
-    menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
-    # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
-    menu["$key-disabled"]=true
-  fi
-}
+! is_standalone && {
 
-is_app_running && is_network_state_ok && {
-  key="Open Magento app in browser"
-  keys+=("$key")
-  menu["$key-handler"]=open_app
-  menu["$key-icon"]="ic_launch_${icon_color}_48dp.png"
-}
-
-is_app_installed && is_app_running && {
-  key="Stop Magento app"
-  keys+=("$key")
-  menu["$key-handler"]=stop_app
-  menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
-}
-
-is_app_installed && ! is_app_running && {
-  if is_network_state_ok; then
-    key="Restart Magento app"
-    keys+=("$key")
-    menu["$key-handler"]=restart_app
-    menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
-  else 
-    key="Can't restart Magento app. Local ports in use."
-    keys+=("$key")
-    menu["$key-handler"]=no_op
-    menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
-    menu["$key-disabled"]=true
-  fi
-}
-
-is_advanced_mode && ! is_app_running && {
-  key="TODO Sync Magento app to remote env"
-  keys+=("$key")
-  menu["$key-handler"]=sync_app_to_remote
-  menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
-  menu["$key-disabled"]=true
-}
-
-is_advanced_mode && ! is_app_running && {
-  key="TODO Clone to new Magento app"
-  keys+=("$key")
-  menu["$key-handler"]=clone_app
-  menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
-  menu["$key-disabled"]=true
-}
-
-is_app_installed && {
-  key="Uninstall this Magento app"
-  keys+=("$key")
-  menu["$key-handler"]=uninstall_app
-  menu["$key-icon"]="ic_delete_${icon_color}_48dp.png"
-}
-
-###
-#
-# start Magento commands submenu
-#
-###
-
-is_app_installed && {
-  key="Magento commands"
-  keys+=("$key")
-
-  ! is_app_running && {
-    key="🛑 App stopped. Many cmds N/A"
-    keys+=("$key")
-    menu["$key-handler"]=no_op
+  ! is_app_installed && {
+    if is_network_state_ok; then
+      key="Install & open Magento app in browser"
+      keys+=("$key")
+      menu["$key-handler"]=install_app
+      menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
+      # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
+    else
+      key="Can't install. Local ports in use."
+      keys+=("$key")
+      menu["$key-handler"]=no_op
+      menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
+      # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
+      menu["$key-disabled"]=true
+    fi
   }
 
-  key="Start shell in Magento app"
-  keys+=("$key")
-  menu["$key-handler"]=start_shell_in_app
-
-  is_app_running && {
-
-    key="Reindex"
+  is_app_running && is_network_state_ok && {
+    key="Open Magento app in browser"
     keys+=("$key")
-    menu["$key-handler"]=reindex
+    menu["$key-handler"]=open_app
+    menu["$key-icon"]="ic_launch_${icon_color}_48dp.png"
+  }
 
-    key="Run cron jobs"
+  is_app_installed && is_app_running && {
+    key="Stop Magento app"
     keys+=("$key")
-    menu["$key-handler"]=run_cron
+    menu["$key-handler"]=stop_app
+    menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
+  }
 
-    key="Enable all except cms cache"
-    keys+=("$key")
-    menu["$key-handler"]=enable_all_except_cms_cache
+  is_app_installed && ! is_app_running && {
+    if is_network_state_ok; then
+      key="Restart Magento app"
+      keys+=("$key")
+      menu["$key-handler"]=restart_app
+      menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+    else 
+      key="Can't restart Magento app. Local ports in use."
+      keys+=("$key")
+      menu["$key-handler"]=no_op
+      menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+      menu["$key-disabled"]=true
+    fi
+  }
 
-    key="Enable all caches"
+  is_advanced_mode && ! is_app_running && {
+    key="TODO Sync Magento app to remote env"
     keys+=("$key")
-    menu["$key-handler"]=enable_all_caches
+    menu["$key-handler"]=sync_app_to_remote
+    menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
+    menu["$key-disabled"]=true
+  }
 
-    key="Disable most caches"
+  is_advanced_mode && ! is_app_running && {
+    key="TODO Clone to new Magento app"
     keys+=("$key")
-    menu["$key-handler"]=disable_most_caches
+    menu["$key-handler"]=clone_app
+    menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
+    menu["$key-disabled"]=true
+  }
 
-    key="Flush Cache"
+  is_app_installed && {
+    key="Uninstall this Magento app"
     keys+=("$key")
-    menu["$key-handler"]=flush_cache
+    menu["$key-handler"]=uninstall_app
+    menu["$key-icon"]="ic_delete_${icon_color}_48dp.png"
+  }
 
-    key="Warm Cache"
+  ###
+  #
+  # start Magento commands submenu
+  #
+  ###
+
+  is_app_installed && {
+    key="Magento commands"
     keys+=("$key")
-    menu["$key-handler"]=warm_cache
+
+    ! is_app_running && {
+      key="🛑 App stopped. Many cmds N/A"
+      keys+=("$key")
+      menu["$key-handler"]=no_op
+    }
+
+    key="Start shell in Magento app"
+    keys+=("$key")
+    menu["$key-handler"]=start_shell_in_app
+
+    is_app_running && {
+
+      key="Reindex"
+      keys+=("$key")
+      menu["$key-handler"]=reindex
+
+      key="Run cron jobs"
+      keys+=("$key")
+      menu["$key-handler"]=run_cron
+
+      key="Enable all except cms cache"
+      keys+=("$key")
+      menu["$key-handler"]=enable_all_except_cms_cache
+
+      key="Enable all caches"
+      keys+=("$key")
+      menu["$key-handler"]=enable_all_caches
+
+      key="Disable most caches"
+      keys+=("$key")
+      menu["$key-handler"]=disable_most_caches
+
+      key="Flush Cache"
+      keys+=("$key")
+      menu["$key-handler"]=flush_cache
+
+      key="Warm Cache"
+      keys+=("$key")
+      menu["$key-handler"]=warm_cache
+
+    }
+
+    key="Pre-generate resized catalog images"
+    keys+=("$key")
+    menu["$key-handler"]=resize_images
+
+    # key="Switch to production mode"
+    # keys+=("$key")
+    # menu["$key-handler"]=switch_to_production_mode
+
+    # key="Switch to developer mode"
+    # keys+=("$key")
+    # menu["$key-handler"]=switch_to_developer_mode
 
   }
 
-  key="Pre-generate resized catalog images"
-  keys+=("$key")
-  menu["$key-handler"]=resize_images
+  ###
+  #
+  # end Magento commands submenu
+  #
+  ###
 
-  # key="Switch to production mode"
-  # keys+=("$key")
-  # menu["$key-handler"]=switch_to_production_mode
+  is_advanced_mode && {
+    key="Start MDM shell"
+    keys+=("$key")
+    menu["$key-handler"]=start_mdm_shell
+    menu["$key-icon"]="ic_code_${icon_color}_48dp.png"
+  }
 
-  # key="Switch to developer mode"
-  # keys+=("$key")
-  # menu["$key-handler"]=switch_to_developer_mode
+  ! is_advanced_mode && {
+    key="Show MDM logs"
+    keys+=("$key")
+    menu["$key-handler"]=show_mdm_logs
+    menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
+  }
 
-}
+  are_other_magento_apps_running && {
+    key="Stop all other Magento apps"
+    keys+=("$key")
+    menu["$key-handler"]=stop_other_apps
+    menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
+  }
 
-###
-#
-# end Magento commands submenu
-#
-###
-
-is_advanced_mode && {
-  key="Start MDM shell"
-  keys+=("$key")
-  menu["$key-handler"]=start_mdm_shell
-  menu["$key-icon"]="ic_code_${icon_color}_48dp.png"
-}
-
-! is_advanced_mode && {
-  key="Show MDM logs"
-  keys+=("$key")
-  menu["$key-handler"]=show_mdm_logs
-  menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
-}
-
-are_other_magento_apps_running && {
-  key="Stop all other Magento apps"
-  keys+=("$key")
-  menu["$key-handler"]=stop_other_apps
-  menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
 }
 
 ###
@@ -236,27 +240,28 @@ are_other_magento_apps_running && {
 #
 ###
 
-
 if is_network_state_ok; then
 
-key="PWA"
-keys+=("$key")
-
-  if is_app_running; then
-    key="Start PWA using this Magento app"
-  else
-    key="🛑 App stopped. Start PWA offline"
-  fi
+  key="PWA"
   keys+=("$key")
-  menu["$key-handler"]="start_pwa_with_app"
 
-  key="Start PWA using a different backend"
-keys+=("$key")
+  ! is_standalone && {
+    if is_app_running; then
+      key="Start PWA using this Magento app"
+    else
+      key="🛑 App stopped. Start PWA offline"
+    fi
+    keys+=("$key")
+    menu["$key-handler"]="start_pwa_with_app"
+  }
+
+  key="Start PWA using a remote backend"
+  keys+=("$key")
   menu["$key-handler"]="start_pwa_with_diff"
 
-# the pwa github repo
-key="Storystore PWA @ GitHub - Docs, Issues, etc."
-keys+=("$key")
+  # the pwa github repo
+  key="Storystore PWA @ GitHub - Docs, Issues, etc."
+  keys+=("$key")
   menu["$key-link"]="https://github.com/PMET-public/storystore-pwa/blob/master/README.md"
 
 else
@@ -355,7 +360,7 @@ is_adobe_system && {
 
   key="Field Readiness"
   keys+=("$key")
-  menu["$key-link"]="https://fieldreadiness-adobe.highspot.com/"
+  menu["$key-link"]="https://fieldreadiness-adobe.highspot.com/spots/5cba1d07659e93677419f707"
 } || :
 
 ###
@@ -448,16 +453,16 @@ is_advanced_mode && {
     key+=" (stops running app)"
   }
 
-    keys+=("$key")
-    menu["$key-handler"]=toggle_mdm_debug_mode
+  keys+=("$key")
+  menu["$key-handler"]=toggle_mdm_debug_mode
 
   key="Force check for new MDM versioon"
   keys+=("$key")
   menu["$key-handler"]=force_check_mdm_ver
 
-  # key="Revert to previous MDM"
-  # keys+=("$key")
-  # menu["$key-handler"]=revert_to_prev_mdm
+  key="Revert to previous MDM"
+  keys+=("$key")
+  menu["$key-handler"]=revert_to_prev_mdm
 
   key="Reload reverse proxy"
   keys+=("$key")

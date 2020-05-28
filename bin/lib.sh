@@ -22,8 +22,8 @@ done
 #
 ###
 
-mdm_version=0.0.21
 mdm_path="$HOME/.mdm"
+mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
 menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
 [[ ! -f "$menu_log_file" || ! -f "$handler_log_file" ]] && {
@@ -129,7 +129,12 @@ verify_mdm_cert_dir() {
     error "Can't read TLS certificates: $mdm_cert_dir/cert1.pem."
 }
 
+is_standalone() {
+  [[ ! -d "$resource_dir/app" ]]
+}
+
 is_app_installed() {
+  is_standalone && return 1
   # grep once and store result in var
   [[ -n "$app_is_installed" ]] ||
     {
@@ -140,6 +145,7 @@ is_app_installed() {
 }
 
 is_app_running() {
+  is_standalone && return 1
   # grep once and store result in var
   [[ -n "$app_is_running" ]] || {
     echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_db_1 Up"
@@ -193,13 +199,12 @@ called_from_platypus_app() {
 
 lookup_latest_remote_sem_ver() {
   curl -svL "$repo_url/releases" | \
-    perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1'
+    perl -ne 'BEGIN{undef $/;} /archive\/([\d.]+)\.tar\.gz/ and print $1'
 }
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local mdm_ver_file more_recent_of_two
-  mdm_ver_file="$mdm_path/latest-sem-ver"
+  local more_recent_of_two
   if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $(stat -f%c "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
@@ -416,8 +421,8 @@ render_platypus_status_menu() {
     key="${keys[$index]}"
     # no handler or link? must be a submenu heading
     [[ -z "${menu["$key-handler"]}" && -z "${menu["$key-link"]}" ]] && {
-      # if a submenu heading, was the last char a newline? if not, add one to start new submenu
-      [[ $menu_output =~ $'\n'$ ]] || menu_output+=$'\n'
+      # if menu has some output already & if a submenu heading, was the last char a newline? if not, add one to start new submenu
+      [[ -n $menu_output && ! $menu_output =~ $'\n'$ ]] && menu_output+=$'\n'
       menu_output+="SUBMENU|$key"
       is_submenu=true
       continue
@@ -465,21 +470,23 @@ handle_menu_selection() {
 
 init_app_specific_vars() {
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
-  cd "$resource_dir/app" || exit
-  # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
-  export_compose_project_name
-  export_compose_file
-  export_image_vars_for_override_yml
-  [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
-  env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
-  mkdir -p "$env_dir"
-  status_msg_file="$env_dir/.status"
-  quit_detection_file="$env_dir/.$PPID-still_running"
-  # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
-  # also ensure log files exist
-  [[ ! -f "$quit_detection_file" ]] && {
-    touch "$quit_detection_file"
-    detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
+  ! is_standalone && {
+    cd "$resource_dir/app"
+    # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
+    export_compose_project_name
+    export_compose_file
+    export_image_vars_for_override_yml
+    [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
+    env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
+    mkdir -p "$env_dir"
+    status_msg_file="$env_dir/.status"
+    quit_detection_file="$env_dir/.$PPID-still_running"
+    # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
+    # also ensure log files exist
+    [[ ! -f "$quit_detection_file" ]] && {
+      touch "$quit_detection_file"
+      detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
+    }
   }
 }
 

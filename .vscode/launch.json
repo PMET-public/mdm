@@ -50,7 +50,20 @@
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "Dockerize from product's magento-cloud master git branch",
+      "name": "Dockerize standalone MDM",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": [
+        "-s"
+      ]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Dockerize product's magento-cloud master git branch",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/dockerize",
       "env": {
