@@ -157,10 +157,26 @@ force_check_mdm_ver() {
 }
 
 revert_to_prev_mdm() {
-  :
+  # what about when verion in lib.sh doesn't match containing dir name?
+  # should only happen on dev machine, right?
+  # have version determined by path only so it's authoritative?
+  local current vers
+  cd "$mdm_path"
+  current="$(readlink current)"
+  # find available version not including 0.0.x
+  vers="$(
+    find . -type d -maxdepth 1 |
+    perl -ne 's/.*\/// and /^[0-9.]+$/ and print' |
+    grep -v '^0\.0\.' |
+    gsort -rV |
+    xargs
+  )"
+  prev=$(echo "${vers/* $current / }" | perl -pe 's/.*?\b([0-9.]+).*/$1/')
+  [[ -d $prev ]] && {
+    rm current
+    ln -sf $prev current
+  }
 }
-
-
 
 toggle_mdm_debug_mode() {
   local app="${parent_pids_path/.app\/Contents\/MacOS\/*/.app}"

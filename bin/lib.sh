@@ -22,8 +22,8 @@ done
 #
 ###
 
-mdm_version=0.0.21
 mdm_path="$HOME/.mdm"
+mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
 menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
 [[ ! -f "$menu_log_file" || ! -f "$handler_log_file" ]] && {
