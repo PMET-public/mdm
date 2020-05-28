@@ -68,6 +68,8 @@ is_update_available && {
   menu["$key-icon"]="ic_system_update_alt_${icon_color}_48dp.png"
 }
 
+! is_standalone && {
+
 ! is_app_installed && {
   if is_network_state_ok; then
     key="Install & open Magento app in browser"
@@ -230,18 +232,20 @@ are_other_magento_apps_running && {
   menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
 }
 
+}
+
 ###
 #
 # start PWA submenu
 #
 ###
 
-
 if is_network_state_ok; then
 
 key="PWA"
 keys+=("$key")
 
+  ! is_standalone && {
   if is_app_running; then
     key="Start PWA using this Magento app"
   else
@@ -249,8 +253,9 @@ keys+=("$key")
   fi
   keys+=("$key")
   menu["$key-handler"]="start_pwa_with_app"
+  }
 
-  key="Start PWA using a different backend"
+  key="Start PWA using a remote backend"
 keys+=("$key")
   menu["$key-handler"]="start_pwa_with_diff"
 
