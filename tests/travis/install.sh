@@ -2,7 +2,13 @@
 
 set +x
 
+msg "Sourcing ./bin/lib.sh"
+# shellcheck source=../../bin/lib.sh
+source ./bin/lib.sh
+
+msg "Running launcher ..."
 output=$(./bin/launcher)
-echo "Output from launcher: $output"
+msg "Output from launcher: $output"
+
+msg "Running launcher with output ..."
 ./bin/launcher "$output"
-env
