@@ -154,12 +154,14 @@ rm -rf "$tmp_app_dir/.git"
 
 # create a clean copy (before composer install) of repo to hold assets with the EE version appended to the dir name
 # app_dir contents will be distributable unit
+# use grep then perl b/c regex (as written against 100K line file) takes too much time TODO: improve
 ee_version=$(
+  grep -EA1 'cloud-metapackage|magento\/product-enterprise-edition' "$tmp_app_dir/composer.lock" |
   perl -ne '
     undef $/;
     s/[\S\s]*(cloud-metapackage|magento\/product-enterprise-edition)"[\S\s]*?"version": "([^"]*)[\S\s]*/\2/m and print
-  ' "$tmp_app_dir/composer.lock"
-)
+')
+[[ -z $ee_version ]] && ee_version="$(perl -ne 's/.*"version":\s*"(2.*)".*/\1/ and print'  "$tmp_app_dir/composer.json")"
 app_dir="$tmp_app_dir-$ee_version"
 rm -rf "$app_dir" || :
 cp -a "$tmp_app_dir" "$app_dir"

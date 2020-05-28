@@ -63,6 +63,21 @@
     {
       "type": "bashdb",
       "request": "launch",
+      "name": "Dockerize community edition git branch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": [
+        "-g", "git@github.com:pmet-public/magento2.git",
+        "-b", "2.3.5-p1-cloud",
+        "-n", "ce"
+      ]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
       "name": "Dockerize product's magento-cloud master git branch",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/dockerize",
