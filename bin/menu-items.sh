@@ -17,7 +17,7 @@ declare -A menu
   keys+=("$key")
   menu["$key-handler"]=start_docker
   menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
-  return
+  return 0
 }
 
 has_status_msg && {
@@ -48,7 +48,7 @@ is_docker_suboptimal && {
   menu["$key-display-condition"]=""
   menu["$key-handler"]=optimize_docker
   menu["$key-icon"]="baseline_speed_${icon_color}_48dp.png"
-  return
+  return 0
 }
 
 ! is_docker_running && {
@@ -56,10 +56,10 @@ is_docker_suboptimal && {
   keys+=("$key")
   menu["$key-handler"]=start_docker
   menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
-  return
+  return 0
 }
 
-! is_docker_ready && return
+! is_docker_ready && return 0
 
 is_update_available && {
   key="Update MDM"
