@@ -199,7 +199,7 @@ called_from_platypus_app() {
 
 lookup_latest_remote_sem_ver() {
   curl -svL "$repo_url/releases" | \
-    perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1'
+    perl -ne 'BEGIN{undef $/;} /archive\/([\d.]+)\.tar\.gz/ and print $1'
 }
 
 is_update_available() {
@@ -472,22 +472,22 @@ init_app_specific_vars() {
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
   ! is_standalone && {
     cd "$resource_dir/app"
-  # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
-  export_compose_project_name
-  export_compose_file
-  export_image_vars_for_override_yml
-  [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
-  env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
-  mkdir -p "$env_dir"
-  status_msg_file="$env_dir/.status"
-  quit_detection_file="$env_dir/.$PPID-still_running"
-  # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
-  # also ensure log files exist
-  [[ ! -f "$quit_detection_file" ]] && {
-    touch "$quit_detection_file"
-    detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
+    # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
+    export_compose_project_name
+    export_compose_file
+    export_image_vars_for_override_yml
+    [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
+    env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
+    mkdir -p "$env_dir"
+    status_msg_file="$env_dir/.status"
+    quit_detection_file="$env_dir/.$PPID-still_running"
+    # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
+    # also ensure log files exist
+    [[ ! -f "$quit_detection_file" ]] && {
+      touch "$quit_detection_file"
+      detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
+    }
   }
-}
 }
 
 init_logging() {
