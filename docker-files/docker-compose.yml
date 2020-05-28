@@ -1,15 +1,15 @@
 version: '3.0'
 services:
-  cert-generator:
+  certbot-dns:
     image: pmetpublic/certbot-dns
     volumes:
       - "./certbot-dns/.dns-config.ini:/.dns-config.ini"
-      - "/dest/path/archive:/etc/letsencrypt/archive"
-    command: '
+      - "${dest_dir:-.}:/etc/letsencrypt/archive"
+    command: "
       --dns-digitalocean \
       --dns-digitalocean-credentials /.dns-config.ini \
       --dns-digitalocean-propagation-seconds 30 \
-      -d "*.yourdomain.com" '
+      -d '${domain:-*.test.com}' "
   storystore-pwa:
     image: pmetpublic/storystore-pwa:latest
     environment:
