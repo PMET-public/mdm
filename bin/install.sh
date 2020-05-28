@@ -76,7 +76,7 @@ Press ANY key to continue to the Docker Desktop For Mac download page. Then down
 https://hub.docker.com/editions/community/docker-ce-desktop-mac/
 
 "
-  read -n 1 -s -r -p ""
+  [[ -z $TRAVIS ]] && read -n 1 -s -r -p ""
   # open docker for mac installation page
   open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
 }
