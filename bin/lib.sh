@@ -129,7 +129,12 @@ verify_mdm_cert_dir() {
     error "Can't read TLS certificates: $mdm_cert_dir/cert1.pem."
 }
 
+is_standalone() {
+  [[ ! -d "$resource_dir/app" ]]
+}
+
 is_app_installed() {
+  is_standalone && return 1
   # grep once and store result in var
   [[ -n "$app_is_installed" ]] ||
     {
@@ -140,6 +145,7 @@ is_app_installed() {
 }
 
 is_app_running() {
+  is_standalone && return 1
   # grep once and store result in var
   [[ -n "$app_is_running" ]] || {
     echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_db_1 Up"
@@ -415,8 +421,8 @@ render_platypus_status_menu() {
     key="${keys[$index]}"
     # no handler or link? must be a submenu heading
     [[ -z "${menu["$key-handler"]}" && -z "${menu["$key-link"]}" ]] && {
-      # if a submenu heading, was the last char a newline? if not, add one to start new submenu
-      [[ $menu_output =~ $'\n'$ ]] || menu_output+=$'\n'
+      # if menu has some output already & if a submenu heading, was the last char a newline? if not, add one to start new submenu
+      [[ -n $menu_output && ! $menu_output =~ $'\n'$ ]] && menu_output+=$'\n'
       menu_output+="SUBMENU|$key"
       is_submenu=true
       continue
@@ -464,7 +470,8 @@ handle_menu_selection() {
 
 init_app_specific_vars() {
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
-  cd "$resource_dir/app" || exit
+  ! is_standalone && {
+    cd "$resource_dir/app"
   # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
   export_compose_project_name
   export_compose_file
@@ -480,6 +487,7 @@ init_app_specific_vars() {
     touch "$quit_detection_file"
     detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
   }
+}
 }
 
 init_logging() {
