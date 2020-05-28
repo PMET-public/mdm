@@ -198,8 +198,7 @@ lookup_latest_remote_sem_ver() {
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local mdm_ver_file more_recent_of_two
-  mdm_ver_file="$mdm_path/latest-sem-ver"
+  local more_recent_of_two
   if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $(stat -f%c "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
