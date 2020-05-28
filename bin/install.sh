@@ -65,7 +65,7 @@ Alternatively, you can allow this script to install Homebrew by pressing ANY key
 }
 
 # do not install docker (which is docker toolbox) via homebrew; use docker for mac instead
-brew install bash coreutils
+brew install bash coreutils || :
 brew upgrade bash coreutils
 
 [[ -d /Applications/Docker.app ]] || {
