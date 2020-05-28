@@ -24,7 +24,7 @@ if [[
   -f /usr/local/bin/brew && \
   -f /usr/local/bin/realpath && \
   -f "$HOME/.mdm/current/bin/mdm" && \
-  -d /Applications/Docker.app
+  ( -d /Applications/Docker.app || $TRAVIS )
 
 ]]; then
 
