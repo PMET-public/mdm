@@ -2,7 +2,6 @@
 
 set +x
 
-msg "Sourcing ./bin/lib.sh"
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
 
