@@ -1,4 +1,10 @@
 language: generic
-os: osx
-osx_image: xcode11.5
 script: ./tests/travis/install-deps-and-mdm.sh
+services:
+  - docker
+
+jobs:
+  include:
+    - os: osx
+      osx_image: xcode11.5
+    - dist: bionic

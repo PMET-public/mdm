@@ -20,16 +20,16 @@ set -e # stop on errors
 
 if [[
 
-  ${BASH_VERSINFO[0]} -ge 5 && \
-  -f /usr/local/bin/brew && \
-  -f /usr/local/bin/realpath && \
+  ${BASH_VERSINFO[0]} -ge 4 && \
+  -n "$(which realpath)" && \
   -f "$HOME/.mdm/current/bin/mdm" && \
-  ( -d /Applications/Docker.app || $TRAVIS )
+  ( "$(uname)" = "Darwin" && -n "$(which brew)" ) && \
+  ( -n "$(which docker)" || ( "$(uname)" = "Darwin" && $TRAVIS ) )
 
 ]]; then
 
   # allow mdm_script_path to be set by the env for debugging
-  mdm_script_path="${mdm_script_path:-$HOME/.mdm/current/bin/mdm}"
+  mdm_script_path="${TRAVIS_BUILD_DIR:-$HOME/.mdm/current}/bin/mdm"
   # shellcheck source=mdm
   source "$mdm_script_path"
 
@@ -44,7 +44,7 @@ else
   else
 
     installer=$(mktemp)
-    curl -sL https://raw.githubusercontent.com/PMET-public/mdm/master/bin/install.sh > "$installer"
+    curl -sL https://raw.githubusercontent.com/PMET-public/mdm/${TRAVIS_BRANCH:-master}/bin/install.sh > "$installer"
     chmod +x "$installer"
     if [[ $TRAVIS ]]; then
       "$installer"
