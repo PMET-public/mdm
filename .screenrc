@@ -12,8 +12,8 @@ mousetrack on
 
 # default windows
 # assumes $PWD is Resources dir of app
-screen -t 'Handler log' 1 sh -c "cat ~/.mdm/envs/$COMPOSE_PROJECT_NAME/handler.log; tail -n 0 -f ~/.mdm/envs/$COMPOSE_PROJECT_NAME/handler.log;"
-screen -t 'Menu log'  2 sh -c "cat ~/.mdm/envs/$COMPOSE_PROJECT_NAME/menu.log; tail -n 0 -f ~/.mdm/envs/$COMPOSE_PROJECT_NAME/menu.log;"
+screen -t 'Handler log' 1 sh -c "cat ~/.mdm/current/handler.log; tail -n 0 -f ~/.mdm/current/handler.log;"
+screen -t 'Menu log'  2 sh -c "cat ~/.mdm/current/menu.log; tail -n 0 -f ~/.mdm/current/menu.log;"
 select 1
 # bind c screen 1 # window numbering starts at 1 not 0
 # bind 0 select 10
