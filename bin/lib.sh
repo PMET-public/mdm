@@ -26,9 +26,6 @@ mdm_path="$HOME/.mdm"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
 menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
-[[ ! -f "$menu_log_file" || ! -f "$handler_log_file" ]] && {
-    touch "$menu_log_file" "$handler_log_file"
-}
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[1;33m'
@@ -468,6 +465,12 @@ handle_menu_selection() {
 
 }
 
+ensure_log_files_exist() {
+  [[ ! -f "$menu_log_file" || ! -f "$handler_log_file" ]] && {
+    touch "$menu_log_file" "$handler_log_file"
+  }
+}
+
 init_app_specific_vars() {
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
   ! is_standalone && {
@@ -480,13 +483,6 @@ init_app_specific_vars() {
     env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
     mkdir -p "$env_dir"
     status_msg_file="$env_dir/.status"
-    quit_detection_file="$env_dir/.$PPID-still_running"
-    # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
-    # also ensure log files exist
-    [[ ! -f "$quit_detection_file" ]] && {
-      touch "$quit_detection_file"
-      detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
-    }
   }
 }
 
@@ -509,6 +505,16 @@ init_logging() {
   set -x
 }
 
+init_quit_detection() {
+  quit_detection_file="$env_dir/.$PPID-still_running"
+  # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
+  # also ensure log files exist
+  [[ ! -f "$quit_detection_file" ]] && {
+    touch "$quit_detection_file"
+    detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
+  }
+}
+
 ###
 #
 # initialization logic
@@ -516,8 +522,10 @@ init_logging() {
 ##
 
 called_from_platypus_app && {
+  ensure_log_files_exist
   init_app_specific_vars
   [[ $debug ]] && init_logging
+  init_quit_detection
 }
 
 : # need to return true or will exit when sourced with "-e" and last test = false
