@@ -38,6 +38,32 @@ is_existing_cloud_env() {
   [[ $env_is_existing_cloud ]]
 }
 
+create_platypys_app() {
+  local name="$1" contents_dir="$2"
+  platypus \
+    --app-icon "$app_icon_path" \
+    --status-item-kind 'Icon' \
+    --status-item-icon "$status_menu_icon_path" \
+    --interface-type 'Status Menu' \
+    --interpreter '/usr/bin/env' \
+    --interpreter-args '-P|/usr/local/bin:/bin|bash' \
+    --overwrite \
+    --text-background-color '#000000' \
+    --text-foreground-color '#FFFFFF' \
+    --name "$name" \
+    --app-version 0.1 \
+    -u 'Keith Bentrup' \
+    --bundle-identifier 'com.magento.mdm' \
+    "$mdm_path/current/bin/launcher" \
+    "$contents_dir.app"
+  [[ -d $contents_dir ]] && {
+    # mv app into app bundle
+    mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
+  }
+  msg "Successfully created $contents_dir.app"
+}
+
+
 print_usage() {
   echo "
 Usage:
@@ -55,13 +81,15 @@ Options:
   -a /path/to/auth.json     Optional path to auth.json file if required by composer
   -i /path/to/file.icns     Optional path to icon for Platyplus OSX app bundle (Apple .icns file preferred)
   -m                        Include complete media cache (larger size and longer time to run but image resizing already done)
+  -s                        Stand-alone app - no included Magento app - used for testing, bare PWA frontend, etc.
 "
 }
 
 # parse options
-while getopts "b:e:g:hp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
+while getopts "b:e:g:hsp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
   case "$opt" in
     h ) print_usage; exit 0 ;;
+    s ) create_platypys_app MDM "$HOME/Downloads/MDM"; exit 0 ;;
     p ) pid="$OPTARG" ;;
     e ) env="$OPTARG" ;;
     g ) git_url="$OPTARG" ;;
@@ -242,24 +270,5 @@ rm -rf "$tmp_app_dir"
 
 # bundle with Platypus
 if has_platypus; then
-  # create app with symlinks
-  platypus \
-    --app-icon "$app_icon_path" \
-    --status-item-kind 'Icon' \
-    --status-item-icon "$status_menu_icon_path" \
-    --interface-type 'Status Menu' \
-    --interpreter '/usr/bin/env' \
-    --interpreter-args '-P|/usr/local/bin:/bin|bash' \
-    --overwrite \
-    --text-background-color '#000000' \
-    --text-foreground-color '#FFFFFF' \
-    --name "$subdomain" \
-    --app-version 0.1 \
-    -u 'Keith Bentrup' \
-    --bundle-identifier 'com.magento.mdm' \
-    "$mdm_path/current/bin/launcher" \
-    "$app_dir.app"
-  # mv app into app bundle
-  mv "$app_dir" "$app_dir.app/Contents/Resources/app"
-  msg "Successfully created $app_dir.app"
+  create_platypys_app "$subdomain" "$app_dir"
 fi
