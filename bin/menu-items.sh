@@ -360,7 +360,7 @@ is_adobe_system && {
 
   key="Field Readiness"
   keys+=("$key")
-  menu["$key-link"]="https://fieldreadiness-adobe.highspot.com/"
+  menu["$key-link"]="https://fieldreadiness-adobe.highspot.com/spots/5cba1d07659e93677419f707"
 } || :
 
 ###
