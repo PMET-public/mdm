@@ -42,21 +42,25 @@ is_adobe_system && ! is_onedrive_linked && {
   menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
 }
 
-is_docker_suboptimal && {
-  key="Adjust Docker for minimum requirements"
-  keys+=("$key")
-  menu["$key-display-condition"]=""
-  menu["$key-handler"]=optimize_docker
-  menu["$key-icon"]="baseline_speed_${icon_color}_48dp.png"
-  return 0
-}
+is_mac && {
 
-! is_docker_running && {
-  key="Start Docker to continue"
-  keys+=("$key")
-  menu["$key-handler"]=start_docker
-  menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
-  return 0
+  is_docker_suboptimal && {
+    key="Adjust Docker for minimum requirements"
+    keys+=("$key")
+    menu["$key-display-condition"]=""
+    menu["$key-handler"]=optimize_docker
+    menu["$key-icon"]="baseline_speed_${icon_color}_48dp.png"
+    return 0
+  }
+
+  ! is_docker_running && {
+    key="Start Docker to continue"
+    keys+=("$key")
+    menu["$key-handler"]=start_docker
+    menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+    return 0
+  }
+
 }
 
 ! is_docker_ready && return 0

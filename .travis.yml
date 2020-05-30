@@ -1,5 +1,10 @@
 language: generic
 script: ./tests/travis/install-deps-and-mdm.sh
+
+git:
+  submodules: false
+  depth: 1
+
 services:
   - docker
 

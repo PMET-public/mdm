@@ -82,8 +82,12 @@ can_optimize_vm_disk() {
   [[ disk_for_vm -lt recommended_vm_disk_mb ]]
 }
 
+is_mac() {
+  [[ "$(uname)" = "Darwin" ]]
+}
+
 is_docker_installed() {
-  [[ -f "$docker_settings_file" ]]
+  [[ -n $(which docker) || -f "$docker_settings_file" ]]
 }
 
 is_docker_suboptimal() {
@@ -177,13 +181,21 @@ are_other_magento_apps_running() {
   return $?
 }
 
-run_without_args() {
-  # for debugging. bash vscode debugger changes normal invocation, so check for a special var 
-  [[ "$vsc_debugger_arg" == "n/a" ]] && return
-  [[ -n "$vsc_debugger_arg" ]] &&
-    menu_selection="$vsc_debugger_arg" ||
-    menu_selection="${BASH_ARGV[-1]}"
-  return "${BASH_ARGC[-1]}" # BASH_ARGC tracks number of parameters in call stack; last index is original script
+invoked_mdm_without_args() {
+  # determining whether mdm was called without args to display the menu or invoke a selection is difficult.
+  # bash5 on mac and bash4 on linux report BASH_ARGC differently. the vsc debugger wraps the call in other args.
+  # modify carefully.
+  # for debugging, bash vscode debugger changes normal invocation, so check for a special var 
+  if [[ "$vsc_debugger_arg" == "n/a" ]]; then
+    return 0
+  elif [[ -n "$vsc_debugger_arg" ]]; then
+    menu_selection="$vsc_debugger_arg"
+    return 1
+  elif [[ ${BASH_ARGV[-1]} =~ /bin/mdm$ ]]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 # need way to distinguish being called from app or other script sourcing this lib (e.g. dockerize script)
@@ -487,7 +499,7 @@ init_app_specific_vars() {
 }
 
 init_logging() {
-  if run_without_args; then
+  if invoked_mdm_without_args; then
     cur_log_file="$menu_log_file"
   else
     cur_log_file="$handler_log_file"
@@ -496,7 +508,7 @@ init_logging() {
   exec > >(tee -ia "$cur_log_file")
   # exec 2> >(tee -ia "$cur_log_file")
   exec 2>> "$cur_log_file"
-  if run_without_args; then
+  if invoked_mdm_without_args; then
     timestamp_msg "Script called without args" >&2
   else 
     timestamp_msg "Script called with ${BASH_ARGV[-1]}" >&2

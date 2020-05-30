@@ -130,7 +130,7 @@ stop_app() {
     docker-compose stop
   } >> "$handler_log_file" 2>&1 &
   # if stopped indirectly (by quitting the app), don't bother to set the status and wait
-  run_without_args ||
+  invoked_mdm_without_args ||
     set_status_and_wait_for_exit $! "Stopping Magento ..."
 }
 
