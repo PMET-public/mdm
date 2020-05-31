@@ -194,6 +194,7 @@ invoked_mdm_without_args() {
   elif [[ ${BASH_ARGV[-1]} =~ /bin/mdm$ ]]; then
     return 0
   else
+    menu_selection="${BASH_ARGV[-1]}"
     return 1
   fi
 }
