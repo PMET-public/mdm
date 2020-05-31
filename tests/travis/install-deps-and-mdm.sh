@@ -42,4 +42,6 @@ msg "Running launcher with dependencies now installed:
 
 }
 
+./bin/launcher toggle_advanced_mode
+
 exit 0
