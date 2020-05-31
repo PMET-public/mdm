@@ -547,8 +547,9 @@ init_quit_detection() {
 called_from_platypus_app && {
   ensure_log_files_exist
   init_app_specific_vars
-  [[ $debug ]] && init_logging
   init_quit_detection
 }
+
+[[ $debug ]] && init_logging
 
 : # need to return true or will exit when sourced with "-e" and last test = false

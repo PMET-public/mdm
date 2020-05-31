@@ -12,4 +12,8 @@ jobs:
   include:
     - os: osx
       osx_image: xcode11.5
+      script: ./tests/travis/install-deps-and-mdm.sh
     - dist: bionic
+      script:
+        - ./tests/travis/install-deps-and-mdm.sh
+        - ./tests/travis/test-menu-selections.sh

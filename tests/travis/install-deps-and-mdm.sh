@@ -1,14 +1,12 @@
 #!/bin/bash
 
-set +x
-shopt -s nocasematch
-
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
 
 msg "Running launcher
 "
 output="$(./bin/launcher)"
+shopt -s nocasematch
 [[ $output =~ install ]] || exit 1
 
 msg "Running launcher with output as param
@@ -41,7 +39,5 @@ msg "Running launcher with dependencies now installed:
   ./bin/launcher
 
 }
-
-./bin/launcher toggle_advanced_mode
 
 exit 0
