@@ -455,13 +455,13 @@ render_platypus_status_menu() {
 }
 
 handle_menu_selection() {
-  local key
+  local key value
   # if selected menu item matches an exit timer, clear exit timer status and exit
   [[ "$menu_selection" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
   
   # otherwise check what type of menu item was selected
 
-  # a func?
+  # a handler?
   key="$menu_selection-handler"
   [[ -n "${menu[$key]}" ]] && {
     "${menu[$key]}"
@@ -474,6 +474,16 @@ handle_menu_selection() {
     open "${menu[$key]}"
     exit
   }
+
+  # not a handler or a link key? look for direct call (useful for testing)
+  for value in "${menu[@]}"; do
+    [[ "$menu_selection" = "$value" ]] && {
+      "$menu_selection"
+      exit
+    }
+  done
+
+  error "Handler for $menu_selection was not found or valid in this context."
 
 }
 
