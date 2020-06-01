@@ -214,13 +214,20 @@ lookup_latest_remote_sem_ver() {
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local more_recent_of_two
-  if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $(stat -f%c "$mdm_ver_file") ))" -lt 86400 ]]; then
+  local more_recent_of_two stat_cmd sort_cmd
+  if is_mac; then
+    stat_cmd=gstat
+    sort_cmd=gsort
+  else
+    stat_cmd=stat
+    sort_cmd=sort
+  fi
+  if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using gsort -V
-    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | gsort -V | tail -1)"
+    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | "$sort_cmd" -V | tail -1)"
     [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
