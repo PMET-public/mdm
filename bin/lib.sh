@@ -554,7 +554,7 @@ init_quit_detection() {
 called_from_platypus_app && {
   ensure_log_files_exist
   init_app_specific_vars
-  init_quit_detection
+  ! is_standalone && init_quit_detection
 }
 
 [[ $debug ]] && init_logging
