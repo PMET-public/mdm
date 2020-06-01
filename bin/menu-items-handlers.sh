@@ -152,8 +152,8 @@ sync_app_to_remote() {
 }
 
 force_check_mdm_ver() {
-  rm "$mdm_ver_file" || :
-  is_update_available
+  rm "$mdm_ver_file" || : # okay if file doesn't exist
+  is_update_available || : # okay if update n/a, just triggering the check
 }
 
 revert_to_prev_mdm() {

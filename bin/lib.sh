@@ -1,11 +1,21 @@
 #!/bin/bash
 set -e
 
+# this lib is used by dockerize, mdm, tests, etc. but logging to STDOUT is problematic for platypus apps
+# so need a way to check and if appropiate, defer until lib can bootstrap the appropiate logging
+included_by_mdm() {
+  # misidentification by shellcheck? implicit array concatenation - which is desired plus = vs =~
+  # shellcheck disable=SC2199
+  [[ "${BASH_SOURCE[@]}" =~ /bin/mdm ]]
+}
+
+[[ $debug ]] && ! included_by_mdm && set -x
+
 # establish $lib_dir for reference
 # N.B. when to use $resource_dir (references a specific platypus app instance) vs $lib_dir:
 # $lib_dir (the dir containing this file) should be used unless a specific running platypus app instance or 
 # its resources from $resource_dir are required to complete successfully.
-# this maximizes what can be tested generically and from a shell
+# this maximizes what can be used generically and from a shell
 
 # iterate thru BASH_SOURCE to find this lib.sh (should work even when debugging in IDE)
 bs_len=${#BASH_SOURCE[@]}
@@ -495,7 +505,7 @@ handle_menu_selection() {
 
 }
 
-ensure_log_files_exist() {
+ensure_mdm_log_files_exist() {
   [[ ! -f "$menu_log_file" || ! -f "$handler_log_file" ]] && {
     touch "$menu_log_file" "$handler_log_file"
   }
@@ -516,7 +526,7 @@ init_app_specific_vars() {
   }
 }
 
-init_logging() {
+init_mdm_logging() {
   if invoked_mdm_without_args; then
     cur_log_file="$menu_log_file"
   else
@@ -552,11 +562,10 @@ init_quit_detection() {
 ##
 
 called_from_platypus_app && {
-  ensure_log_files_exist
+  ensure_mdm_log_files_exist
   init_app_specific_vars
+  [[ $debug ]] && init_mdm_logging
   ! is_standalone && init_quit_detection
 }
-
-[[ $debug ]] && init_logging
 
 : # need to return true or will exit when sourced with "-e" and last test = false

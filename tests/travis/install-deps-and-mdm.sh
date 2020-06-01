@@ -3,11 +3,15 @@
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
 
+env
+
+[[ $debug ]] && set -x
+
 msg "Running launcher
 "
 output="$(./bin/launcher)"
 shopt -s nocasematch
-[[ $output =~ install ]] || exit 1
+[[ $output =~ install ]] || error "Could not find install menu item."
 
 msg "Running launcher with output as param
 "
@@ -28,7 +32,7 @@ msg "Running launcher with dependencies now installed:
   "
   output3="$(./bin/launcher)"
 
-  [[ "$output" = "$output3" ]] || exit 1
+  [[ "$output" = "$output3" ]] || error "Launcher output should be different."
 
   msg "Rerunning launcher with new output
   "
