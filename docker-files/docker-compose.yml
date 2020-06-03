@@ -18,7 +18,7 @@ services:
       - DEMO_MODE=${DEMO_MODE:-false}
     ports:
       - 3000:3000
-  storystore-pwa:
+  storystore-pwa-prev:
     image: pmetpublic/storystore-pwa:docker-prev
     environment:
       - MAGENTO_URL=${MAGENTO_URL:-https://venia.magento.com/graphql}
