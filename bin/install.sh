@@ -36,7 +36,7 @@ latest_release_ver=$(curl -s "$repo_url/releases" | \
 curl -sLO "$repo_url/archive/$latest_release_ver.tar.gz"
 mkdir -p "$latest_release_ver"
 tar -zxf "$latest_release_ver.tar.gz" --strip-components 1 -C "$latest_release_ver"
-rm "$latest_release_ver.tar.gz" current || : # cleanup and remove old link
+rm "$latest_release_ver.tar.gz" current 2> /dev/null || : # cleanup and remove old link
 ln -sf "$latest_release_ver" current
 
 set +x # if we make it this far, turn off the debugging output for the rest
