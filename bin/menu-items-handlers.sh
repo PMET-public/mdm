@@ -375,8 +375,9 @@ start_pwa_with_app() {
     COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
     DEMO_MODE="false" \
     STORYSTORE_PWA_VERSION=$(get_host_version)
-  docker-compose rm -sfv storystore-pwa
-  docker-compose up -d storystore-pwa
+  docker-compose pull
+  docker-compose rm -sfv storystore-pwa storystore-pwa-prev
+  docker-compose up -d storystore-pwa storystore-pwa-prev
   ! is_nginx_rev_proxy_running && reload_rev_proxy
   local index=1
   until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
@@ -384,12 +385,14 @@ start_pwa_with_app() {
 }
 
 start_pwa_with_diff() {
+  # TODO combine this with above for DRYness
   export MAGENTO_URL="" \
     COMPOSE_PROJECT_NAME="" \
     COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
     DEMO_MODE="true"
-  docker-compose rm -sfv storystore-pwa
-  docker-compose up -d storystore-pwa
+  docker-compose pull
+  docker-compose rm -sfv storystore-pwa storystore-pwa-prev
+  docker-compose up -d storystore-pwa storystore-pwa-prev
   ! is_nginx_rev_proxy_running && reload_rev_proxy
   local index=1
   until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
