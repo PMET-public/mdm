@@ -11,7 +11,7 @@ services:
       --dns-digitalocean-propagation-seconds 30 \
       -d '${domain:-*.test.com}' "
   storystore-pwa:
-    image: pmetpublic/storystore-pwa:latest
+    image: pmetpublic/storystore-pwa:docker
     environment:
       - MAGENTO_URL=${MAGENTO_URL:-https://venia.magento.com/graphql}
       - NEXT_TELEMETRY_DISABLED=1
@@ -19,7 +19,7 @@ services:
     ports:
       - 3000:3000
   storystore-pwa:
-    image: pmetpublic/storystore-pwa:prev
+    image: pmetpublic/storystore-pwa:docker-prev
     environment:
       - MAGENTO_URL=${MAGENTO_URL:-https://venia.magento.com/graphql}
       - NEXT_TELEMETRY_DISABLED=1
