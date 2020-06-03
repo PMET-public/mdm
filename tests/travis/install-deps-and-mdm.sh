@@ -3,8 +3,6 @@
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
 
-env
-
 [[ $debug ]] && set -x
 
 msg "Running launcher
