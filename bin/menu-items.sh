@@ -251,7 +251,7 @@ if is_network_state_ok; then
 
   ! is_standalone && {
     if is_app_running; then
-      key="Start PWA using this Magento app"
+      key="(Re)start latest PWA using this Magento app"
     else
       key="🛑 App stopped. Start PWA offline"
     fi
