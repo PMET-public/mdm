@@ -3,19 +3,21 @@ name: test runner
 on:
   push:
 
-env:
-  debug: true
-
 jobs:
-  dockerize-standalone:
+  run-CI-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os:
           - ubuntu-latest
           - macos-latest
+        value: [true, ""]
+    env:
+      debug: ${{ matrix.value }}
     steps:
       - uses: actions/checkout@v2
-      - name: create standalone mdm
+      - name: run-CI-tests
+        env:
+          debug: ${{ matrix.value }}
         run: |
           ./tests/CI/install-deps-and-mdm.sh
