@@ -97,7 +97,7 @@ is_mac() {
 }
 
 is_CI() {
-  [[ $GITHUB_REF || $TRAVIS ]]
+  [[ $GITHUB_WORKSPACE || $TRAVIS ]]
 }
 
 is_docker_installed() {

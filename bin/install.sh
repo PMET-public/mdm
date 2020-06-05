@@ -21,7 +21,7 @@ msg() {
 }
 
 is_CI() {
-  [[ $GITHUB_REF || $TRAVIS ]]
+  [[ $GITHUB_WORKSPACE || $TRAVIS ]]
 }
 
 # increase the size & clear the terminal
