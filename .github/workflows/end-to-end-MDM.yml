@@ -8,6 +8,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - run: |
-        brew install platypus
-        ./bin/dockerize -s
+      - name: create standalone mdm
+        run: |
+          brew install platypus
+          ./bin/dockerize -s
