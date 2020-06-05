@@ -10,5 +10,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: create standalone mdm
         run: |
+          env
           brew install platypus
-          ./bin/dockerize -s
+          # ./bin/dockerize -s
