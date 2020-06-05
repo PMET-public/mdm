@@ -8,22 +8,22 @@ jobs:
   include:
   - os: osx
     osx_image: xcode11.5
-    script: "./tests/travis/install-deps-and-mdm.sh"
+    script: "./tests/CI/install-deps-and-mdm.sh"
   - os: osx
     osx_image: xcode11.5
     env:
     - debug=true
-    script: "./tests/travis/install-deps-and-mdm.sh"
+    script: "./tests/CI/install-deps-and-mdm.sh"
   - dist: bionic
     script:
-    - "./tests/travis/install-deps-and-mdm.sh"
-    - "./tests/travis/test-menu-selections.sh"
+    - "./tests/CI/install-deps-and-mdm.sh"
+    - "./tests/CI/test-menu-selections.sh"
   - dist: bionic
     env:
     - debug=true
     script:
-    - "./tests/travis/install-deps-and-mdm.sh"
-    - "./tests/travis/test-menu-selections.sh"
+    - "./tests/CI/install-deps-and-mdm.sh"
+    - "./tests/CI/test-menu-selections.sh"
 env:
   global:
     secure: b9lNE7J5V8glRuU4/Ac2Ak6ISdtvTk6NZXHa3UxYsBte9u/HXQhhxSx2RIFlxiqQPdvOrEUwAdxjEA8LrRcv2AdR8riNUe/21wuCay/BTgc+jJSVtkcYziW8i9hGHBmpCDrs7xfW9UGScV+XjExA3E3YUu836khVoAMcIl4PdrgdtEx0EzePiI5a1Y8ZQBP8QLFj/nlP8gBAgIIfiNqabmeOfbrAmTeXo5Wi3dT5dCYtdJO8ks1iIvon4XavV3qoRZGLrfrpF+4IS9LJnVsfc12mOL/NwnYVQoe2Af21FGn587y9ookI/DfbVH7QeFGtL0DCn4tvywh0ZxJb96UvY7Z5eTDnmVAKCxz2h2hESSvCC59rZ/M9ikR4AFN+1ix5lYBWM5JMweNLZfmXIWkziZ5rjxnLBObvggH9wInmjHRJOQrNbj0VkEzXXuW6B66gXDwqQtrFr1YRc3V5+CSi49KnqT2z6Riy5/sqDdULlHWc3cFIaDoKGrsbbufgO/dVOUQLAu8kC62UWdx9lgmMPPoittqfQA8MdkrA95PQy7mkYPfRsF/Sanjk1KNpaS59rlxCH0k3P1Qh/LsczOv19yroDho+fGOqRqJmDy40yIxJOqG9S00VQDDQz4/Xm1HEdSilLnppoPtxko41zTnu7SH5+G1Vsax0gh5Ctk81onI=
