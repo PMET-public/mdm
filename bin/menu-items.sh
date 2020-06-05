@@ -259,7 +259,7 @@ if is_network_state_ok; then
     menu["$key-handler"]="start_pwa_with_app"
   }
 
-  key="Start PWA using a remote backend"
+  key="(Re)start latest PWA using a remote backend"
   keys+=("$key")
   menu["$key-handler"]="start_pwa_with_diff"
 
