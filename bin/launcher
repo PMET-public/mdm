@@ -29,7 +29,7 @@ is_CI() {
 # allow mdm_script_path to be set by env var for debugging or testing
 if [[ $GITHUB_WORKSPACE ]]; then
   REPO_DIR="$GITHUB_WORKSPACE"
-  REPO_BRANCH=" ${GITHUB_REF#refs/heads/}"
+  REPO_BRANCH="${GITHUB_REF#refs/heads/}"
 elif [[ $TRAVIS ]]; then
   REPO_DIR="$TRAVIS_BUILD_DIR"
   REPO_BRANCH="$TRAVIS_BRANCH"
