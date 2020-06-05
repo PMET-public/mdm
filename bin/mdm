@@ -20,5 +20,5 @@ source "$lib_dir/menu-items.sh" || :
 if invoked_mdm_without_args; then
   render_platypus_status_menu
 else
-  handle_menu_selection
+  handle_mdm_input
 fi

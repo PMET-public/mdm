@@ -204,12 +204,12 @@ invoked_mdm_without_args() {
   if [[ "$vsc_debugger_arg" == "n/a" ]]; then
     return 0
   elif [[ -n "$vsc_debugger_arg" ]]; then
-    menu_selection="$vsc_debugger_arg"
+    mdm_input="$vsc_debugger_arg"
     return 1
   elif [[ ${BASH_ARGV[-1]} =~ /bin/mdm$ ]]; then
     return 0
   else
-    menu_selection="${BASH_ARGV[-1]}"
+    mdm_input="${BASH_ARGV[-1]}"
     return 1
   fi
 }
@@ -477,22 +477,22 @@ render_platypus_status_menu() {
   printf "%s" "$menu_output"
 }
 
-handle_menu_selection() {
+handle_mdm_input() {
   local key value
   # if selected menu item matches an exit timer, clear exit timer status and exit
-  [[ "$menu_selection" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
+  [[ "$mdm_input" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
   
   # otherwise check what type of menu item was selected
 
   # a handler?
-  key="$menu_selection-handler"
+  key="$mdm_input-handler"
   [[ -n "${menu[$key]}" ]] && {
     "${menu[$key]}"
     exit
   }
 
   # a link?
-  key="$menu_selection-link"
+  key="$mdm_input-link"
   [[ -n "${menu[$key]}" ]] && {
     open "${menu[$key]}"
     exit
@@ -500,13 +500,24 @@ handle_menu_selection() {
 
   # not a handler or a link key? look for direct call (useful for testing)
   for value in "${menu[@]}"; do
-    [[ "$menu_selection" = "$value" ]] && {
-      "$menu_selection"
+    [[ "$mdm_input" = "$value" ]] && {
+      msg "$mdm_input found in current menu. Running ...
+"
+      "$mdm_input"
       exit
     }
   done
 
-  error "Handler for $menu_selection was not found or valid in this context."
+  for value in "${testable_menu[@]}"; do
+    [[ "$mdm_input" = "$value" ]] && {
+      warning "$mdm_input NOT FOUND in current menu BUT is testable menu option. Running anyway ...
+"
+      "$mdm_input"
+      exit
+    }
+  done
+
+  error "Handler for $mdm_input was not found or valid in this context."
 
 }
 
