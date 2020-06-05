@@ -3,9 +3,17 @@ name: test runner
 on:
   push:
 
+env:
+  debug: true
+
 jobs:
   dockerize-standalone:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: create standalone mdm
