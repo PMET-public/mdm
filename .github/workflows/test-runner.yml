@@ -5,7 +5,7 @@ on:
 
 env:
   # set a default terminal for various cmds that expect it
-  TERM=xterm
+  TERM: xterm
 
 jobs:
   run-CI-tests:
