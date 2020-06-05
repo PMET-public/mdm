@@ -3,6 +3,10 @@ name: test runner
 on:
   push:
 
+env:
+  # set a default terminal for various cmds that expect it
+  TERM=xterm
+
 jobs:
   run-CI-tests:
     runs-on: ${{ matrix.os }}
