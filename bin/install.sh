@@ -20,6 +20,10 @@ msg() {
   printf "%b%s%b\n" "$green" "$*" "$no_color"
 }
 
+is_CI() {
+  [[ $GITHUB_REF || $TRAVIS ]]
+}
+
 # increase the size & clear the terminal
 printf '\e[8;50;140t'
 
@@ -58,7 +62,7 @@ Once all requirements are installed and validated, this script will not need to 
   Alternatively, you can allow this script to install Homebrew by pressing ANY key to continue.
   "
 
-    [[ -z "$TRAVIS" ]] && read -n 1 -s -r -p ""
+    ! is_CI && read -n 1 -s -r -p ""
 
     clear
 
@@ -77,7 +81,7 @@ Once all requirements are installed and validated, this script will not need to 
   https://hub.docker.com/editions/community/docker-ce-desktop-mac/
 
   "
-    [[ -z "$TRAVIS" ]] && read -n 1 -s -r -p ""
+    ! is_CI && read -n 1 -s -r -p ""
     # open docker for mac installation page
     open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
   }

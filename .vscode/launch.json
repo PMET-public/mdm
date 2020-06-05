@@ -25,7 +25,7 @@
         //"vsc_debugger_arg": "Restart Magento app",
         //"vsc_debugger_arg": "Start MDM shell",
         "vsc_debugger_arg": "Reload reverse proxy",
-        "TRAVIS_BUILD_DIR": "${workspaceFolder}",
+        "REPO_DIR": "${workspaceFolder}",
         "parent_pids_path": 
           "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
       },
@@ -42,7 +42,7 @@
       "env": {
         "debug": true,
         "vsc_debugger_arg": "toggle_advanced_mode",
-        "TRAVIS_BUILD_DIR": "${workspaceFolder}",
+        "REPO_DIR": "${workspaceFolder}",
         "parent_pids_path": 
           "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
       },
@@ -57,7 +57,7 @@
       "env": {
         "debug": true,
        // "vsc_debugger_arg": "n/a",
-        "TRAVIS_BUILD_DIR": "${workspaceFolder}",
+        "REPO_DIR": "${workspaceFolder}",
         "parent_pids_path": 
         //"${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
         "${env:HOME}/Downloads/ref-2.3.5-p1.app/Contents/Resources/script"

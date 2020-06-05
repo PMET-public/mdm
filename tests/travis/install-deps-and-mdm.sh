@@ -19,8 +19,8 @@ msg "Running launcher with dependencies now installed:
 "
 ./bin/launcher
 
-# now try without homebrew pre-installed (for travis-ci envs)
-[[ "$TRAVIS" && "$(uname)" = "Darwin" ]] && {
+# now try without homebrew pre-installed (for CI envs)
+is_CI && is_mac && {
 
   msg "Removing homebrew
   "

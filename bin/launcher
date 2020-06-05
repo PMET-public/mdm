@@ -18,18 +18,34 @@ set -e # stop on errors
 #
 # the depedency check should run every time in case its copied to new computer
 
+is_mac() {
+  [[ "$(uname)" = "Darwin" ]]
+}
+
+is_CI() {
+  [[ $GITHUB_REF || $TRAVIS ]]
+}
+
+# allow mdm_script_path to be set by env var for debugging or testing
+if [[ $GITHUB_REF ]]; then
+  REPO_DIR="$GITHUB_WORKSPACE"
+  REPO_BRANCH=" ${GITHUB#refs/heads/}"
+elif [[ $TRAVIS ]]; then
+  REPO_DIR="$TRAVIS_BUILD_DIR"
+  REPO_BRANCH="$TRAVIS_BRANCH"
+fi
+
 if [[
 
   ${BASH_VERSINFO[0]} -ge 4 && \
   -n "$(which realpath)" && \
   -f "$HOME/.mdm/current/bin/mdm" && \
   ( "$(uname)" != "Darwin" || -n "$(which brew)" ) && \
-  ( -n "$(which docker)" || ( "$(uname)" = "Darwin" && $TRAVIS ) )
+  ( -n "$(which docker)" || ( $(is_mac) && ! $(is_CI) ) )
 
 ]]; then
 
-  # allow mdm_script_path to be set by the env for debugging
-  mdm_script_path="${TRAVIS_BUILD_DIR:-$HOME/.mdm/current}/bin/mdm"
+  mdm_script_path="${REPO_DIR:-$HOME/.mdm/current}/bin/mdm"
   # shellcheck source=mdm
   source "$mdm_script_path"
 
@@ -44,9 +60,9 @@ else
   else
 
     installer=$(mktemp)
-    curl -sL https://raw.githubusercontent.com/PMET-public/mdm/${TRAVIS_BRANCH:-master}/bin/install.sh > "$installer"
+    curl -sL "https://raw.githubusercontent.com/PMET-public/mdm/${REPO_BRANCH:-master}/bin/install.sh" > "$installer"
     chmod +x "$installer"
-    if [[ "$(uname)" = "Darwin" && -z $TRAVIS ]]; then
+    if is_mac && ! is_CI; then
       open -a Terminal "$installer"
     else
       "$installer"

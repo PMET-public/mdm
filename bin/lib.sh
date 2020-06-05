@@ -96,6 +96,10 @@ is_mac() {
   [[ "$(uname)" = "Darwin" ]]
 }
 
+is_CI() {
+  [[ $GITHUB_REF || $TRAVIS ]]
+}
+
 is_docker_installed() {
   [[ -n $(which docker) || -f "$docker_settings_file" ]]
 }
@@ -124,6 +128,7 @@ is_onedrive_linked() {
 
 reload_rev_proxy() {
   verify_mdm_cert_dir
+  # shellcheck source=nginx-rev-proxy-setup.sh
   source "$lib_dir/nginx-rev-proxy-setup.sh"
 }
 
