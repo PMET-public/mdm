@@ -256,12 +256,12 @@ if is_network_state_ok; then
       key="🛑 App stopped. Start PWA offline"
     fi
     keys+=("$key")
-    menu["$key-handler"]="start_pwa_with_app"
+    menu["$key-handler"]=start_pwa_with_app
   }
 
   key="(Re)start latest PWA using a remote backend"
   keys+=("$key")
-  menu["$key-handler"]="start_pwa_with_diff"
+  menu["$key-handler"]=start_pwa_with_diff
 
   # the pwa github repo
   key="Storystore PWA @ GitHub - Docs, Issues, etc."
