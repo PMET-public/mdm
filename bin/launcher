@@ -17,6 +17,13 @@ set -e # stop on errors
 # otherwise offer a single option to install dependencies when selected
 #
 # the depedency check should run every time in case its copied to new computer
+#
+# also noote this launching script is invoked as
+# `/usr/bin/env -P "/usr/local/bin:/bin" bash "/path/to/osx.app/Content/Resoources/name-of-launching-script"`
+# using the upgraded /usr/local/bin/bash if found or /bin/bash.
+# however, -P does not export the path, just sets it for `env` command. so export PATH if necessary
+
+[[ "$PATH" =~ "/usr/local/bin" ]] || export PATH="/usr/local/bin:$PATH"
 
 is_mac() {
   [[ "$(uname)" = "Darwin" ]]
