@@ -33,6 +33,10 @@ is_CI() {
   [[ $GITHUB_WORKSPACE || $TRAVIS ]]
 }
 
+is_docker_compatible() {
+  ! ( is_mac && is_CI )
+}
+
 # allow mdm_script_path to be set by env var for debugging or testing
 if [[ $GITHUB_WORKSPACE ]]; then
   REPO_DIR="$GITHUB_WORKSPACE"
@@ -44,11 +48,11 @@ fi
 
 if [[
 
+  -f "$HOME/.mdm/current/bin/mdm" && \
+  ( -n "$(which brew)" || ! "$(is_mac)" ) && \
   ${BASH_VERSINFO[0]} -ge 4 && \
   -n "$(which realpath)" && \
-  -f "$HOME/.mdm/current/bin/mdm" && \
-  ( "$(uname)" != "Darwin" || -n "$(which brew)" ) && \
-  ( -n "$(which docker)" || ( $(is_mac) && ! $(is_CI) ) )
+  ( -n "$(which docker)" || ! "$(is_docker_compatible)" )
 
 ]]; then
 
