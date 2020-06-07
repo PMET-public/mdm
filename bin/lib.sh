@@ -527,10 +527,8 @@ handle_mdm_input() {
 }
 
 ensure_mdm_log_files_exist() {
-  [[ ! -f "$menu_log_file" || ! -f "$handler_log_file" ]] && {
     touch "$menu_log_file" "$handler_log_file"
   }
-}
 
 init_app_specific_vars() {
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
