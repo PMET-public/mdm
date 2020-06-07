@@ -12,7 +12,7 @@ icon_color=$(is_dark_mode && echo "white" || echo "black")
 
 declare -A menu
 
-! is_docker_installed && {
+! is_docker_installed && is_docker_compatible && {
   key="Complete Docker installation by running for first time"
   keys+=("$key")
   menu["$key-handler"]=start_docker
@@ -42,28 +42,32 @@ is_adobe_system && ! is_onedrive_linked && {
   menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
 }
 
-is_mac && {
+is_docker_compatible && {
 
-  is_docker_suboptimal && {
-    key="Adjust Docker for minimum requirements"
-    keys+=("$key")
-    menu["$key-display-condition"]=""
-    menu["$key-handler"]=optimize_docker
-    menu["$key-icon"]="baseline_speed_${icon_color}_48dp.png"
-    return 0
+  is_mac && {
+
+    is_docker_suboptimal && {
+      key="Adjust Docker for minimum requirements"
+      keys+=("$key")
+      menu["$key-display-condition"]=""
+      menu["$key-handler"]=optimize_docker
+      menu["$key-icon"]="baseline_speed_${icon_color}_48dp.png"
+      return 0
+    }
+
+    ! is_docker_running && {
+      key="Start Docker to continue"
+      keys+=("$key")
+      menu["$key-handler"]=start_docker
+      menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
+      return 0
+    }
+
   }
 
-  ! is_docker_running && {
-    key="Start Docker to continue"
-    keys+=("$key")
-    menu["$key-handler"]=start_docker
-    menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
-    return 0
-  }
+  ! is_docker_ready && return 0
 
 }
-
-! is_docker_ready && return 0
 
 is_update_available && {
   key="Update MDM"
@@ -229,7 +233,7 @@ is_update_available && {
     menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
   }
 
-  are_other_magento_apps_running && {
+  is_docker_compatible && are_other_magento_apps_running && {
     key="Stop all other Magento apps"
     keys+=("$key")
     menu["$key-handler"]=stop_other_apps
@@ -249,19 +253,23 @@ if is_network_state_ok; then
   key="PWA"
   keys+=("$key")
 
-  ! is_standalone && {
-    if is_app_running; then
-      key="(Re)start latest PWA using this Magento app"
-    else
-      key="🛑 App stopped. Start PWA offline"
-    fi
-    keys+=("$key")
-    menu["$key-handler"]=start_pwa_with_app
-  }
+  is_docker_compatible && {
 
-  key="(Re)start latest PWA using a remote backend"
-  keys+=("$key")
-  menu["$key-handler"]=start_pwa_with_diff
+    ! is_standalone && {
+      if is_app_running; then
+        key="(Re)start latest PWA using this Magento app"
+      else
+        key="🛑 App stopped. Start PWA offline"
+      fi
+      keys+=("$key")
+      menu["$key-handler"]=start_pwa_with_app
+    }
+
+    key="(Re)start latest PWA using a remote backend"
+    keys+=("$key")
+    menu["$key-handler"]=start_pwa_with_diff
+
+  }
 
   # the pwa github repo
   key="Storystore PWA @ GitHub - Docs, Issues, etc."
@@ -468,21 +476,25 @@ is_advanced_mode && {
   keys+=("$key")
   menu["$key-handler"]=revert_to_prev_mdm
 
-  key="Reload reverse proxy"
-  keys+=("$key")
-  menu["$key-handler"]=reload_rev_proxy
+  is_docker_compatible && {
 
-  key="⚠️ Remove Magento images (breaks stopped apps)"
-  keys+=("$key")
-  menu["$key-handler"]=rm_magento_docker_images
+    key="Reload reverse proxy"
+    keys+=("$key")
+    menu["$key-handler"]=reload_rev_proxy
 
-  key="⚠️ Reset Docker (keeps only images)"
-  keys+=("$key")
-  menu["$key-handler"]=reset_docker
+    key="⚠️ Remove Magento images (breaks stopped apps)"
+    keys+=("$key")
+    menu["$key-handler"]=rm_magento_docker_images
 
-  key="🚨 Wipe Docker (removes everything!!!)"
-  keys+=("$key")
-  menu["$key-handler"]=wipe_docker
+    key="⚠️ Reset Docker (keeps only images)"
+    keys+=("$key")
+    menu["$key-handler"]=reset_docker
+
+    key="🚨 Wipe Docker (removes everything!!!)"
+    keys+=("$key")
+    menu["$key-handler"]=wipe_docker
+
+  }
 
 
 }

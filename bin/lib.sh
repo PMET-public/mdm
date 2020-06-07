@@ -100,6 +100,11 @@ is_CI() {
   [[ $GITHUB_WORKSPACE || $TRAVIS ]]
 }
 
+# this exists for CI testing of some functionality even when docker is n/a (e.g. travis and github ci with a mac)
+is_docker_compatible() {
+  ! ( is_mac && is_CI )
+}
+
 is_docker_installed() {
   [[ -n $(which docker) || -f "$docker_settings_file" ]]
 }
