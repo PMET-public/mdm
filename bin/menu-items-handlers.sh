@@ -107,6 +107,7 @@ install_app() {
     docker-compose up -d $services
     reload_rev_proxy
     # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
+    # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
     docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | \
       perl -pe 's/ .*/ $(get_host)/' >> /etc/hosts;
       /app/bin/magento cache:enable
@@ -375,35 +376,37 @@ stop_other_apps() {
   set_status_and_wait_for_exit $! "Stopping other apps ..."
 }
 
+
+# TODO change away positional pararms & is demo mode still used?
 start_pwa_with_app() {
-  export MAGENTO_URL=https://$(get_host) \
-    COMPOSE_PROJECT_NAME="" \
-    COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
-    DEMO_MODE="false" \
-    STORYSTORE_PWA_VERSION=$(get_host_version)
-  docker-compose pull
-  docker-compose rm -sfv storystore-pwa storystore-pwa-prev
-  docker-compose up -d storystore-pwa storystore-pwa-prev
-  ! is_nginx_rev_proxy_running && reload_rev_proxy
-  local index=1
-  until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
-  open https://pwa.the1umastory.com
+  start_pwa "https://$(get_host)" "" "false"
 }
 
 start_pwa_with_diff() {
-  # TODO combine this with above for DRYness
-  export MAGENTO_URL="" \
-    COMPOSE_PROJECT_NAME="" \
-    COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
-    DEMO_MODE="true"
-  docker-compose pull
-  docker-compose rm -sfv storystore-pwa storystore-pwa-prev
-  docker-compose up -d storystore-pwa storystore-pwa-prev
-  ! is_nginx_rev_proxy_running && reload_rev_proxy
-  local index=1
-  until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
-  open https://pwa.the1umastory.com/settings
+  start_pwa "" "settings" "true"
 }
+
+start_pwa() {
+  local magento_url pwa_path demo_mode
+  magento_url="$1"
+  pwa_path="$2"
+  demo_mode="$3"
+  {
+    export MAGENTO_URL="$magento_url" \
+      COMPOSE_PROJECT_NAME="mdm" \
+      COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
+      DEMO_MODE="$demo_mode"
+    docker-compose pull
+    docker-compose rm -sfv storystore-pwa storystore-pwa-prev
+    docker-compose up -d storystore-pwa storystore-pwa-prev
+    ! is_nginx_rev_proxy_running && reload_rev_proxy
+    local index=1
+    until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
+    open "https://pwa.the1umastory.com/$pwa_path"
+  } >> "$handler_log_file" 2>&1 &
+  set_status_and_wait_for_exit $! "(Re)starting PWA"
+}
+
 
 toggle_advanced_mode() {
   if [[ -f "$advanced_mode_flag_file" ]]; then
