@@ -337,8 +337,8 @@ unset BASH_XTRACEFD
 unset debug
 # set title of terminal
 echo -n -e '\033]0;${FUNCNAME[1]} $COMPOSE_PROJECT_NAME\007'
-# by exporting this, additional debug configurations will work
-export parent_pids_path=\"$parent_pids_path\"
+# is this export still needed?  (old comment: by exporting this, additional debug configurations will work)
+# export parent_pids_path=\"$parent_pids_path\"
 clear
 source \"$lib_dir/lib.sh\"
 ${*}
