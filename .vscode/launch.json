@@ -56,7 +56,7 @@
       "program": "${workspaceFolder}/bin/launcher",
       "env": {
         "debug": true,
-       // "vsc_debugger_arg": "n/a",
+      "vsc_debugger_arg": "n/a",
         "REPO_DIR": "${workspaceFolder}",
         "parent_pids_path": 
         //"${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
