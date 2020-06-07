@@ -203,10 +203,16 @@ reset_docker() {
     warning \"This will delete all docker containers, volumes, and networks.
 Docker images will be preserved to avoid downloading all images from scratch.\"
     confirm_or_exit
-    docker stop \$(docker ps -qa)
-    docker rm -fv \$(docker ps -qa)
-    docker volume rm -f \$(docker volume ls -q)
-    docker network prune -f
+    container_ids=\"\$(docker ps -qa)\"
+    [[ \$container_ids ]] && {
+      docker stop \$container_ids
+      docker rm -fv \$container_ids
+    }
+    volume_ids=\"\$(docker volume ls -q)\"
+    [[ \$volume_ids ]] && {
+      docker volume rm -f \$volume_ids
+    }
+    docker network prune -f || :
   "
 }
 
