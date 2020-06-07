@@ -527,12 +527,14 @@ handle_mdm_input() {
 }
 
 ensure_mdm_log_files_exist() {
-    touch "$menu_log_file" "$handler_log_file"
-  }
+  touch "$menu_log_file" "$handler_log_file"
+}
 
 init_app_specific_vars() {
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
-  ! is_standalone && {
+  if is_standalone; then
+    env_dir="$mdm_path/envs/standalone"
+  else
     cd "$resource_dir/app"
     # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
     export_compose_project_name
@@ -540,9 +542,9 @@ init_app_specific_vars() {
     export_image_vars_for_override_yml
     [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
     env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
-    mkdir -p "$env_dir"
-    status_msg_file="$env_dir/.status"
-  }
+  fi
+  mkdir -p "$env_dir"
+  status_msg_file="$env_dir/.status"
 }
 
 init_mdm_logging() {
