@@ -382,20 +382,20 @@ start_pwa_with_app() {
   start_pwa "https://$(get_host)" "" "false"
 }
 
-start_pwa_with_diff() {
+start_pwa_with_remote() {
   start_pwa "" "settings" "true"
 }
 
 start_pwa() {
-  local magento_url pwa_path demo_mode
+  local magento_url pwa_path cloud_mode
   magento_url="$1"
   pwa_path="$2"
-  demo_mode="$3"
+  cloud_mode="$3"
   {
     export MAGENTO_URL="$magento_url" \
       COMPOSE_PROJECT_NAME="mdm" \
       COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml" \
-      DEMO_MODE="$demo_mode"
+      CLOUD_MODE="$cloud_mode"
     docker-compose pull
     docker-compose rm -sfv storystore-pwa storystore-pwa-prev
     docker-compose up -d storystore-pwa storystore-pwa-prev

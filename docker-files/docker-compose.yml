@@ -15,10 +15,10 @@ services:
     environment:
       - MAGENTO_URL=${MAGENTO_URL:-https://venia.magento.com/graphql}
       - NEXT_TELEMETRY_DISABLED=1
-      - DEMO_MODE=${DEMO_MODE:-false}
+      - CLOUD_MODE=${CLOUD_MODE:-false}
   storystore-pwa-prev:
     image: pmetpublic/storystore-pwa:docker-prev
     environment:
       - MAGENTO_URL=${MAGENTO_URL:-https://venia.magento.com/graphql}
       - NEXT_TELEMETRY_DISABLED=1
-      - DEMO_MODE=${DEMO_MODE:-false}
+      - CLOUD_MODE=${CLOUD_MODE:-false}
