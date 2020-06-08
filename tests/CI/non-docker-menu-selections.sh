@@ -7,23 +7,25 @@ source ./bin/lib.sh
 
 launch_output="$(./bin/launcher)"
 
-# on
+# advanced mode on
 ./bin/launcher toggle_advanced_mode 
 
 launch_output2="$(./bin/launcher)"
 
 [[ "$launch_output" = "$launch_output2" ]] && error "Launch output should be different."
 
-# off
+# advanced mode  off
 ./bin/launcher toggle_advanced_mode
 
 launch_output3="$(./bin/launcher)"
 
 [[ "$launch_output" = "$launch_output3" ]] || error "Launch output should be the same."
 
-# on again
+# advanced mode  on again
 ./bin/launcher toggle_advanced_mode
 
+
+# force check mdm version
 stat_output="$(stat "$mdm_ver_file")"
 
 stat_output2="$(stat "$mdm_ver_file")"
