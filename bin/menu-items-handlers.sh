@@ -51,7 +51,7 @@ Installing Platypus ...
 
   msg "
 Additional tools successfully installed.
-  "
+"
 }
 
 optimize_docker() {
@@ -206,44 +206,44 @@ toggle_mdm_debug_mode() {
 }
 
 rm_magento_docker_images() {
-  run_as_bash_script_in_terminal "
-    warning \"This will delete all Magento images to force the download of the latest versions. 
-If a Magento app is stopped, it will NOT be preserved.\"
-    confirm_or_exit
-    docker images | grep -E '^(magento|pmetpublic)/' | awk '{print \$3}' | xargs docker rmi -f
-  "
+  run_in_new_terminal
+  warning "This will delete all Magento images to force the download of the latest versions. 
+If a Magento app is stopped, it will NOT be preserved."
+  confirm_or_exit
+  docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}' | xargs docker rmi -f
+  msg "Magento docker images successfully removed."
 }
 
 reset_docker() {
-  run_as_bash_script_in_terminal "
-    warning \"This will delete all docker containers, volumes, and networks.
-Docker images will be preserved to avoid downloading all images from scratch.\"
-    confirm_or_exit
-    container_ids=\"\$(docker ps -qa)\"
-    [[ \$container_ids ]] && {
-      docker stop \$container_ids
-      docker rm -fv \$container_ids
-    }
-    volume_ids=\"\$(docker volume ls -q)\"
-    [[ \$volume_ids ]] && {
-      docker volume rm -f \$volume_ids
-    }
-    docker network prune -f || :
-  "
+  run_in_new_terminal
+  warning "This will delete all docker containers, volumes, and networks.
+Docker images will be preserved to avoid downloading all images from scratch."
+  confirm_or_exit
+  # remove containers
+  container_ids="$(docker ps -qa)"
+  [[ $container_ids ]] && {
+    docker stop $container_ids
+    docker rm -fv $container_ids
+  }
+  # remove volumes
+  volume_ids="$(docker volume ls -q)"
+  [[ $volume_ids ]] && {
+    docker volume rm -f $volume_ids
+  }
+  # remove networks
+  docker network prune -f || :
+  msg "Docker reset successfully."
 }
 
 wipe_docker() {
-  run_as_bash_script_in_terminal "
-    warning \"This will delete ALL local docker artifacts - containers, images, volumes, and networks!\"
-    confirm_or_exit
-    docker stop \$(docker ps -qa) || :
-    docker rm -fv \$(docker ps -qa) || :
-    docker volume rm -f \$(docker volume ls -q) || :
-    docker network prune -f || :
-    docker rmi -f \$(docker images -qa) || :
-    # also clean up envs artifacts
-    rm -rf \"$mdm_path/envs/*\" || :
-  "
+  run_in_new_terminal
+  warning "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
+  confirm_or_exit
+  reset_docker
+  docker rmi -f $(docker images -qa) || :
+  # also clean up envs artifacts
+  rm -rf "$mdm_path/envs/*" || :
+  msg "Docker wiped successfully."
 }
 
 clone_app() {
@@ -255,22 +255,19 @@ no_op() {
 }
 
 start_shell_in_app() {
-  run_as_bash_script_in_terminal "
-    cd \"$resource_dir/app\" || exit
-    docker-compose run --rm deploy bash
-  "
+  run_in_new_terminal
+  cd "$resource_dir/app" || exit
+  docker-compose run --rm deploy bash
 }
 
 run_as_bash_cmds_in_app() {
-  run_as_bash_script_in_terminal "
-    cd \"$resource_dir/app\" || exit
-    echo 'Running in Magento app:'
-    msg '
+  run_in_new_terminal
+  cd "$resource_dir/app" || exit
+  echo 'Running in Magento app:'
+  msg '
     $1
-    
-    '
-    docker-compose run --rm deploy bash -c '$1' 2> /dev/null
-  "
+'
+  docker-compose run --rm deploy bash -c '$1' 2> /dev/null
 }
 
 reindex() {
@@ -300,19 +297,18 @@ flush_cache() {
 warm_cache() {
   # compare to chrome extenstion function (keep the funcs synced)
   domain=$(get_host)
-  run_as_bash_script_in_terminal "
-    set -x
-    domain=$domain
-    url=\"https://\$domain\"
-    tmp_file=$(mktemp)
+  run_in_new_terminal
+  set -x
+  domain=$domain
+  url="https://$domain"
+  tmp_file=$(mktemp)
 
-    msg Warming cache ...
+  msg Warming cache ...
 
-    # recursively get admin and store front
-    wget -nv -O \$tmp_file -H --domains=\$domain \$url/admin
-    wget -nv -r -X static,media -l 1 -O \$tmp_file -H --domains=\$domain \$url
-    rm \$tmp_file
-  "
+  # recursively get admin and store front
+  wget -nv -O $tmp_file -H --domains=$domain $url/admin
+  wget -nv -r -X static,media -l 1 -O $tmp_file -H --domains=$domain $url
+  rm $tmp_file
 }
 
 resize_images() {
@@ -335,11 +331,11 @@ start_mdm_shell() {
   else
     services_status="$(warning Magento app not installed yet.)"
   fi
-  run_as_bash_script_in_terminal "
-    cd \"$resource_dir/app\" || exit
-    msg Running $COMPOSE_PROJECT_NAME from $(pwd)
-    echo -e \"\\n\\n$services_status\"
-    msg \"
+  run_in_new_terminal
+  cd "$resource_dir/app" || exit
+  msg Running $COMPOSE_PROJECT_NAME from $(pwd)
+  echo -e "\\n\\n$services_status"
+  msg "
 
 You can run docker-compose cmds here, but it's recommend to use the MDM app to (un)install or
 start/stop the Magento app to ensure the proper application state.
@@ -347,8 +343,8 @@ start/stop the Magento app to ensure the proper application state.
 Magento docker-compose reference: https://devdocs.magento.com/cloud/docker/docker-quick-reference.html
 Full docker-compose reference: https://docs.docker.com/compose/reference/overview/
 
-\"
-    bash -l"
+"
+  bash -l
 }
 
 show_app_logs() {
@@ -356,23 +352,21 @@ show_app_logs() {
 }
 
 show_mdm_logs() {
-  run_as_bash_script_in_terminal "
-    cd \"$resource_dir\" || exit
-    screen -c '$lib_dir/../.screenrc'
-    exit
-  "
+  run_in_new_terminal
+  cd "$resource_dir" || exit
+  screen -c '$lib_dir/../.screenrc'
+  exit
 }
 
 uninstall_app() {
   timestamp_msg "${FUNCNAME[0]}"
-  run_as_bash_script_in_terminal "
-    exec > >(tee -ia \"$handler_log_file\")
-    exec 2> >(tee -ia \"$handler_log_file\" >&2)
-    warning THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!
-    confirm_or_exit
-    cd \"$resource_dir/app\" || exit
-    docker-compose down -v
-  "
+  run_in_new_terminal
+  exec > >(tee -ia "$handler_log_file")
+  exec 2> >(tee -ia "$handler_log_file" >&2)
+  warning THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!
+  confirm_or_exit
+  cd "$resource_dir/app" || exit
+  docker-compose down -v
 }
 
 stop_other_apps() {
