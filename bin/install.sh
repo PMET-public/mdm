@@ -20,6 +20,12 @@ msg() {
   printf "%b%s%b\n" "$green" "$*" "$no_color"
 }
 
+msg_w_newlines() {
+  msg "
+$*
+"
+}
+
 is_CI() {
   [[ $GITHUB_WORKSPACE || $TRAVIS ]]
 }
