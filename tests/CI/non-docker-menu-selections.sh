@@ -5,10 +5,12 @@ source ./bin/lib.sh
 
 [[ $debug ]] && set -x
 
+./bin/launcher install_additional_tools
+
 launch_output="$(./bin/launcher)"
 
 # advanced mode on
-./bin/launcher toggle_advanced_mode 
+./bin/launcher toggle_advanced_mode
 
 launch_output2="$(./bin/launcher)"
 
@@ -21,7 +23,7 @@ launch_output3="$(./bin/launcher)"
 
 [[ "$launch_output" = "$launch_output3" ]] || error "Launch output should be the same."
 
-# advanced mode  on again
+# advanced mode on again
 ./bin/launcher toggle_advanced_mode
 
 
