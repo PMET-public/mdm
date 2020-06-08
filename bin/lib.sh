@@ -303,8 +303,14 @@ msg() {
   printf "%b%s%b" "$green" "$*" "$no_color"
 }
 
-timestamp_msg() {
-  echo "$(msg "[$(date -u +%FT%TZ)] $*")"
+msg_w_newlines() {
+  msg "
+$*
+"
+}
+
+msg_w_timestamp() {
+  msg "[$(date -u +%FT%TZ)] $*"
 }
 
 convert_secs_to_hms() {
@@ -326,7 +332,7 @@ ARE YOU SURE?! (y/n)
 "
   read -p ''
   [[ $REPLY =~ ^[Yy]$ ]] || {
-    msg "Exiting unchanged." && exit
+    msg_w_newlines "Exiting unchanged." && exit
   }
 }
 
@@ -537,8 +543,7 @@ handle_mdm_input() {
   for value in "${menu[@]}"; do
     [[ "$mdm_input" = "$value" ]] && {
       export MDM_DIRECT_HANDLER_CALL=true
-      msg "$mdm_input found in current menu. Running ...
-"
+      msg_w_newlines "$mdm_input found in current menu. Running ..."
       "$mdm_input"
       exit
     }
@@ -590,9 +595,9 @@ init_mdm_logging() {
   # exec 2> >(tee -ia "$cur_log_file")
   exec 2>> "$cur_log_file"
   if invoked_mdm_without_args; then
-    timestamp_msg "Script called without args" >&2
+    msg_w_timestamp "Script called without args" >&2
   else 
-    timestamp_msg "Script called with ${BASH_ARGV[-1]}" >&2
+    msg_w_timestamp "Script called with ${BASH_ARGV[-1]}" >&2
   fi
   # before this point, enabling debugging could cause debug info in menu output
   set -x

@@ -25,38 +25,30 @@ install_additional_tools() {
   run_in_new_terminal
 
   is_magento_cloud_cli_installed || {
-    msg "
-Installing magento-cloud CLI ...
-"
+    msg_w_newlines "Installing magento-cloud CLI ..."
     curl -sLS https://accounts.magento.cloud/cli/installer | php
   }
 
   ! is_docker_bash_completion_installed && is_docker_compatible && {
-    msg "
-Installing shell completion support for Docker ...
-"
+    msg_w_newlines "Installing shell completion support for Docker ..."
     etc=/Applications/Docker.app/Contents/Resources/etc
     ln -s $etc/docker.bash-completion $(brew --prefix)/etc/bash_completion.d/docker
     ln -s $etc/docker-compose.bash-completion $(brew --prefix)/etc/bash_completion.d/docker-compose
   }
 
   is_mac && ! is_platypus_installed && {
-    msg "
-Installing Platypus ...
-"
+    msg_w_newlines "Installing Platypus ..."
     brew cask install platypus
     gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
     chmod +x /usr/local/bin/platypus
   }
 
-  msg "
-Additional tools successfully installed.
-"
+  msg_w_newlines "Additional tools successfully installed."
 }
 
 optimize_docker() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     cp "$docker_settings_file" "$docker_settings_file.bak"
     can_optimize_vm_cpus && perl -i -pe "s/(\"cpus\"\s*:\s*)\d+/\${1}$recommended_vm_cpu/" "$docker_settings_file"
     can_optimize_vm_swap && perl -i -pe "s/(\"swapMiB\"\s*:\s*)\d+/\${1}$recommended_vm_swap_mb/" "$docker_settings_file"
@@ -72,7 +64,7 @@ optimize_docker() {
 
 start_docker() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     restart_docker_and_wait
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Starting Docker VM ..."
@@ -84,7 +76,7 @@ update_mdm() {
 
 install_app() {
   (
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     docker-compose pull # check for new versions
     # create containers but do not start
     docker-compose up --no-start
@@ -142,7 +134,7 @@ open_app() {
 
 stop_app() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     docker-compose stop
   } >> "$handler_log_file" 2>&1 &
   # if stopped indirectly (by quitting the app), don't bother to set the status and wait
@@ -152,7 +144,7 @@ stop_app() {
 
 restart_app() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     services="$(get_docker_compose_runtime_services)"
     docker-compose start $services
     reload_rev_proxy
@@ -214,7 +206,7 @@ If a Magento app is stopped, it will NOT be preserved."
   [[ $image_ids ]] && {
     docker rmi -f $image_ids
   }
-  msg "Magento docker images successfully removed."
+  msg_w_newlines "Magento docker images successfully removed."
 }
 
 reset_docker() {
@@ -235,7 +227,7 @@ Docker images will be preserved to avoid downloading all images from scratch."
   }
   # remove networks
   docker network prune -f || :
-  msg "Docker reset successfully."
+  msg_w_newlines "Docker reset successfully."
 }
 
 wipe_docker() {
@@ -246,7 +238,7 @@ wipe_docker() {
   docker rmi -f $(docker images -qa) || :
   # also clean up envs artifacts
   rm -rf "$mdm_path/envs/*" || :
-  msg "Docker wiped successfully."
+  msg_w_newlines "Docker wiped successfully."
 }
 
 clone_app() {
@@ -338,14 +330,12 @@ start_mdm_shell() {
   cd "$resource_dir/app" || exit
   msg Running $COMPOSE_PROJECT_NAME from $(pwd)
   echo -e "\\n\\n$services_status"
-  msg "
-
+  msg_w_newlines "
 You can run docker-compose cmds here, but it's recommend to use the MDM app to (un)install or
 start/stop the Magento app to ensure the proper application state.
 
 Magento docker-compose reference: https://devdocs.magento.com/cloud/docker/docker-quick-reference.html
 Full docker-compose reference: https://docs.docker.com/compose/reference/overview/
-
 "
   bash -l
 }
@@ -362,7 +352,7 @@ show_mdm_logs() {
 }
 
 uninstall_app() {
-  timestamp_msg "${FUNCNAME[0]}"
+  msg_w_timestamp "${FUNCNAME[0]}"
   run_in_new_terminal
   exec > >(tee -ia "$handler_log_file")
   exec 2> >(tee -ia "$handler_log_file" >&2)
@@ -374,7 +364,7 @@ uninstall_app() {
 
 stop_other_apps() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     compose_project_names="$(
       docker ps -f "label=com.docker.compose.service=db" --format="{{ .Names  }}" | \
       perl -pe 's/_db_1$//' | \

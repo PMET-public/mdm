@@ -5,39 +5,32 @@ source ./bin/lib.sh
 
 [[ $debug ]] && set -x
 
-msg "Running launcher
-"
+msg_w_newlines "Running launcher ..."
 output="$(./bin/launcher)"
 shopt -s nocasematch
 [[ $output =~ install ]] || error "Could not find install menu item."
 
-msg "Running launcher with output as param
-"
+msg_w_newlines "Running launcher with output as param ..."
 ./bin/launcher "$output"
 
-msg "Running launcher with dependencies now installed:
-"
+msg_w_newlines "Running launcher with dependencies now installed ..."
 ./bin/launcher
 
 # now try without homebrew pre-installed (for CI envs)
 is_CI && is_mac && {
 
-  msg "Removing homebrew
-  "
+  msg_w_newlines "Removing homebrew ..."
   echo "y" | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
 
-  msg "Rerunning launcher
-  "
+  msg_w_newlines "Rerunning launcher ..."
   output3="$(./bin/launcher)"
 
   [[ "$output" = "$output3" ]] || error "Launcher output should be different."
 
-  msg "Rerunning launcher with new output
-  "
+  msg_w_newlines "Rerunning launcher with new output ..."
   ./bin/launcher "$output3"
 
-  msg "Rerunning launcher with dependencies installed again
-  "
+  msg_w_newlines "Rerunning launcher with dependencies installed again ..."
   ./bin/launcher
 
 }

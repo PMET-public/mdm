@@ -60,7 +60,7 @@ create_platypys_app() {
     # mv app into app bundle
     mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
   }
-  msg "Successfully created $contents_dir.app"
+  msg_w_newlines "Successfully created $contents_dir.app"
 }
 
 

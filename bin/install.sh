@@ -46,10 +46,8 @@ ln -sf "$latest_release_ver" current
 set +x # if we make it this far, turn off the debugging output for the rest
 clear
 
-msg "
-
-Once all requirements are installed and validated, this script will not need to run again.
-"
+msg_w_newlines "
+Once all requirements are installed and validated, this script will not need to run again."
 
 [[ "$(uname)" = "Darwin" ]] && {
   # install homebrew
@@ -58,9 +56,7 @@ Once all requirements are installed and validated, this script will not need to 
   skeptical about entering your password here, you can install Homebrew (https://brew.sh/)
   independently first. Then you will NOT be prompted for your password by this script.
   "
-    msg "
-  Alternatively, you can allow this script to install Homebrew by pressing ANY key to continue.
-  "
+    msg_w_newlines "Alternatively, you can allow this script to install Homebrew by pressing ANY key to continue."
 
     ! is_CI && read -n 1 -s -r -p ""
 
@@ -74,25 +70,20 @@ Once all requirements are installed and validated, this script will not need to 
   brew upgrade bash coreutils
 
   [[ -d /Applications/Docker.app ]] || {
-    msg "
-
+    msg_w_newlines "
   Press ANY key to continue to the Docker Desktop For Mac download page. Then download and install that app.
 
   https://hub.docker.com/editions/community/docker-ce-desktop-mac/
-
-  "
+"
     ! is_CI && read -n 1 -s -r -p ""
     # open docker for mac installation page
     open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
   }
 
-  msg "
-  CLI dependencies successfully installed. If you downloaded and installed Docker Desktop for Mac,
-  this script should not need to run again.
+  msg_w_newlines "CLI dependencies successfully installed. If you downloaded and installed Docker Desktop for Mac, this script should not need to run again.
 
-  You may close this terminal.
-
-  "
+You may close this terminal.
+"
 }
 
 : # return true

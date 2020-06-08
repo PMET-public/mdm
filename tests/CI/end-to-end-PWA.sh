@@ -1,6 +1,6 @@
 #!/bin/bash
 
-msg "Installing platypus"
+msg_w_newlines "Installing platypus ..."
 
 brew install platypus
 
