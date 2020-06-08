@@ -357,6 +357,21 @@ ${*}
   return false
 }
 
+# this function will invoke the caller in a new terminal if it was not already directly called
+run_in_new_terminal() {
+  local caller script
+  [[ ! $MDM_DIRECT_HANDLER_CALL ]] && {
+    caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_in_new_terminal //; s/ .*//')"
+    script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
+    echo "#!/usr/bin/env bash -l
+export REPO_DIR=\"${REPO_DIR}\"
+$lib_dir/launcher $caller
+" > "$script"
+    chmod u+x "$script"
+    open -a Terminal "$script"
+  } || :
+}
+
 detect_quit_and_stop_app() {
   # run the loop in a subshell so it doesn't fill the log with loop output
   ( 
