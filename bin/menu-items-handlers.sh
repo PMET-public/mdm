@@ -210,7 +210,10 @@ rm_magento_docker_images() {
   warning "This will delete all Magento images to force the download of the latest versions. 
 If a Magento app is stopped, it will NOT be preserved."
   confirm_or_exit
-  docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}' | xargs docker rmi -f
+  image_ids=$(docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}')
+  [[ $image_ids ]] && {
+    docker rmi -f $image_ids
+  }
   msg "Magento docker images successfully removed."
 }
 
