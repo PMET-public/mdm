@@ -54,7 +54,7 @@ create_platypys_app() {
     --app-version 0.1 \
     -u 'Keith Bentrup' \
     --bundle-identifier 'com.magento.mdm' \
-    "$mdm_path/current/bin/launcher" \
+    "$lib_dir/launcher" \
     "$contents_dir.app"
   [[ -d $contents_dir ]] && {
     # mv app into app bundle

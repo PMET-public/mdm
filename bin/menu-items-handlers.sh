@@ -394,7 +394,7 @@ start_pwa() {
   {
     export MAGENTO_URL="$magento_url" \
       COMPOSE_PROJECT_NAME="mdm" \
-      COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
+      COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml" \
       DEMO_MODE="$demo_mode"
     docker-compose pull
     docker-compose rm -sfv storystore-pwa storystore-pwa-prev
