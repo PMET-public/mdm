@@ -42,4 +42,6 @@ is_CI && is_mac && {
 
 }
 
+./bin/launcher 
+
 exit 0

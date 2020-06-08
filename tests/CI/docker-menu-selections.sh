@@ -4,3 +4,5 @@
 source ./bin/lib.sh
 
 [[ $debug ]] && set -x
+
+exit 0
