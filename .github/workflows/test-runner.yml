@@ -20,8 +20,15 @@ jobs:
       debug: ${{ matrix.value }}
     steps:
       - uses: actions/checkout@v2
-      - name: run-CI-tests
+      - name: install
         env:
           debug: ${{ matrix.value }}
         run: |
           ./tests/CI/install-deps-and-mdm.sh
+      - name: non-docker tests
+        run: |
+          ./tests/CI/non-docker-menu-selections.sh
+      - if: runner.os != 'macOS'
+        name: docker tests
+        run: |
+          ./tests/CI/docker-menu-selections.sh
