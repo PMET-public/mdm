@@ -67,8 +67,22 @@ has_status_msg() {
   [[ -f "$status_msg_file" ]]
 }
 
-has_additional_tools() {
-  [[ -f /usr/local/bin/composer && -f ~/.magento-cloud/bin/magento-cloud ]]
+is_magento_cloud_cli_installed() {
+  [[ -f "$HOME/.magento-cloud/bin/magento-cloud" ]]
+}
+
+is_docker_bash_completion_installed() {
+  [[ -f "$(brew --prefix)/etc/bash_completion.d/docker" ]]
+}
+
+is_platypus_installed() {
+  [[ -n "$(which platypus)" ]]
+}
+
+are_additional_tools_installed() {
+  is_mac && is_magento_cloud_cli_installed || return
+  is_docker_compatible && is_docker_bash_completion_installed || return
+  is_mac && is_platypus_installed || return
 }
 
 can_optimize_vm_cpus() {

@@ -21,21 +21,36 @@ show_status() {
   echo "---------"
 }
 
-
 install_additional_tools() {
-  run_as_bash_script_in_terminal "
-    msg \"Installing composer\"
-    brew install composer
-    msg \"Installing magento-cloud CLI\"
+  run_in_new_terminal
+
+  is_magento_cloud_cli_installed || {
+    msg "
+Installing magento-cloud CLI ...
+"
     curl -sLS https://accounts.magento.cloud/cli/installer | php
-    msg \"Installing shell completion support for Docker\"
+  }
+
+  ! is_docker_bash_completion_installed && is_docker_compatible && {
+    msg "
+Installing shell completion support for Docker ...
+"
     etc=/Applications/Docker.app/Contents/Resources/etc
-    ln -s \$etc/docker.bash-completion \$(brew --prefix)/etc/bash_completion.d/docker
-    ln -s \$etc/docker-compose.bash-completion \$(brew --prefix)/etc/bash_completion.d/docker-compose
-    msg \"Install Platypus \"
+    ln -s $etc/docker.bash-completion $(brew --prefix)/etc/bash_completion.d/docker
+    ln -s $etc/docker-compose.bash-completion $(brew --prefix)/etc/bash_completion.d/docker-compose
+  }
+
+  is_mac && ! is_platypus_installed && {
+    msg "
+Installing Platypus ...
+"
     brew cask install platypus
     gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
     chmod +x /usr/local/bin/platypus
+  }
+
+  msg "
+Additional tools successfully installed.
   "
 }
 

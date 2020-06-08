@@ -28,7 +28,7 @@ has_status_msg && {
   [[ "$key" =~ ^DISABLED ]] || menu["$key-icon"]="ic_check_${icon_color}_48dp.png"
 }
 
-! has_additional_tools && {
+! are_additional_tools_installed && {
   key="Install additional tools for additional features"
   keys+=("$key")
   menu["$key-handler"]=install_additional_tools
