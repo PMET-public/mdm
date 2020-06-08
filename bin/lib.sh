@@ -32,6 +32,7 @@ done
 #
 ###
 
+# in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when that specific dir is intended
 mdm_path="$HOME/.mdm"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
 menu_log_file="$mdm_path/current/menu.log"
@@ -429,8 +430,8 @@ export_compose_file() {
     COMPOSE_FILE+=":docker-compose.override.yml"
   }
   # also use the global override file included with MDM
-  [[  -f "$mdm_path/current/docker-files/mcd.override.yml" ]] && {
-    COMPOSE_FILE+=":$mdm_path/current/docker-files/mcd.override.yml"
+  [[  -f "$lib_dir/../docker-files/mcd.override.yml" ]] && {
+    COMPOSE_FILE+=":$lib_dir/../docker-files/mcd.override.yml"
   }
 }
 
@@ -506,6 +507,7 @@ handle_mdm_input() {
   # not a handler or a link key? look for direct call (useful for testing)
   for value in "${menu[@]}"; do
     [[ "$mdm_input" = "$value" ]] && {
+      export MDM_DIRECT_HANDLER_CALL=true
       msg "$mdm_input found in current menu. Running ...
 "
       "$mdm_input"
@@ -513,14 +515,15 @@ handle_mdm_input() {
     }
   done
 
-  for value in "${testable_menu[@]}"; do
-    [[ "$mdm_input" = "$value" ]] && {
-      warning "$mdm_input NOT FOUND in current menu BUT is testable menu option. Running anyway ...
-"
-      "$mdm_input"
-      exit
-    }
-  done
+# maybe allow direct calls independent of context? or bad idea b/c could create impossible scenarios?
+#   for value in "${testable_menu[@]}"; do
+#     [[ "$mdm_input" = "$value" ]] && {
+#       warning "$mdm_input NOT FOUND in current menu BUT is testable menu option. Running anyway ...
+# "
+#       "$mdm_input"
+#       exit
+#     }
+#   done
 
   error "Handler for $mdm_input was not found or valid in this context."
 
