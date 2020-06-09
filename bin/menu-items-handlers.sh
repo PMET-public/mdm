@@ -40,7 +40,8 @@ install_additional_tools() {
     msg_w_newlines "Installing Platypus ..."
     brew cask install platypus
     gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
-    chmod +x /usr/local/bin/platypus
+    gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > /usr/local/share/platypus/ScriptExec
+    chmod +x /usr/local/bin/platypus /usr/local/share/platypus/ScriptExec
   }
 
   msg_w_newlines "Additional tools successfully installed."
