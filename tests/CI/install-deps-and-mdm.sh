@@ -17,27 +17,6 @@ msg_w_newlines "Running launcher with output as param ..."
 msg_w_newlines "Running launcher with dependencies now installed ..."
 ./bin/launcher
 
-# now try without homebrew pre-installed (for CI envs)
-is_CI && is_mac && {
-
-  msg_w_newlines "Removing homebrew ..."
-  echo "y" | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
-
-  msg_w_newlines "Rerunning launcher ..."
-  output3="$(./bin/launcher)"
-
-  [[ "$output" = "$output3" ]] || error "Launcher output should be different."
-
-  msg_w_newlines "Rerunning launcher with new output ..."
-  ./bin/launcher "$output3"
-
-  msg_w_newlines "Rerunning launcher with dependencies installed again ..."
-  ./bin/launcher
-
-}
-
-./bin/launcher 
-
 ./bin/launcher install_additional_tools
 
 ./bin/launcher
