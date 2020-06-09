@@ -41,6 +41,7 @@ install_additional_tools() {
     brew cask install platypus
     gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
     mkdir -p /usr/local/share/platypus
+    cp -R PlatypusDefault.icns MainMenu.nib /usr/local/share/platypus/
     gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > /usr/local/share/platypus/ScriptExec
     chmod +x /usr/local/bin/platypus /usr/local/share/platypus/ScriptExec
   }
