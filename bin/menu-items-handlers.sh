@@ -29,8 +29,8 @@ install_additional_tools() {
     curl -sLS https://accounts.magento.cloud/cli/installer | php
   }
 
-  ! is_docker_bash_completion_installed && is_docker_compatible && {
-    msg_w_newlines "Installing shell completion support for Docker ..."
+  ! is_docker_bash_completion_installed && is_mac && {
+    msg_w_newlines "Installing shell completion support for Docker for Mac ..."
     etc=/Applications/Docker.app/Contents/Resources/etc
     ln -s $etc/docker.bash-completion $(brew --prefix)/etc/bash_completion.d/docker
     ln -s $etc/docker-compose.bash-completion $(brew --prefix)/etc/bash_completion.d/docker-compose
