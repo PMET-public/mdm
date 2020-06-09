@@ -32,3 +32,6 @@ jobs:
         name: docker tests
         run: |
           ./tests/CI/docker-menu-selections.sh
+      - name: create standalone mdm
+        run: |
+          ./tests/CI/end-to-end-PWA.sh

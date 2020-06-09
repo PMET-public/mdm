@@ -8,19 +8,29 @@ jobs:
   include:
   - os: osx
     osx_image: xcode11.5
-    script: "./tests/CI/install-deps-and-mdm.sh"
+    script:
+    - "./tests/CI/install-deps-and-mdm.sh"
+    - "./tests/CI/non-docker-menu-selections.sh"
+    - "./tests/CI/end-to-end-PWA.sh"
   - os: osx
     osx_image: xcode11.5
     env:
     - debug=true
-    script: "./tests/CI/install-deps-and-mdm.sh"
+    script: 
+    - "./tests/CI/install-deps-and-mdm.sh"
+    - "./tests/CI/non-docker-menu-selections.sh"
+    - "./tests/CI/end-to-end-PWA.sh"
   - dist: bionic
     script:
     - "./tests/CI/install-deps-and-mdm.sh"
     - "./tests/CI/non-docker-menu-selections.sh"
+    - "./tests/CI/docker-menu-selection.sh"
+    - "./tests/CI/end-to-end-PWA.sh"
   - dist: bionic
     env:
     - debug=true
     script:
     - "./tests/CI/install-deps-and-mdm.sh"
     - "./tests/CI/non-docker-menu-selections.sh"
+    - "./tests/CI/docker-menu-selection.sh"
+    - "./tests/CI/end-to-end-PWA.sh"
