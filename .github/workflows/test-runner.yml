@@ -35,3 +35,7 @@ jobs:
       - name: create standalone mdm
         run: |
           ./tests/CI/end-to-end-PWA.sh
+      - if: runner.os == 'macOS'
+        name: check homebrew dependency behavior
+        run: |
+          ./tests/CI/check-homebrew.sh

@@ -12,6 +12,7 @@ jobs:
     - "./tests/CI/install-deps-and-mdm.sh"
     - "./tests/CI/non-docker-menu-selections.sh"
     - "./tests/CI/end-to-end-PWA.sh"
+    - "./tests/CI/check-homebrew.sh"
   - os: osx
     osx_image: xcode11.5
     env:
@@ -20,6 +21,7 @@ jobs:
     - "./tests/CI/install-deps-and-mdm.sh"
     - "./tests/CI/non-docker-menu-selections.sh"
     - "./tests/CI/end-to-end-PWA.sh"
+    - "./tests/CI/check-homebrew.sh"
   - dist: bionic
     script:
     - "./tests/CI/install-deps-and-mdm.sh"
