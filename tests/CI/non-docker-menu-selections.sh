@@ -6,8 +6,6 @@ set -e
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
 
-./bin/launcher install_additional_tools
-
 launch_output="$(./bin/launcher)"
 
 # advanced mode on
@@ -39,7 +37,5 @@ wait # check runs in background
 stat_output3="$(stat "$mdm_ver_file")"
 
 [[ "$stat_output" = "$stat_output2" && "$stat_output" != "$stat_output3" ]] || error "Stat output should be different."
-
-# 
 
 exit 0

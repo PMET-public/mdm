@@ -38,4 +38,8 @@ is_CI && is_mac && {
 
 ./bin/launcher 
 
+./bin/launcher install_additional_tools
+
+./bin/launcher
+
 exit 0
