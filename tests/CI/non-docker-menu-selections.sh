@@ -1,9 +1,10 @@
 #!/bin/bash
 
+set -e
+[[ $debug ]] && set -x
+
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
-
-[[ $debug ]] && set -x
 
 ./bin/launcher install_additional_tools
 

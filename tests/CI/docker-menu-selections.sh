@@ -1,9 +1,10 @@
 #!/bin/bash
 
+set -e
+[[ $debug ]] && set -x
+
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
-
-[[ $debug ]] && set -x
 
 yes 'no' | ./bin/launcher rm_magento_docker_images
 yes | ./bin/launcher rm_magento_docker_images
