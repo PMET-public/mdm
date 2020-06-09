@@ -24,7 +24,7 @@ jobs:
     script:
     - "./tests/CI/install-deps-and-mdm.sh"
     - "./tests/CI/non-docker-menu-selections.sh"
-    - "./tests/CI/docker-menu-selection.sh"
+    - "./tests/CI/docker-menu-selections.sh"
     - "./tests/CI/end-to-end-PWA.sh"
   - dist: bionic
     env:
@@ -32,5 +32,5 @@ jobs:
     script:
     - "./tests/CI/install-deps-and-mdm.sh"
     - "./tests/CI/non-docker-menu-selections.sh"
-    - "./tests/CI/docker-menu-selection.sh"
+    - "./tests/CI/docker-menu-selections.sh"
     - "./tests/CI/end-to-end-PWA.sh"
