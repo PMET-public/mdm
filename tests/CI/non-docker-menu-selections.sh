@@ -6,21 +6,21 @@ set -e
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
 
-launch_output="$(./bin/launcher)"
+launcher_output="$(./bin/launcher)"
 
 # advanced mode on
 ./bin/launcher toggle_advanced_mode
 
-launch_output2="$(./bin/launcher)"
+launcher_output2="$(./bin/launcher)"
 
-[[ "$launch_output" = "$launch_output2" ]] && error "Launch output should be different."
+[[ "$launcher_output" = "$launcher_output2" ]] && error "Launcher output should be different."
 
 # advanced mode  off
 ./bin/launcher toggle_advanced_mode
 
-launch_output3="$(./bin/launcher)"
+launcher_output3="$(./bin/launcher)"
 
-[[ "$launch_output" = "$launch_output3" ]] || error "Launch output should be the same."
+[[ "$launcher_output" = "$launcher_output3" ]] || error "Launcher output should be the same."
 
 # advanced mode on again
 ./bin/launcher toggle_advanced_mode

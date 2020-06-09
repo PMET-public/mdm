@@ -3,36 +3,28 @@ git:
   submodules: false
   depth: 1
 services:
-- docker
+  - docker
+os:
+  - linux
+  - osx
+dist: bionic
+env:
+  - debug=true
+  - debug=""
+
+install:
+  - "./tests/CI/install-deps-and-mdm.sh"
+script:
+  - "./tests/CI/non-docker-menu-selections.sh"
+  - "./tests/CI/end-to-end-PWA.sh"
+
 jobs:
   include:
-  - os: osx
-    osx_image: xcode11.5
-    script:
-    - "./tests/CI/install-deps-and-mdm.sh"
-    - "./tests/CI/non-docker-menu-selections.sh"
-    - "./tests/CI/end-to-end-PWA.sh"
-    - "./tests/CI/check-homebrew.sh"
-  - os: osx
-    osx_image: xcode11.5
-    env:
-    - debug=true
-    script: 
-    - "./tests/CI/install-deps-and-mdm.sh"
-    - "./tests/CI/non-docker-menu-selections.sh"
-    - "./tests/CI/end-to-end-PWA.sh"
-    - "./tests/CI/check-homebrew.sh"
-  - dist: bionic
-    script:
-    - "./tests/CI/install-deps-and-mdm.sh"
-    - "./tests/CI/non-docker-menu-selections.sh"
-    - "./tests/CI/docker-menu-selections.sh"
-    - "./tests/CI/end-to-end-PWA.sh"
-  - dist: bionic
-    env:
-    - debug=true
-    script:
-    - "./tests/CI/install-deps-and-mdm.sh"
-    - "./tests/CI/non-docker-menu-selections.sh"
-    - "./tests/CI/docker-menu-selections.sh"
-    - "./tests/CI/end-to-end-PWA.sh"
+    - stage: post-not-mac
+      if: os != osx
+      script:
+        - "./tests/CI/docker-menu-selections.sh"
+    - stage: post-mac
+      if: os == osx
+      after_script:
+        - "./tests/CI/check-homebrew.sh"

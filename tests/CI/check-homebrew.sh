@@ -10,12 +10,12 @@ source ./bin/lib.sh
 output="$(./bin/launcher)"
 
 msg_w_newlines "Removing homebrew ..."
-echo "y" | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
+yes | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
 
 msg_w_newlines "Rerunning launcher ..."
 output2="$(./bin/launcher)" # output2 should be install prereqs option
 
-[[ "$output" = "$output2" ]] || error "Launcher output should be different."
+[[ "$output" = "$output2" ]] && error "Launcher output should be different."
 
 msg_w_newlines "Rerunning launcher with new output ..."
 ./bin/launcher "$output2"
