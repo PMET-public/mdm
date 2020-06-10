@@ -21,22 +21,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install
-        env:
-          debug: ${{ matrix.value }}
         run: |
           ./tests/CI/install-deps-and-mdm.sh
       - name: non-docker tests
         run: |
           ./tests/CI/non-docker-menu-selections.sh
-      - if: runner.os != 'macOS'
-        name: docker tests
+      - name: docker tests
         run: |
           ./tests/CI/docker-menu-selections.sh
-      - if: runner.os == 'macOS'
-        name: create standalone mdm
+      - name: create standalone mdm
         run: |
           ./tests/CI/create-standalone-mdm.sh
-      - if: runner.os == 'macOS'
-        name: check homebrew dependency behavior
+      - name: check homebrew dependency behavior
         run: |
           ./tests/CI/check-homebrew.sh

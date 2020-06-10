@@ -16,15 +16,6 @@ install:
   - "./tests/CI/install-deps-and-mdm.sh"
 script:
   - "./tests/CI/non-docker-menu-selections.sh"
-
-jobs:
-  include:
-    - stage: post-not-mac
-      if: os != osx
-      script:
-        - "./tests/CI/docker-menu-selections.sh"
-    - stage: post-mac
-      if: os == osx
-      script:
-        - "./tests/CI/create-standalone-mdm.sh"
-        - "./tests/CI/check-homebrew.sh"
+  - "./tests/CI/docker-menu-selections.sh"
+  - "./tests/CI/create-standalone-mdm.sh"
+  - "./tests/CI/check-homebrew.sh"

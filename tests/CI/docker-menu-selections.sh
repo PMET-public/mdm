@@ -6,32 +6,37 @@ set -e
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
 
-# turn on advanced mode if reset option not available
-launcher_output="$(./bin/launcher)"
-shopt -s nocasematch
-[[ $launcher_output =~ maintenance ]] || ./bin/launcher toggle_advanced_mode
 
-docker run pmetpublic/nginx-with-pagespeed bash
+is_docker_compatible && {
 
-yes 'no' | ./bin/launcher rm_magento_docker_images
-yes | ./bin/launcher rm_magento_docker_images
+  # turn on advanced mode if reset option not available
+  launcher_output="$(./bin/launcher)"
+  shopt -s nocasematch
+  [[ $launcher_output =~ maintenance ]] || ./bin/launcher toggle_advanced_mode
 
-[[ $(docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}') ]] &&
-  error "Magento images not removed."
+  docker run pmetpublic/nginx-with-pagespeed bash
 
-yes 'no' | ./bin/launcher reset_docker
-yes | ./bin/launcher reset_docker
+  yes 'no' | ./bin/launcher rm_magento_docker_images
+  yes | ./bin/launcher rm_magento_docker_images
 
-[[ $(docker ps -qa) ]] &&
-  error "Containers not removed."
+  [[ $(docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}') ]] &&
+    error "Magento images not removed."
 
-yes 'no' | ./bin/launcher wipe_docker
-yes | ./bin/launcher wipe_docker
+  yes 'no' | ./bin/launcher reset_docker
+  yes | ./bin/launcher reset_docker
 
-[[ ! $(docker ps -qa) ]] &&
-  [[ ! $(docker images -qa) ]] &&
-  [[ ! $(docker volume ls -q) ]] &&
-  [[ ! $(docker network ls -q) ]] &&
-  error "Docker not wiped."
+  [[ $(docker ps -qa) ]] &&
+    error "Containers not removed."
+
+  yes 'no' | ./bin/launcher wipe_docker
+  yes | ./bin/launcher wipe_docker
+
+  [[ ! $(docker ps -qa) ]] &&
+    [[ ! $(docker images -qa) ]] &&
+    [[ ! $(docker volume ls -q) ]] &&
+    [[ ! $(docker network ls -q) ]] &&
+    error "Docker not wiped."
+
+}
 
 exit 0
