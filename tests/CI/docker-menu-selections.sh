@@ -6,8 +6,11 @@ set -e
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
 
-docker run pmetpublic/nginx-with-pagespeed bash
+# turn on advanced mode if reset option not available
+launcher_output="$(./bin/launcher)"
+[[ $launcher_output =~ reset\ docker ]] || ./bin/launcher toggle_advanced_mode
 
+docker run pmetpublic/nginx-with-pagespeed bash
 
 yes 'no' | ./bin/launcher rm_magento_docker_images
 yes | ./bin/launcher rm_magento_docker_images
