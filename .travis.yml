@@ -16,7 +16,6 @@ install:
   - "./tests/CI/install-deps-and-mdm.sh"
 script:
   - "./tests/CI/non-docker-menu-selections.sh"
-  - "./tests/CI/end-to-end-PWA.sh"
 
 jobs:
   include:
@@ -26,5 +25,6 @@ jobs:
         - "./tests/CI/docker-menu-selections.sh"
     - stage: post-mac
       if: os == osx
-      after_script:
+      script:
+        - "./tests/CI/create-standalone-mdm.sh"
         - "./tests/CI/check-homebrew.sh"

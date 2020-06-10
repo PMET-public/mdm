@@ -32,9 +32,10 @@ jobs:
         name: docker tests
         run: |
           ./tests/CI/docker-menu-selections.sh
-      - name: create standalone mdm
+      - if: runner.os == 'macOS'
+        name: create standalone mdm
         run: |
-          ./tests/CI/end-to-end-PWA.sh
+          ./tests/CI/create-standalone-mdm.sh
       - if: runner.os == 'macOS'
         name: check homebrew dependency behavior
         run: |
