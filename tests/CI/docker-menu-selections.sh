@@ -8,7 +8,8 @@ source ./bin/lib.sh
 
 # turn on advanced mode if reset option not available
 launcher_output="$(./bin/launcher)"
-[[ $launcher_output =~ reset\ docker ]] || ./bin/launcher toggle_advanced_mode
+shopt -s nocasematch
+[[ $launcher_output =~ maintenance ]] || ./bin/launcher toggle_advanced_mode
 
 docker run pmetpublic/nginx-with-pagespeed bash
 
