@@ -22,6 +22,8 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
 app_icon_path="$lib_dir/../icons/magento.icns"
 status_menu_icon_path="$lib_dir/../icons/magento-logo.png"
+# reset SIGPIPE b/c github workflows' trap is breaking it
+trap - SIGPIPE
 rand_subdomain_suffix="$(base64 < /dev/random | tr '[:upper:]' '[:lower:]' | head -c 4)"
 tld="the1umastory.com"
 
