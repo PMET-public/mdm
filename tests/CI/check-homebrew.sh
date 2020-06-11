@@ -13,7 +13,7 @@ is_mac && is_CI && {
   output="$(./bin/launcher)"
 
   msg_w_newlines "Removing homebrew ..."
-  yes | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
+  echo "y" | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
 
   msg_w_newlines "Rerunning launcher ..."
   output2="$(./bin/launcher)" # output2 should be install prereqs option
