@@ -38,7 +38,8 @@ if is_docker_compatible; then
     error "Docker not wiped."
 
 else
-  warning "Test skipped."
+  warning "Test skipped.
+"
 fi
 
 exit 0

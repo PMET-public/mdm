@@ -27,7 +27,8 @@ if is_mac && is_CI; then
   ./bin/launcher
 
 else
-  warning "Test skipped."
+  warning "Test skipped.
+"
 fi
 
 exit 0
