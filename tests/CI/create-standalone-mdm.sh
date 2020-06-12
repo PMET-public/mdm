@@ -1,5 +1,5 @@
 #!/bin/bash
-trap - SIGPIPE
+
 set -e
 [[ $debug ]] && set -x
 
