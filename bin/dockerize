@@ -269,6 +269,7 @@ else
 fi
 cid=$(docker create $ssh_auth_opts $creeate_opts -v "$PWD:/app:delegated" \
   -e COMPOSER_AUTH -e COMPOSER_HOME=.composer \
+  --user $(id -u):$(id -g) \
   pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1 /tmp/script_for_php_container)
 docker cp "$script_for_tmp_php_container" $cid:/tmp/script_for_php_container
 docker start $start_opts $cid
