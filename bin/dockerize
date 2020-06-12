@@ -227,7 +227,9 @@ cd "$tmp_app_dir" || exit
 [[ ! -z "$auth_json_path" ]] && # if auth.json provided, use it
   cp "$auth_json_path" "$tmp_app_dir"
 [[ ! -f "auth.json" && ! $COMPOSER_AUTH ]] && 
-  warning "No auth.json file detected! Composer may be rate-limited and/or unable to download required packages." &&
+  warning "No auth.json OR COMPOSER_AUTH env var file detected! 
+Composer may be rate-limited and/or unable to download required packages.
+  " &&
   sleep 5
 # backup for later restore
 cp composer.json composer.json.bak
@@ -269,7 +271,7 @@ cp -r docker-compose*.yml .docker "$app_dir"
 mv composer.json.bak composer.json
 mv composer.lock.bak composer.lock
 # remove auth.json from distributable dir if it exists
-rm "$app_dir/auth.json" || :
+rm "$app_dir/auth.json" 2> /dev/null || :
 # special case: assuming some existing installed packages already have catalog imagery from modules in pub/media, we can delete that media
 # this can significantly reduce composer archive size
 is_existing_cloud_env && {
