@@ -226,7 +226,7 @@ grep -q DATABASE_CONFIGURATION "$app_dir/.magento.env.yaml" || perl -i -pe "s/^ 
 cd "$tmp_app_dir" || exit
 [[ ! -z "$auth_json_path" ]] && # if auth.json provided, use it
   cp "$auth_json_path" "$tmp_app_dir"
-[[ ! -f "auth.json" ]] && 
+[[ ! -f "auth.json" && ! $COMPOSER_AUTH ]] && 
   warning "No auth.json file detected! Composer may be rate-limited and/or unable to download required packages." &&
   sleep 5
 # backup for later restore
@@ -240,23 +240,26 @@ python -c "import sys, json; data = json.load(sys.stdin); data.pop('scripts', 0)
 script_for_tmp_php_container=$(mktemp)
 cat << EOF > "$script_for_tmp_php_container"
 #!/bin/bash
-env COMPOSER_HOME=.composer composer global require hirak/prestissimo --no-interaction # parallelize downloads (much faster)
-env COMPOSER_HOME=.composer composer install --no-suggest --no-ansi --no-interaction --no-progress --prefer-dist
+composer global require hirak/prestissimo --no-interaction # parallelize downloads (much faster)
+composer install --no-suggest --no-ansi --no-interaction --no-progress --prefer-dist
 # require (or replace if already required) the official magento cloud docker module with ours
 # also note that a few envs may have a composer repo entry that needs to be updated
 perl -i -pe 's/magento\/magento-cloud-docker.git/pmet-public\/magento-cloud-docker.git/' composer.json
 grep -q 'pmet-public/magento-cloud-docker' composer.json ||
-  env COMPOSER_HOME=.composer composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
-env COMPOSER_HOME=.composer composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
+  composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
+composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
 ./vendor/bin/ece-docker build:compose --host="$host"
 EOF
 chmod +x "$script_for_tmp_php_container"
 # get php version of app
 app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml)
-SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
-ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
-  --mount type=bind,src=$HOME/.ssh/known_hosts,target=/root/.ssh/known_hosts"
+if is_mac; then
+  SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
+  ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
+    --mount type=bind,src=$HOME/.ssh/known_hosts,target=/root/.ssh/known_hosts"
+fi
 cid=$(docker create $ssh_auth_opts -it -v "$PWD:/app:delegated" \
+  -e COMPOSER_AUTH -e COMPOSER_HOME=.composer \
   pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1 /tmp/script_for_php_container)
 docker cp "$script_for_tmp_php_container" $cid:/tmp/script_for_php_container
 docker start -ai $cid
