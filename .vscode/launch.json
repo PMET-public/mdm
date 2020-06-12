@@ -24,8 +24,28 @@
         //"vsc_debugger_arg": "Install & open Magento app in browser",
         //"vsc_debugger_arg": "Restart Magento app",
         //"vsc_debugger_arg": "Start MDM shell",
-        "vsc_debugger_arg": "Reload reverse proxy",
-        "mdm_script_path": "${workspaceFolder}/bin/mdm",
+        // "vsc_debugger_arg": "Reload reverse proxy",
+        //"vsc_debugger_arg": "Install additional tools for additional features",
+        "vsc_debugger_arg": "⚠️ Remove Magento images (breaks stopped apps)",
+        "REPO_DIR": "${workspaceFolder}",
+        "parent_pids_path": 
+          "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
+      },
+      "args": []
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      // N.B. For this configuration to work, the contextual menu for a specific app must be in a state 
+      // where the arg is a valid selection!!
+      "name": "launcher with direct handler call",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/launcher",
+      "env": {
+        "debug": true,
+        //"vsc_debugger_arg": "install_additional_tools",
+        "vsc_debugger_arg": "rm_magento_docker_images",
+        "REPO_DIR": "${workspaceFolder}",
         "parent_pids_path": 
           "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
       },
@@ -39,8 +59,8 @@
       "program": "${workspaceFolder}/bin/launcher",
       "env": {
         "debug": true,
-        "vsc_debugger_arg": "n/a",
-        "mdm_script_path": "${workspaceFolder}/bin/mdm",
+      "vsc_debugger_arg": "n/a",
+        "REPO_DIR": "${workspaceFolder}",
         "parent_pids_path": 
         //"${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
         "${env:HOME}/Downloads/ref-2.3.5-p1.app/Contents/Resources/script"

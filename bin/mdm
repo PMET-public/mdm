@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# N.B. the launching script is invoked as
-# `/usr/bin/env -P "/usr/local/bin:/bin" bash "/path/to/osx.app/Content/Resoources/name-of-launching-script"`
-# using the upgraded /usr/local/bin/bash if found or /bin/bash.
-# however, -P does not export the path, just sets it for `env` command.
-# so export PATH if necessary
-[[ "$PATH" =~ "/usr/local/bin" ]] || export PATH="/usr/local/bin:$PATH"
-
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
@@ -17,8 +10,8 @@ source "$lib_dir/menu-items-handlers.sh" || :
 # shellcheck source=menu-items.sh
 source "$lib_dir/menu-items.sh" || :
 
-if run_without_args; then
+if invoked_mdm_without_args; then
   render_platypus_status_menu
 else
-  handle_menu_selection
+  handle_mdm_input
 fi

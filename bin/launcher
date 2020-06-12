@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e # stop on errors
-# set -x # turn on debugging
+[[ $debug ]] && set -x
 
 # understanding the Platypus UX:
 #
@@ -17,19 +17,46 @@ set -e # stop on errors
 # otherwise offer a single option to install dependencies when selected
 #
 # the depedency check should run every time in case its copied to new computer
+#
+# also noote this launching script is invoked as
+# `/usr/bin/env -P "/usr/local/bin:/bin" bash "/path/to/osx.app/Content/Resoources/name-of-launching-script"`
+# using the upgraded /usr/local/bin/bash if found or /bin/bash.
+# however, -P does not export the path, just sets it for `env` command. so export PATH if necessary
+
+[[ "$PATH" =~ "/usr/local/bin" ]] || export PATH="/usr/local/bin:$PATH"
+
+is_mac() {
+  [[ "$(uname)" = "Darwin" ]]
+}
+
+is_CI() {
+  [[ $GITHUB_WORKSPACE || $TRAVIS ]]
+}
+
+is_docker_compatible() {
+  ! ( is_mac && is_CI )
+}
+
+# allow mdm_script_path to be set by env var for debugging or testing
+if [[ $GITHUB_WORKSPACE ]]; then
+  REPO_DIR="$GITHUB_WORKSPACE"
+  REPO_BRANCH="${GITHUB_REF#refs/heads/}"
+elif [[ $TRAVIS ]]; then
+  REPO_DIR="$TRAVIS_BUILD_DIR"
+  REPO_BRANCH="$TRAVIS_BRANCH"
+fi
 
 if [[
 
-  ${BASH_VERSINFO[0]} -ge 5 && \
-  -f /usr/local/bin/brew && \
-  -f /usr/local/bin/realpath && \
   -f "$HOME/.mdm/current/bin/mdm" && \
-  -d /Applications/Docker.app
+  ( -n "$(which brew)" || ! "$(is_mac)" ) && \
+  ${BASH_VERSINFO[0]} -ge 4 && \
+  -n "$(which realpath)" && \
+  ( -n "$(which docker)" || ! "$(is_docker_compatible)" )
 
 ]]; then
 
-  # allow mdm_script_path to be set by the env for debugging
-  mdm_script_path="${mdm_script_path:-$HOME/.mdm/current/bin/mdm}"
+  mdm_script_path="${REPO_DIR:-$HOME/.mdm/current}/bin/mdm"
   # shellcheck source=mdm
   source "$mdm_script_path"
 
@@ -44,12 +71,12 @@ else
   else
 
     installer=$(mktemp)
-    curl -sL https://raw.githubusercontent.com/PMET-public/mdm/master/bin/install.sh > "$installer"
+    curl -sL "https://raw.githubusercontent.com/PMET-public/mdm/${REPO_BRANCH:-master}/bin/install.sh" > "$installer"
     chmod +x "$installer"
-    if [[ $TRAVIS ]]; then
-      "$installer"
-    else
+    if is_mac && ! is_CI; then
       open -a Terminal "$installer"
+    else
+      "$installer"
     fi
 
   fi

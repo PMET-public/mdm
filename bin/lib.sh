@@ -1,11 +1,21 @@
 #!/bin/bash
 set -e
 
+# this lib is used by dockerize, mdm, tests, etc. but logging to STDOUT is problematic for platypus apps
+# so need a way to check and if appropiate, defer until lib can bootstrap the appropiate logging
+included_by_mdm() {
+  # misidentification by shellcheck? implicit array concatenation - which is desired plus = vs =~
+  # shellcheck disable=SC2199
+  [[ "${BASH_SOURCE[@]}" =~ /bin/mdm ]]
+}
+
+[[ $debug ]] && ! included_by_mdm && set -x
+
 # establish $lib_dir for reference
 # N.B. when to use $resource_dir (references a specific platypus app instance) vs $lib_dir:
 # $lib_dir (the dir containing this file) should be used unless a specific running platypus app instance or 
 # its resources from $resource_dir are required to complete successfully.
-# this maximizes what can be tested generically and from a shell
+# this maximizes what can be used generically and from a shell
 
 # iterate thru BASH_SOURCE to find this lib.sh (should work even when debugging in IDE)
 bs_len=${#BASH_SOURCE[@]}
@@ -22,6 +32,7 @@ done
 #
 ###
 
+# in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when that specific dir is intended
 mdm_path="$HOME/.mdm"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
 menu_log_file="$mdm_path/current/menu.log"
@@ -56,8 +67,22 @@ has_status_msg() {
   [[ -f "$status_msg_file" ]]
 }
 
-has_additional_tools() {
-  [[ -f /usr/local/bin/composer && -f ~/.magento-cloud/bin/magento-cloud ]]
+is_magento_cloud_cli_installed() {
+  [[ -f "$HOME/.magento-cloud/bin/magento-cloud" ]]
+}
+
+is_docker_bash_completion_installed() {
+  [[ -f "$(brew --prefix)/etc/bash_completion.d/docker" ]]
+}
+
+is_platypus_installed() {
+  [[ -n "$(which platypus)" ]]
+}
+
+are_additional_tools_installed() {
+  is_mac && is_magento_cloud_cli_installed || return
+  is_docker_compatible && is_docker_bash_completion_installed || return
+  is_mac && is_platypus_installed || return
 }
 
 can_optimize_vm_cpus() {
@@ -82,8 +107,21 @@ can_optimize_vm_disk() {
   [[ disk_for_vm -lt recommended_vm_disk_mb ]]
 }
 
+is_mac() {
+  [[ "$(uname)" = "Darwin" ]]
+}
+
+is_CI() {
+  [[ $GITHUB_WORKSPACE || $TRAVIS ]]
+}
+
+# this exists for CI testing of some functionality even when docker is n/a (e.g. travis and github ci with a mac)
+is_docker_compatible() {
+  ! ( is_mac && is_CI )
+}
+
 is_docker_installed() {
-  [[ -f "$docker_settings_file" ]]
+  [[ -n $(which docker) || -f "$docker_settings_file" ]]
 }
 
 is_docker_suboptimal() {
@@ -110,6 +148,7 @@ is_onedrive_linked() {
 
 reload_rev_proxy() {
   verify_mdm_cert_dir
+  # shellcheck source=nginx-rev-proxy-setup.sh
   source "$lib_dir/nginx-rev-proxy-setup.sh"
 }
 
@@ -177,13 +216,22 @@ are_other_magento_apps_running() {
   return $?
 }
 
-run_without_args() {
-  # for debugging. bash vscode debugger changes normal invocation, so check for a special var 
-  [[ "$vsc_debugger_arg" == "n/a" ]] && return
-  [[ -n "$vsc_debugger_arg" ]] &&
-    menu_selection="$vsc_debugger_arg" ||
-    menu_selection="${BASH_ARGV[-1]}"
-  return "${BASH_ARGC[-1]}" # BASH_ARGC tracks number of parameters in call stack; last index is original script
+invoked_mdm_without_args() {
+  # determining whether mdm was called without args to display the menu or invoke a selection is difficult.
+  # bash5 on mac and bash4 on linux report BASH_ARGC differently. the vsc debugger wraps the call in other args.
+  # modify carefully.
+  # for debugging, bash vscode debugger changes normal invocation, so check for a special var 
+  if [[ "$vsc_debugger_arg" == "n/a" ]]; then
+    return 0
+  elif [[ -n "$vsc_debugger_arg" ]]; then
+    mdm_input="$vsc_debugger_arg"
+    return 1
+  elif [[ ${BASH_ARGV[-1]} =~ /bin/mdm$ ]]; then
+    return 0
+  else
+    mdm_input="${BASH_ARGV[-1]}"
+    return 1
+  fi
 }
 
 # need way to distinguish being called from app or other script sourcing this lib (e.g. dockerize script)
@@ -201,13 +249,20 @@ lookup_latest_remote_sem_ver() {
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local more_recent_of_two
-  if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $(stat -f%c "$mdm_ver_file") ))" -lt 86400 ]]; then
+  local more_recent_of_two stat_cmd sort_cmd
+  if is_mac; then
+    stat_cmd=gstat
+    sort_cmd=gsort
+  else
+    stat_cmd=stat
+    sort_cmd=sort
+  fi
+  if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using gsort -V
-    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | gsort -V | tail -1)"
+    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | "$sort_cmd" -V | tail -1)"
     [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
@@ -248,8 +303,14 @@ msg() {
   printf "%b%s%b" "$green" "$*" "$no_color"
 }
 
-timestamp_msg() {
-  echo "$(msg "[$(date -u +%FT%TZ)] $*")"
+msg_w_newlines() {
+  msg "
+$*
+"
+}
+
+msg_w_timestamp() {
+  msg "[$(date -u +%FT%TZ)] $*"
 }
 
 convert_secs_to_hms() {
@@ -271,7 +332,7 @@ ARE YOU SURE?! (y/n)
 "
   read -p ''
   [[ $REPLY =~ ^[Yy]$ ]] || {
-    msg "Exiting unchanged." && exit
+    msg_w_newlines "Exiting unchanged." && exit
   }
 }
 
@@ -297,8 +358,8 @@ unset BASH_XTRACEFD
 unset debug
 # set title of terminal
 echo -n -e '\033]0;${FUNCNAME[1]} $COMPOSE_PROJECT_NAME\007'
-# by exporting this, additional debug configurations will work
-export parent_pids_path=\"$parent_pids_path\"
+# is this export still needed?  (old comment: by exporting this, additional debug configurations will work)
+# export parent_pids_path=\"$parent_pids_path\"
 clear
 source \"$lib_dir/lib.sh\"
 ${*}
@@ -314,6 +375,21 @@ ${*}
     sleep 0.5
   done
   return false
+}
+
+# this function will invoke the caller in a new terminal if it was not already directly called
+run_in_new_terminal() {
+  local caller script
+  [[ ! $MDM_DIRECT_HANDLER_CALL ]] && {
+    caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_in_new_terminal //; s/ .*//')"
+    script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
+    echo "#!/usr/bin/env bash -l
+export REPO_DIR=\"${REPO_DIR}\"
+$lib_dir/launcher $caller
+" > "$script"
+    chmod u+x "$script"
+    open -a Terminal "$script"
+  } || :
 }
 
 detect_quit_and_stop_app() {
@@ -389,8 +465,8 @@ export_compose_file() {
     COMPOSE_FILE+=":docker-compose.override.yml"
   }
   # also use the global override file included with MDM
-  [[  -f "$mdm_path/current/docker-files/mcd.override.yml" ]] && {
-    COMPOSE_FILE+=":$mdm_path/current/docker-files/mcd.override.yml"
+  [[  -f "$lib_dir/../docker-files/mcd.override.yml" ]] && {
+    COMPOSE_FILE+=":$lib_dir/../docker-files/mcd.override.yml"
   }
 }
 
@@ -442,27 +518,53 @@ render_platypus_status_menu() {
   printf "%s" "$menu_output"
 }
 
-handle_menu_selection() {
-  local key
+handle_mdm_input() {
+  local key value
   # if selected menu item matches an exit timer, clear exit timer status and exit
-  [[ "$menu_selection" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
+  [[ "$mdm_input" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
   
   # otherwise check what type of menu item was selected
 
-  # a func?
-  key="$menu_selection-handler"
+  # a handler?
+  key="$mdm_input-handler"
   [[ -n "${menu[$key]}" ]] && {
     "${menu[$key]}"
     exit
   }
 
   # a link?
-  key="$menu_selection-link"
+  key="$mdm_input-link"
   [[ -n "${menu[$key]}" ]] && {
     open "${menu[$key]}"
     exit
   }
 
+  # not a handler or a link key? look for direct call (useful for testing)
+  for value in "${menu[@]}"; do
+    [[ "$mdm_input" = "$value" ]] && {
+      export MDM_DIRECT_HANDLER_CALL=true
+      msg_w_newlines "$mdm_input found in current menu. Running ..."
+      "$mdm_input"
+      exit
+    }
+  done
+
+# maybe allow direct calls independent of context? or bad idea b/c could create impossible scenarios?
+#   for value in "${testable_menu[@]}"; do
+#     [[ "$mdm_input" = "$value" ]] && {
+#       warning "$mdm_input NOT FOUND in current menu BUT is testable menu option. Running anyway ...
+# "
+#       "$mdm_input"
+#       exit
+#     }
+#   done
+
+  error "Handler for $mdm_input was not found or valid in this context."
+
+}
+
+ensure_mdm_log_files_exist() {
+  touch "$menu_log_file" "$handler_log_file"
 }
 
 ensure_log_files_exist() {
@@ -473,7 +575,9 @@ ensure_log_files_exist() {
 
 init_app_specific_vars() {
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
-  ! is_standalone && {
+  if is_standalone; then
+    env_dir="$mdm_path/envs/standalone"
+  else
     cd "$resource_dir/app"
     # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
     export_compose_project_name
@@ -481,13 +585,13 @@ init_app_specific_vars() {
     export_image_vars_for_override_yml
     [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
     env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
-    mkdir -p "$env_dir"
-    status_msg_file="$env_dir/.status"
-  }
+  fi
+  mkdir -p "$env_dir"
+  status_msg_file="$env_dir/.status"
 }
 
-init_logging() {
-  if run_without_args; then
+init_mdm_logging() {
+  if invoked_mdm_without_args; then
     cur_log_file="$menu_log_file"
   else
     cur_log_file="$handler_log_file"
@@ -496,10 +600,10 @@ init_logging() {
   exec > >(tee -ia "$cur_log_file")
   # exec 2> >(tee -ia "$cur_log_file")
   exec 2>> "$cur_log_file"
-  if run_without_args; then
-    timestamp_msg "Script called without args" >&2
+  if invoked_mdm_without_args; then
+    msg_w_timestamp "Script called without args" >&2
   else 
-    timestamp_msg "Script called with ${BASH_ARGV[-1]}" >&2
+    msg_w_timestamp "Script called with ${BASH_ARGV[-1]}" >&2
   fi
   # before this point, enabling debugging could cause debug info in menu output
   set -x
@@ -522,10 +626,10 @@ init_quit_detection() {
 ##
 
 called_from_platypus_app && {
-  ensure_log_files_exist
+  ensure_mdm_log_files_exist
   init_app_specific_vars
-  [[ $debug ]] && init_logging
-  init_quit_detection
+  [[ $debug ]] && init_mdm_logging
+  ! is_standalone && init_quit_detection
 }
 
 : # need to return true or will exit when sourced with "-e" and last test = false

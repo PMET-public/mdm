@@ -21,27 +21,37 @@ show_status() {
   echo "---------"
 }
 
-
 install_additional_tools() {
-  run_as_bash_script_in_terminal "
-    msg \"Installing composer\"
-    brew install composer
-    msg \"Installing magento-cloud CLI\"
+  run_in_new_terminal
+
+  is_magento_cloud_cli_installed || {
+    msg_w_newlines "Installing magento-cloud CLI ..."
     curl -sLS https://accounts.magento.cloud/cli/installer | php
-    msg \"Installing shell completion support for Docker\"
+  }
+
+  ! is_docker_bash_completion_installed && is_mac && {
+    msg_w_newlines "Installing shell completion support for Docker for Mac ..."
     etc=/Applications/Docker.app/Contents/Resources/etc
-    ln -s \$etc/docker.bash-completion \$(brew --prefix)/etc/bash_completion.d/docker
-    ln -s \$etc/docker-compose.bash-completion \$(brew --prefix)/etc/bash_completion.d/docker-compose
-    msg \"Install Platypus \"
+    ln -s $etc/docker.bash-completion $(brew --prefix)/etc/bash_completion.d/docker
+    ln -s $etc/docker-compose.bash-completion $(brew --prefix)/etc/bash_completion.d/docker-compose
+  }
+
+  is_mac && ! is_platypus_installed && {
+    msg_w_newlines "Installing Platypus ..."
     brew cask install platypus
     gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
-    chmod +x /usr/local/bin/platypus
-  "
+    mkdir -p /usr/local/share/platypus
+    cp -R /Applications/Platypus.app/Contents/Resources/PlatypusDefault.icns /Applications/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/
+    gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > /usr/local/share/platypus/ScriptExec
+    chmod +x /usr/local/bin/platypus /usr/local/share/platypus/ScriptExec
+  }
+
+  msg_w_newlines "Additional tools successfully installed."
 }
 
 optimize_docker() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     cp "$docker_settings_file" "$docker_settings_file.bak"
     can_optimize_vm_cpus && perl -i -pe "s/(\"cpus\"\s*:\s*)\d+/\${1}$recommended_vm_cpu/" "$docker_settings_file"
     can_optimize_vm_swap && perl -i -pe "s/(\"swapMiB\"\s*:\s*)\d+/\${1}$recommended_vm_swap_mb/" "$docker_settings_file"
@@ -57,7 +67,7 @@ optimize_docker() {
 
 start_docker() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     restart_docker_and_wait
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "Starting Docker VM ..."
@@ -69,7 +79,7 @@ update_mdm() {
 
 install_app() {
   (
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     docker-compose pull # check for new versions
     # create containers but do not start
     docker-compose up --no-start
@@ -107,6 +117,7 @@ install_app() {
     docker-compose up -d $services
     reload_rev_proxy
     # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
+    # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
     docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | \
       perl -pe 's/ .*/ $(get_host)/' >> /etc/hosts;
       /app/bin/magento cache:enable
@@ -126,17 +137,17 @@ open_app() {
 
 stop_app() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     docker-compose stop
   } >> "$handler_log_file" 2>&1 &
   # if stopped indirectly (by quitting the app), don't bother to set the status and wait
-  run_without_args ||
+  invoked_mdm_without_args ||
     set_status_and_wait_for_exit $! "Stopping Magento ..."
 }
 
 restart_app() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     services="$(get_docker_compose_runtime_services)"
     docker-compose start $services
     reload_rev_proxy
@@ -152,8 +163,8 @@ sync_app_to_remote() {
 }
 
 force_check_mdm_ver() {
-  rm "$mdm_ver_file" || :
-  is_update_available
+  rm "$mdm_ver_file" || : # okay if file doesn't exist
+  is_update_available || : # okay if update n/a, just triggering the check
 }
 
 revert_to_prev_mdm() {
@@ -190,38 +201,47 @@ toggle_mdm_debug_mode() {
 }
 
 rm_magento_docker_images() {
-  run_as_bash_script_in_terminal "
-    warning \"This will delete all Magento images to force the download of the latest versions. 
-If a Magento app is stopped, it will NOT be preserved.\"
-    confirm_or_exit
-    docker images | grep -E '^(magento|pmetpublic)/' | awk '{print \$3}' | xargs docker rmi -f
-  "
+  run_in_new_terminal
+  warning "This will delete all Magento images to force the download of the latest versions. 
+If a Magento app is stopped, it will NOT be preserved."
+  confirm_or_exit
+  image_ids=$(docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}')
+  [[ $image_ids ]] && {
+    docker rmi -f $image_ids
+  }
+  msg_w_newlines "Magento docker images successfully removed."
 }
 
 reset_docker() {
-  run_as_bash_script_in_terminal "
-    warning \"This will delete all docker containers, volumes, and networks.
-Docker images will be preserved to avoid downloading all images from scratch.\"
-    confirm_or_exit
-    docker stop \$(docker ps -qa)
-    docker rm -fv \$(docker ps -qa)
-    docker volume rm -f \$(docker volume ls -q)
-    docker network prune -f
-  "
+  run_in_new_terminal
+  warning "This will delete all docker containers, volumes, and networks.
+Docker images will be preserved to avoid downloading all images from scratch."
+  confirm_or_exit
+  # remove containers
+  container_ids="$(docker ps -qa)"
+  [[ $container_ids ]] && {
+    docker stop $container_ids
+    docker rm -fv $container_ids
+  }
+  # remove volumes
+  volume_ids="$(docker volume ls -q)"
+  [[ $volume_ids ]] && {
+    docker volume rm -f $volume_ids
+  }
+  # remove networks
+  docker network prune -f || :
+  msg_w_newlines "Docker reset successfully."
 }
 
 wipe_docker() {
-  run_as_bash_script_in_terminal "
-    warning \"This will delete ALL local docker artifacts - containers, images, volumes, and networks!\"
-    confirm_or_exit
-    docker stop \$(docker ps -qa) || :
-    docker rm -fv \$(docker ps -qa) || :
-    docker volume rm -f \$(docker volume ls -q) || :
-    docker network prune -f || :
-    docker rmi -f \$(docker images -qa) || :
-    # also clean up envs artifacts
-    rm -rf \"$mdm_path/envs/*\" || :
-  "
+  run_in_new_terminal
+  warning "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
+  confirm_or_exit
+  reset_docker
+  docker rmi -f $(docker images -qa) || :
+  # also clean up envs artifacts
+  rm -rf "$mdm_path/envs/*" || :
+  msg_w_newlines "Docker wiped successfully."
 }
 
 clone_app() {
@@ -233,22 +253,19 @@ no_op() {
 }
 
 start_shell_in_app() {
-  run_as_bash_script_in_terminal "
-    cd \"$resource_dir/app\" || exit
-    docker-compose run --rm deploy bash
-  "
+  run_in_new_terminal
+  cd "$resource_dir/app" || exit
+  docker-compose run --rm deploy bash
 }
 
 run_as_bash_cmds_in_app() {
-  run_as_bash_script_in_terminal "
-    cd \"$resource_dir/app\" || exit
-    echo 'Running in Magento app:'
-    msg '
+  run_in_new_terminal
+  cd "$resource_dir/app" || exit
+  echo 'Running in Magento app:'
+  msg '
     $1
-    
-    '
-    docker-compose run --rm deploy bash -c '$1' 2> /dev/null
-  "
+'
+  docker-compose run --rm deploy bash -c '$1' 2> /dev/null
 }
 
 reindex() {
@@ -278,19 +295,18 @@ flush_cache() {
 warm_cache() {
   # compare to chrome extenstion function (keep the funcs synced)
   domain=$(get_host)
-  run_as_bash_script_in_terminal "
-    set -x
-    domain=$domain
-    url=\"https://\$domain\"
-    tmp_file=$(mktemp)
+  run_in_new_terminal
+  set -x
+  domain=$domain
+  url="https://$domain"
+  tmp_file=$(mktemp)
 
-    msg Warming cache ...
+  msg Warming cache ...
 
-    # recursively get admin and store front
-    wget -nv -O \$tmp_file -H --domains=\$domain \$url/admin
-    wget -nv -r -X static,media -l 1 -O \$tmp_file -H --domains=\$domain \$url
-    rm \$tmp_file
-  "
+  # recursively get admin and store front
+  wget -nv -O $tmp_file -H --domains=$domain $url/admin
+  wget -nv -r -X static,media -l 1 -O $tmp_file -H --domains=$domain $url
+  rm $tmp_file
 }
 
 resize_images() {
@@ -313,20 +329,18 @@ start_mdm_shell() {
   else
     services_status="$(warning Magento app not installed yet.)"
   fi
-  run_as_bash_script_in_terminal "
-    cd \"$resource_dir/app\" || exit
-    msg Running $COMPOSE_PROJECT_NAME from $(pwd)
-    echo -e \"\\n\\n$services_status\"
-    msg \"
-
+  run_in_new_terminal
+  cd "$resource_dir/app" || exit
+  msg Running $COMPOSE_PROJECT_NAME from $(pwd)
+  echo -e "\\n\\n$services_status"
+  msg_w_newlines "
 You can run docker-compose cmds here, but it's recommend to use the MDM app to (un)install or
 start/stop the Magento app to ensure the proper application state.
 
 Magento docker-compose reference: https://devdocs.magento.com/cloud/docker/docker-quick-reference.html
 Full docker-compose reference: https://docs.docker.com/compose/reference/overview/
-
-\"
-    bash -l"
+"
+  bash -l
 }
 
 show_app_logs() {
@@ -334,28 +348,26 @@ show_app_logs() {
 }
 
 show_mdm_logs() {
-  run_as_bash_script_in_terminal "
-    cd \"$resource_dir\" || exit
-    screen -c '$lib_dir/../.screenrc'
-    exit
-  "
+  run_in_new_terminal
+  cd "$resource_dir" || exit
+  screen -c '$lib_dir/../.screenrc'
+  exit
 }
 
 uninstall_app() {
-  timestamp_msg "${FUNCNAME[0]}"
-  run_as_bash_script_in_terminal "
-    exec > >(tee -ia \"$handler_log_file\")
-    exec 2> >(tee -ia \"$handler_log_file\" >&2)
-    warning THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!
-    confirm_or_exit
-    cd \"$resource_dir/app\" || exit
-    docker-compose down -v
-  "
+  msg_w_timestamp "${FUNCNAME[0]}"
+  run_in_new_terminal
+  exec > >(tee -ia "$handler_log_file")
+  exec 2> >(tee -ia "$handler_log_file" >&2)
+  warning THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!
+  confirm_or_exit
+  cd "$resource_dir/app" || exit
+  docker-compose down -v
 }
 
 stop_other_apps() {
   {
-    timestamp_msg "${FUNCNAME[0]}"
+    msg_w_timestamp "${FUNCNAME[0]}"
     compose_project_names="$(
       docker ps -f "label=com.docker.compose.service=db" --format="{{ .Names  }}" | \
       perl -pe 's/_db_1$//' | \
@@ -369,32 +381,37 @@ stop_other_apps() {
   set_status_and_wait_for_exit $! "Stopping other apps ..."
 }
 
+
+# TODO change away positional pararms & is demo mode still used?
 start_pwa_with_app() {
-  export MAGENTO_URL=https://$(get_host) \
-    COMPOSE_PROJECT_NAME="" \
-    COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
-    DEMO_MODE="false" \
-    STORYSTORE_PWA_VERSION=$(get_host_version)
-  docker-compose rm -sfv storystore-pwa
-  docker-compose up -d storystore-pwa
-  ! is_nginx_rev_proxy_running && reload_rev_proxy
-  local index=1
-  until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
-  open https://pwa.the1umastory.com
+  start_pwa "https://$(get_host)" "" "false"
 }
 
-start_pwa_with_diff() {
-  export MAGENTO_URL="" \
-    COMPOSE_PROJECT_NAME="" \
-    COMPOSE_FILE="$mdm_path/current/docker-files/docker-compose.yml" \
-    DEMO_MODE="true"
-  docker-compose rm -sfv storystore-pwa
-  docker-compose up -d storystore-pwa
-  ! is_nginx_rev_proxy_running && reload_rev_proxy
-  local index=1
-  until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
-  open https://pwa.the1umastory.com/settings
+start_pwa_with_remote() {
+  start_pwa "" "settings" "true"
 }
+
+start_pwa() {
+  local magento_url pwa_path cloud_mode
+  magento_url="$1"
+  pwa_path="$2"
+  cloud_mode="$3"
+  {
+    export MAGENTO_URL="$magento_url" \
+      COMPOSE_PROJECT_NAME="mdm" \
+      COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml" \
+      CLOUD_MODE="$cloud_mode"
+    docker-compose pull
+    docker-compose rm -sfv storystore-pwa storystore-pwa-prev
+    docker-compose up -d storystore-pwa storystore-pwa-prev
+    ! is_nginx_rev_proxy_running && reload_rev_proxy
+    local index=1
+    until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
+    open "https://pwa.the1umastory.com/$pwa_path"
+  } >> "$handler_log_file" 2>&1 &
+  set_status_and_wait_for_exit $! "(Re)starting PWA"
+}
+
 
 toggle_advanced_mode() {
   if [[ -f "$advanced_mode_flag_file" ]]; then

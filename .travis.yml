@@ -1,4 +1,21 @@
 language: generic
-os: osx
-osx_image: xcode11.5
-script: ./tests/travis/install-deps-and-mdm.sh
+git:
+  submodules: false
+  depth: 1
+services:
+  - docker
+os:
+  - linux
+  - osx
+dist: bionic
+env:
+  - debug=true
+  - debug=""
+
+install:
+  - "./tests/CI/install-deps-and-mdm.sh"
+script:
+  - "./tests/CI/non-docker-menu-selections.sh"
+  - "./tests/CI/docker-menu-selections.sh"
+  - "./tests/CI/create-standalone-mdm.sh"
+  - "./tests/CI/check-homebrew.sh"

@@ -22,7 +22,7 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
 app_icon_path="$lib_dir/../icons/magento.icns"
 status_menu_icon_path="$lib_dir/../icons/magento-logo.png"
-rand_subdomain_suffix=$(LC_ALL=C tr -dc 'a-z' < /dev/random | fold -w 4 | head -n 1)
+rand_subdomain_suffix="$(head /dev/random | LC_ALL=C tr -dc 'a-z' | head -c 4)"
 tld="the1umastory.com"
 
 # Platypus is the OSX app bundler https://github.com/sveinbjornt/Platypus
@@ -54,15 +54,24 @@ create_platypys_app() {
     --app-version 0.1 \
     -u 'Keith Bentrup' \
     --bundle-identifier 'com.magento.mdm' \
-    "$mdm_path/current/bin/launcher" \
+    "$lib_dir/launcher" \
     "$contents_dir.app"
   [[ -d $contents_dir ]] && {
     # mv app into app bundle
     mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
   }
-  msg "Successfully created $contents_dir.app"
+  msg_w_newlines "Successfully created $contents_dir.app"
 }
 
+create_fake_platypus_app() {
+  local name="$1" contents_dir="$2"
+  mkdir -p "$contents_dir.app/Contents/Resources"
+  cp "$lib_dir/launcher" "$contents_dir.app/Contents/Resources/script"
+  [[ -d $contents_dir ]] && {
+    # mv app into app bundle
+    mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
+  }
+}
 
 print_usage() {
   echo "
@@ -271,4 +280,8 @@ rm -rf "$tmp_app_dir"
 # bundle with Platypus
 if has_platypus; then
   create_platypys_app "$subdomain" "$app_dir"
+elif is_mac; then
+  error "Platypus is not installed."
+else 
+  create_fake_platypus_app "$subdomain" "$app_dir"
 fi

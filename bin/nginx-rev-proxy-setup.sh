@@ -33,13 +33,14 @@ EOF
 
 done
 
-#ensure latest
-docker pull pmetpublic/nginx-with-pagespeed
+# ensure latest
+docker_nginx_image="pmetpublic/nginx-with-pagespeed:1.0"
+docker pull "$docker_nginx_image"
 
-cid=$(docker create --label mdm-nginx-rev-proxy -v "$mdm_cert_dir":/etc/letsencrypt -p 443:443 -p 80:80 pmetpublic/nginx-with-pagespeed)
+cid=$(docker create --label mdm-nginx-rev-proxy -v "$mdm_cert_dir":/etc/letsencrypt -p 443:443 -p 80:80 --network mdm_default "$docker_nginx_image")
 docker cp $tmp_dir/. $cid:/etc/nginx/conf.d
 # include pwa config too
-docker cp "$mdm_path/current/etc/nginx/conf.d/pwa.nginx.conf" $cid:/etc/nginx/conf.d
+docker cp "$lib_dir/../etc/nginx/conf.d/pwa.nginx.conf" $cid:/etc/nginx/conf.d
 
 rm -rf $tmp_dir
 # delete exited or currently running nginx rev proxies

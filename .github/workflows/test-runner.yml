@@ -1,0 +1,37 @@
+name: test runner
+
+on:
+  push:
+
+env:
+  # set a default terminal for various cmds that expect it
+  TERM: xterm
+
+jobs:
+  run-CI-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        value: [true, ""]
+    env:
+      debug: ${{ matrix.value }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: install
+        run: |
+          ./tests/CI/install-deps-and-mdm.sh
+      - name: non-docker tests
+        run: |
+          ./tests/CI/non-docker-menu-selections.sh
+      - name: docker tests
+        run: |
+          ./tests/CI/docker-menu-selections.sh
+      - name: create standalone mdm
+        run: |
+          ./tests/CI/create-standalone-mdm.sh
+      - name: check homebrew dependency behavior
+        run: |
+          ./tests/CI/check-homebrew.sh

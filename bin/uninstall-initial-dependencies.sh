@@ -2,7 +2,7 @@
 
 set -x # turn on debugging
 
-read -r -p $'\033[0;31mThis script is for testing on new systems only and should not ordinarily be run. ARE YOU SURE?? (y/n) \033[0m'
+read -r -p $'\033[0;31mThis script is for manual testing on new systems only and should not ordinarily be run. ARE YOU SURE?? (y/n) \033[0m'
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "Removing magento-cloud CLI"
   rm -rf ~/.magento-cloud
