@@ -63,6 +63,15 @@ create_platypys_app() {
   msg_w_newlines "Successfully created $contents_dir.app"
 }
 
+create_fake_platypus_app() {
+  local name="$1" contents_dir="$2"
+  mkdir -p "$contents_dir.app/Contents/Resources"
+  cp "$lib_dir/launcher" "$contents_dir.app/Contents/Resources/script"
+  [[ -d $contents_dir ]] && {
+    # mv app into app bundle
+    mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
+  }
+}
 
 print_usage() {
   echo "
@@ -271,4 +280,8 @@ rm -rf "$tmp_app_dir"
 # bundle with Platypus
 if has_platypus; then
   create_platypys_app "$subdomain" "$app_dir"
+elif is_mac; then
+  error "Platypus is not installed."
+else 
+  create_fake_platypus_app "$subdomain" "$app_dir"
 fi
