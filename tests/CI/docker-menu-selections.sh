@@ -7,7 +7,7 @@ set -e
 source ./bin/lib.sh
 
 
-is_docker_compatible && {
+if is_docker_compatible; then
 
   # turn on advanced mode if reset option not available
   launcher_output="$(./bin/launcher)"
@@ -37,6 +37,8 @@ is_docker_compatible && {
     [[ ! $(docker network ls -q) ]] &&
     error "Docker not wiped."
 
-}
+else
+  warning "Test skipped."
+fi
 
 exit 0

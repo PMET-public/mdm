@@ -7,7 +7,7 @@ set -e
 source ./bin/lib.sh
 
 # add is_CI so don't accidentally run this potentially destructive test locally
-is_mac && is_CI && {
+if is_mac && is_CI; then
 
   # now try without homebrew pre-installed (for CI envs)
   output="$(./bin/launcher)"
@@ -26,6 +26,8 @@ is_mac && is_CI && {
   msg_w_newlines "Rerunning launcher with dependencies installed again ..."
   ./bin/launcher
 
-}
+else
+  warning "Test skipped."
+fi
 
 exit 0
