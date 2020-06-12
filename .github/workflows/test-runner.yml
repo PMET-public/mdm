@@ -6,6 +6,7 @@ on:
 env:
   # set a default terminal for various cmds that expect it
   TERM: xterm
+  COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
 jobs:
   run-CI-tests:
@@ -32,6 +33,9 @@ jobs:
       - name: create standalone mdm
         run: |
           ./tests/CI/create-standalone-mdm.sh
+      - name: create mdm app from mc repo
+        run: |
+          ./tests/CI/create-mdm-app-from-mc-repo.sh
       - name: check homebrew dependency behavior
         run: |
           ./tests/CI/check-homebrew.sh

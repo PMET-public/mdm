@@ -9,13 +9,16 @@ os:
   - osx
 dist: bionic
 env:
-  - debug=true
-  - debug=""
-
+  matrix:
+    - debug=true
+    - debug=""
+  global:
+    secure: COPpjrzMZ0r/FKj8VqDNaLTqn1vMELWA3JHygxAWzYiDzPhYQQ+JoijFuBjZVcLX/DfyD2vZzFhhJCyA+/KemNmuH9TX/jTm1LKwLD8fAL1cqzvzB750W9Aavv6mdm5VaPvgQZZt6Lkzs0+qiCm1Thkz6pFXIT39+r2lf0Juo69KX5Pc6Be/m8B7MFUuHjNnJpQS8qhD+7zCM+5sGVv39gB8EAO1agPQTmv/VPQZmx8PA24mztuGo1R6j5R1wUppfKxqayPPw9ElbEPKLC3YucrEZ98IIimQvH/4XjQ5SvHq0l5Oeqjgy9EY6P00CIufMHm5gar2dieTZ6iQFjC7virax0GZMROzF8sahTOkmT0+dKbDIWHXDZoT41dfDwo511WJx46J2r5+dkbS5h1MOPYfN+0qGeQfigo2bMsuCMhnYigwavNVq2GZEimpmFkKXlx+isq8qe2P0bubyR0zyyxmU8gjDqcRT0iO5PrGH8kS1+iqogIVSIOwhuozcSJhnjUKs9eBjrWrv4ql1POfomX6hvj9BIeGtMs053a8vQjHf2u6NKGNrPUQysDn8aMu9Riem6xrUz320ftnawZ9e+Ua3g/p01zR8lIytn0eqsrwoWygqhharGNFuC7243YRwH5OU1tFNa6Y8I2ChC2/CJsFbABL/2AAGPuqc1g81vM=
 install:
   - "./tests/CI/install-deps-and-mdm.sh"
 script:
   - "./tests/CI/non-docker-menu-selections.sh"
   - "./tests/CI/docker-menu-selections.sh"
   - "./tests/CI/create-standalone-mdm.sh"
+  - "./tests/CI/create-mdm-app-from-mc-repo.sh"
   - "./tests/CI/check-homebrew.sh"
