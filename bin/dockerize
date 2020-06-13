@@ -278,8 +278,6 @@ cid=$(docker create $ssh_auth_opts $creeate_opts -v "$PWD:/app:delegated" \
   pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1 /tmp/script_for_php_container)
 docker cp "$script_for_tmp_php_container" $cid:/tmp/script_for_php_container
 docker start $start_opts $cid
-# TODO remove
-docker logs $cid
 rm "$script_for_tmp_php_container"
 cp -r docker-compose*.yml .docker "$app_dir"
 # restore the original composer files for use in the build container later

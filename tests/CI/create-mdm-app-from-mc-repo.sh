@@ -7,10 +7,12 @@ set -e
 source ./bin/lib.sh
 
 if ! is_mac; then
-  ./bin/dockerize -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.3.5-ref-github
-  open -a MDM
-  ps_output="$(ps aux | grep "MDM$" || :)"
-  [[ $ps_output =~ Contents/MacOS/MDM$ ]] || error "Expected MDM process not found."
+  app_name="app-from-repo-test"
+  ./bin/dockerize -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.3.5-ref-github -n "$app_name"
+  msg_w_newlines "$app_name successfully created."
+  app_dir"$(find ~/Downloads -name "$app_name*.app" -type d)"
+  "$HOME/Downloads/$app_dir/Contents/Resources/script"
+  "$HOME/Downloads/$app_dir/Contents/Resources/script" install_app
 else
   warning "Test skipped.
 "
