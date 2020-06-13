@@ -237,7 +237,7 @@ invoked_mdm_without_args() {
 }
 
 # need way to distinguish being called from app or other script sourcing this lib (e.g. dockerize script)
-called_from_platypus_app() {
+called_from_bundled_app() {
   # allow parent_pids_path to be set by the env to debug a specific instance
   # otherwise grab the actual exact path of the osx platypus app
   parent_pids_path="${parent_pids_path:-$(ps -p $PPID -o command=)}"
@@ -643,7 +643,7 @@ init_quit_detection() {
 #
 ##
 
-called_from_platypus_app && {
+called_from_bundled_app && {
   ensure_mdm_log_files_exist
   init_app_specific_vars
   [[ $debug ]] && init_mdm_logging
