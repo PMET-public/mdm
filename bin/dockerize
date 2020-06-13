@@ -22,7 +22,7 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
 app_icon_path="$lib_dir/../icons/magento.icns"
 status_menu_icon_path="$lib_dir/../icons/magento-logo.png"
-rand_subdomain_suffix="$(head /dev/random | LC_ALL=C tr -dc 'a-z' | head -c 4)"
+rand_subdomain_suffix="$(head /dev/urandom | LC_ALL=C tr -dc 'a-z' | head -c 4)"
 tld="the1umastory.com"
 
 # Platypus is the OSX app bundler https://github.com/sveinbjornt/Platypus
