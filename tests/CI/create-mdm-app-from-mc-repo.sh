@@ -17,6 +17,15 @@ if ! is_mac; then
   # invoke it emulating platypus app method
   run_bundled_app_as_script "$HOME/Downloads/$app_dir/Contents/Resources/script"
   run_bundled_app_as_script "$HOME/Downloads/$app_dir/Contents/Resources/script" install_app
+  run_bundled_app_as_script "$HOME/Downloads/$app_dir/Contents/Resources/script" start_mdm_shell
+  for (( index=0; index < 15; ((index++)) )); do
+    echo "subprocesses: "; pgrep -aP $$
+    export_compose_project_name
+    export_compose_file
+    docker ps
+    docker-compose ps
+    sleep 60
+  done
 else
   warning_w_newlines "Test skipped."
 fi
