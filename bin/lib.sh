@@ -322,9 +322,9 @@ msg_w_timestamp() {
 }
 
 convert_secs_to_hms() {
-  ((h=$1/3600))
-  ((m=($1%3600)/60))
-  ((s=$1%60))
+  h="$(($1/3600))"
+  m="$((($1%3600)/60))"
+  s="$(($1%60))"
   printf "%02d:%02d:%02d" "$h" "$m" "$s"
 }
 
@@ -635,7 +635,7 @@ init_quit_detection() {
   [[ ! -f "$quit_detection_file" ]] && {
     touch "$quit_detection_file"
     detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
-  }
+  } || :
 }
 
 ###
