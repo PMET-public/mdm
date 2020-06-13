@@ -586,9 +586,9 @@ run_bundled_app_as_script() {
   export parent_pids_path="${abs_path_to_script/\/Resources\//\/MacOS\/}"
   # invoke in the same way platypus would
   if is_mac; then
-    /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$abs_path_to_script" "$script_arg"
+    /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$abs_path_to_script $script_arg"
   else
-    /usr/bin/env bash -c "$abs_path_to_script" "$script_arg"
+    /usr/bin/env bash -c "$abs_path_to_script $script_arg"
   fi
 }
 
