@@ -71,6 +71,18 @@ create_fake_platypus_app() {
     # mv app into app bundle
     mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
   }
+  msg_w_newlines "Successfully created $contents_dir.app"
+}
+
+create_bundled_app() {
+  local name="$1" contents_dir="$2"
+  if has_platypus; then
+    create_platypus_app "$name" "$contents_dir"
+  elif is_mac; then
+    error "Platypus is not installed."
+  else 
+    create_fake_platypus_app "$name" "$contents_dir"
+  fi
 }
 
 print_usage() {
@@ -117,7 +129,7 @@ while getopts "b:e:g:hsp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
 done
 
 [[ $standalone ]] && {
-  create_platypus_app "${app_name:-MDM}" "$HOME/Downloads/${app_name:-MDM}"
+  create_bundled_app "${app_name:-MDM}" "$HOME/Downloads/${app_name:-MDM}"
   exit 0
 }
 
@@ -295,11 +307,4 @@ tar -zcf "$app_dir/.composer.tar.gz" .composer
 cd "$app_dir" || exit
 rm -rf "$tmp_app_dir"
 
-# bundle with Platypus
-if has_platypus; then
-  create_platypus_app "$subdomain" "$app_dir"
-elif is_mac; then
-  error "Platypus is not installed."
-else 
-  create_fake_platypus_app "$subdomain" "$app_dir"
-fi
+create_bundled_app "$subdomain" "$app_dir"
