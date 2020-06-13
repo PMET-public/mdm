@@ -38,7 +38,7 @@ is_existing_cloud_env() {
   [[ $env_is_existing_cloud ]]
 }
 
-create_platypys_app() {
+create_platypus_app() {
   local name="$1" contents_dir="$2"
   platypus \
     --app-icon "$app_icon_path" \
@@ -117,7 +117,7 @@ while getopts "b:e:g:hsp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
 done
 
 [[ $standalone ]] && {
-  create_platypys_app "${app_name:-MDM}" "$HOME/Downloads/${app_name:-MDM}"
+  create_platypus_app "${app_name:-MDM}" "$HOME/Downloads/${app_name:-MDM}"
   exit 0
 }
 
@@ -297,7 +297,7 @@ rm -rf "$tmp_app_dir"
 
 # bundle with Platypus
 if has_platypus; then
-  create_platypys_app "$subdomain" "$app_dir"
+  create_platypus_app "$subdomain" "$app_dir"
 elif is_mac; then
   error "Platypus is not installed."
 else 
