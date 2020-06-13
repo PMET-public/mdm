@@ -580,6 +580,12 @@ ensure_log_files_exist() {
   }
 }
 
+run_bundled_app_as_script() {
+  local abs_path_to_script="$1" script_arg="$2"
+  # invoke in the same way platypus would
+  /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$abs_path_to_script" "$script_arg"
+}
+
 init_app_specific_vars() {
   resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
   if is_standalone; then
