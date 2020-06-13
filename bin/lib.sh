@@ -582,8 +582,13 @@ ensure_log_files_exist() {
 
 run_bundled_app_as_script() {
   local abs_path_to_script="$1" script_arg="$2"
+  export parent_pids_path="$abs_path_to_script"
   # invoke in the same way platypus would
-  /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$abs_path_to_script" "$script_arg"
+  if is_mac; then
+    /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$abs_path_to_script" "$script_arg"
+  else
+    /usr/bin/env bash -c "$abs_path_to_script" "$script_arg"
+  fi
 }
 
 init_app_specific_vars() {
