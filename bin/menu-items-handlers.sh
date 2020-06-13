@@ -202,7 +202,7 @@ toggle_mdm_debug_mode() {
 
 rm_magento_docker_images() {
   run_in_new_terminal
-  warning "This will delete all Magento images to force the download of the latest versions. 
+  warning_w_newlines "This will delete all Magento images to force the download of the latest versions. 
 If a Magento app is stopped, it will NOT be preserved."
   confirm_or_exit
   image_ids=$(docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}')
@@ -214,7 +214,7 @@ If a Magento app is stopped, it will NOT be preserved."
 
 reset_docker() {
   run_in_new_terminal
-  warning "This will delete all docker containers, volumes, and networks.
+  warning_w_newlines "This will delete all docker containers, volumes, and networks.
 Docker images will be preserved to avoid downloading all images from scratch."
   confirm_or_exit
   # remove containers
@@ -235,7 +235,7 @@ Docker images will be preserved to avoid downloading all images from scratch."
 
 wipe_docker() {
   run_in_new_terminal
-  warning "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
+  warning_w_newlines "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
   confirm_or_exit
   reset_docker
   docker rmi -f $(docker images -qa) || :
@@ -327,7 +327,7 @@ start_mdm_shell() {
   if is_app_installed; then
     services_status="$(docker-compose ps)"
   else
-    services_status="$(warning Magento app not installed yet.)"
+    services_status="$(warning_w_newlines "Magento app not installed yet.")"
   fi
   run_in_new_terminal
   cd "$resource_dir/app" || exit
@@ -359,7 +359,7 @@ uninstall_app() {
   run_in_new_terminal
   exec > >(tee -ia "$handler_log_file")
   exec 2> >(tee -ia "$handler_log_file" >&2)
-  warning THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!
+  warning_w_newlines "THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!"
   confirm_or_exit
   cd "$resource_dir/app" || exit
   docker-compose down -v

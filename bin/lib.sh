@@ -302,6 +302,12 @@ warning() {
   printf "%b%s%b" "$yellow" "$*" "$no_color"
 }
 
+warning_w_newlines() {
+  warning "
+$*
+"
+}
+
 msg() {
   printf "%b%s%b" "$green" "$*" "$no_color"
 }
@@ -555,8 +561,7 @@ handle_mdm_input() {
 # maybe allow direct calls independent of context? or bad idea b/c could create impossible scenarios?
 #   for value in "${testable_menu[@]}"; do
 #     [[ "$mdm_input" = "$value" ]] && {
-#       warning "$mdm_input NOT FOUND in current menu BUT is testable menu option. Running anyway ...
-# "
+#       warning_w_newlines "$mdm_input NOT FOUND in current menu BUT is testable menu option. Running anyway ..."
 #       "$mdm_input"
 #       exit
 #     }

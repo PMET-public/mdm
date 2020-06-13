@@ -16,6 +16,12 @@ warning() {
   printf "%b%s%b" "$yellow" "$*" "$no_color"
 }
 
+warning_w_newlines() {
+  warning "
+$*
+"
+}
+
 msg() {
   printf "%b%s%b\n" "$green" "$*" "$no_color"
 }
@@ -58,10 +64,9 @@ Once all requirements are installed and validated, this script will not need to 
 [[ "$(uname)" = "Darwin" ]] && {
   # install homebrew
   [[ -f /usr/local/bin/brew ]] || {
-    warning "This script installs Homebrew, which may require your password. If you're
+    warning_w_newlines "This script installs Homebrew, which may require your password. If you're
   skeptical about entering your password here, you can install Homebrew (https://brew.sh/)
-  independently first. Then you will NOT be prompted for your password by this script.
-  "
+  independently first. Then you will NOT be prompted for your password by this script."
     msg_w_newlines "Alternatively, you can allow this script to install Homebrew by pressing ANY key to continue."
 
     ! is_CI && read -n 1 -s -r -p ""

@@ -12,8 +12,7 @@ if is_mac; then
   ps_output="$(ps aux | grep "MDM$" || :)"
   [[ $ps_output =~ Contents/MacOS/MDM$ ]] || error "Expected MDM process not found."
 else
-  warning "Test skipped.
-"
+  warning_w_newlines "Test skipped."
 fi
 
 exit 0

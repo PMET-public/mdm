@@ -232,7 +232,7 @@ cd "$tmp_app_dir" || exit
 [[ ! -z "$auth_json_path" ]] && # if auth.json provided, use it
   cp "$auth_json_path" "$tmp_app_dir"
 [[ ! -f "auth.json" && ! $COMPOSER_AUTH ]] && 
-  warning "No auth.json OR COMPOSER_AUTH env var file detected! 
+  warning_w_newlines "No auth.json OR COMPOSER_AUTH env var file detected! 
 Composer may be rate-limited and/or unable to download required packages.
   " &&
   sleep 5

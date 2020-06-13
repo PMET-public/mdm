@@ -14,8 +14,7 @@ if ! is_mac; then
   "$HOME/Downloads/$app_dir/Contents/Resources/script"
   "$HOME/Downloads/$app_dir/Contents/Resources/script" install_app
 else
-  warning "Test skipped.
-"
+  warning_w_newlines "Test skipped."
 fi
 
 exit 0
