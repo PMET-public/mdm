@@ -17,6 +17,11 @@ if ! is_mac; then
   # invoke it emulating platypus app method
   run_bundled_app_as_script "$HOME/Downloads/$app_dir/Contents/Resources/script"
   run_bundled_app_as_script "$HOME/Downloads/$app_dir/Contents/Resources/script" install_app
+  for (( index=0; index < 15; ((index++)) )); do
+    sleep 60
+    docker ps
+    docker-compose ps
+  done
 else
   warning_w_newlines "Test skipped."
 fi
