@@ -12,9 +12,6 @@ env:
   matrix:
     - debug=true
     - debug=""
-  global:
-    # COMPOSE_AUTH
-    # secure: DURKZIYaRE4nzMxaST820B70CKAXm6c1Hcz+SufuGpWBpAHj4C977YpbE7nyNEE4A1mg9Q6iRIj5VO7RzK5LpkqD91Vavsa0B52479sEJ5X4l/T12s8XSXhHRxfiX4TPgieED3xpRxmmYfo/4CHyIOFwfNYfh81ilA0+htg6ZCWt+FP8+YaC9kbYroPGebY+864GNJCFyTK7xB/dJETeMMig9zpLX6DsvfMPAIfS+eFRXWpD5Bti1/B9agdr/eUiIQHNqWdfCkrPUFLYAbkyouJdU+XPL+Yk1+nGfcxZvXWtwz9TYiNID0woVMvXnnxeF4HIABQwQntcq+W0B2BBqGMZKyl5ozuzmVouS6DA3thGD3DT6Mth32FOJj74oYWZg3rlLTknFKsCm7Vk+bRNVZITNn8e/N7gQ7wzDBFyh3tQJa3Rd2rIPL9f4+eNSQs0kbzHFSuh2tAN1LbMoKH5s4eVRct5beZk1iiW/foR5cao+IXWltCJKqlAh4ZCMCsAC6YEidaLMj5g/HYSfx39JI0TYSBAqnFmSRNMJ2gUhCUH/fhy3gQ252dSESbHb41/BpJrEv/VnqAhDns9hn/oRzdG2Vx8/SnBtNFKNl7kvzwGrCILvA8ltSueEazbNJn6dmAUC2V87HQG2nt1D8Vwkja/KImefpt6QuJWHoQKcLo=
 install:
   - "./tests/CI/install-deps-and-mdm.sh"
 script:

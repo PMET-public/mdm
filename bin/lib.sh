@@ -7,8 +7,7 @@ trap 'error "Command $BASH_COMMAND on line $LINENO failed with exit code $?."' E
 # this lib is used by dockerize, mdm, tests, etc. but logging to STDOUT is problematic for platypus apps
 # so need a way to check and if appropiate, defer until lib can bootstrap the appropiate logging
 included_by_mdm() {
-  # misidentification by shellcheck? implicit array concatenation - which is desired plus = vs =~
-  # shellcheck disable=SC2199
+  # shellcheck disable=SC2199 # error in shellcheck? implicit array concatenation - which is desired plus = vs =~
   [[ "${BASH_SOURCE[@]}" =~ /bin/mdm ]]
 }
 
