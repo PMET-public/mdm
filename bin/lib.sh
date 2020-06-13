@@ -585,8 +585,8 @@ run_bundled_app_as_script() {
   # invoke in the same way platypus would
   if is_mac; then
     /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$abs_path_to_script" "$script_arg"
-  else
-    /usr/bin/env - PATH="/usr/local/bin:/bin" bash -c "$abs_path_to_script" "$script_arg"
+  fi
+    /usr/bin/env bash -c "$abs_path_to_script" "$script_arg"
   fi
 }
 
