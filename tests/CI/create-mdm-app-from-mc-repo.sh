@@ -10,7 +10,8 @@ if ! is_mac; then
   app_name="app-from-repo-test"
   ./bin/dockerize -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.3.5-ref-github -n "$app_name"
   msg_w_newlines "$app_name successfully created."
-  app_dir"$(find ~/Downloads -name "$app_name*.app" -type d)"
+  app_dir="$(find "$HOME/Downloads" -name "$app_name*.app" -type d)"
+  app_dir="${app_dir#$HOME/Downloads/}"
   "$HOME/Downloads/$app_dir/Contents/Resources/script"
   "$HOME/Downloads/$app_dir/Contents/Resources/script" install_app
 else
