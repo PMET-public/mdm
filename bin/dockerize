@@ -98,7 +98,7 @@ Options:
 while getopts "b:e:g:hsp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
   case "$opt" in
     h ) print_usage; exit 0 ;;
-    s ) create_platypys_app MDM "$HOME/Downloads/MDM"; exit 0 ;;
+    s ) standalone=true ;;
     p ) pid="$OPTARG" ;;
     e ) env="$OPTARG" ;;
     g ) git_url="$OPTARG" ;;
@@ -115,6 +115,11 @@ while getopts "b:e:g:hsp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
     : ) print_usage; error "Invalid option: -$OPTARG requires an argument" 1>&2 ;;
   esac
 done
+
+[[ $standalone ]] && {
+  create_platypys_app "${app_name:-MDM}" "$HOME/Downloads/${app_name:-MDM}"
+  exit 0
+}
 
 # additional error checking
 {
