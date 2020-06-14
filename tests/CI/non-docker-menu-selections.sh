@@ -32,7 +32,9 @@ stat_output="$(stat "$mdm_ver_file")"
 stat_output2="$(stat "$mdm_ver_file")"
 
 ./bin/launcher force_check_mdm_ver
+# TODO figure out why wait fails
 wait # check runs in background
+sleep 10
 
 stat_output3="$(stat "$mdm_ver_file")"
 
