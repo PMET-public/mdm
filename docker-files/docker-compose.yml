@@ -17,11 +17,13 @@ services:
       - NEXT_TELEMETRY_DISABLED=1
       - CLOUD_MODE=${CLOUD_MODE:-false}
       - PREV_RELEASE_REDIRECT_URL=https://pwa-prev.the1umastory.com
+      - LATEST_RELEASE_REDIRECT_URL=https://pwa.the1umastory.com
   storystore-pwa-prev:
     image: pmetpublic/storystore-pwa:docker-prev
     environment:
       - MAGENTO_URL=${MAGENTO_URL:-https://venia.magento.com/graphql}
       - NEXT_TELEMETRY_DISABLED=1
       - CLOUD_MODE=${CLOUD_MODE:-false}
+      - PREV_RELEASE_REDIRECT_URL=https://pwa-prev.the1umastory.com
       - LATEST_RELEASE_REDIRECT_URL=https://pwa.the1umastory.com
 
