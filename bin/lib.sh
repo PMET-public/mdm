@@ -356,35 +356,6 @@ get_host() {
     error "Host not found"
 }
 
-# echos pid of script as result
-run_as_bash_script_in_terminal() {
-  local script counter pid
-  script=$(mktemp -t "$COMPOSE_PROJECT_NAME-${FUNCNAME[1]}") || exit
-  echo "#!/usr/bin/env bash -l
-set +x
-unset BASH_XTRACEFD
-unset debug
-# set title of terminal
-echo -n -e '\033]0;${FUNCNAME[1]} $COMPOSE_PROJECT_NAME\007'
-# is this export still needed?  (old comment: by exporting this, additional debug configurations will work)
-# export parent_pids_path=\"$parent_pids_path\"
-clear
-source \"$lib_dir/lib.sh\"
-${*}
-" > "$script"
-  chmod u+x "$script"
-  open -a Terminal "$script"
-  # wait up to a brief time to return pid of script or false
-  # exit status of pid will be unavailable b/c not a child job
-  # but script could leave exit status artifact
-  for (( counter=0; counter < 10; ((counter++)) )); do
-    pid="$(pgrep -f "$script")"
-    [[ -n "$pid" ]] && echo "$pid" && return
-    sleep 0.5
-  done
-  return false
-}
-
 # this function will invoke the caller in a new terminal if it was not already directly called
 run_in_new_terminal() {
   local caller script
