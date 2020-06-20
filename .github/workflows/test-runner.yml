@@ -16,7 +16,8 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-        value: [true, ""]
+        # value: [true, ""]
+        value: [true]
     env:
       debug: ${{ matrix.value }}
     steps:

@@ -15,17 +15,19 @@ if ! is_mac; then
   app_dir="${app_dir#$HOME/Downloads/}"
   
   # invoke it emulating platypus app method
-  run_bundled_app_as_script "$HOME/Downloads/$app_dir/Contents/Resources/script"
-  run_bundled_app_as_script "$HOME/Downloads/$app_dir/Contents/Resources/script" install_app
-  run_bundled_app_as_script "$HOME/Downloads/$app_dir/Contents/Resources/script" start_mdm_shell
-  for (( index=0; index < 15; ((index++)) )); do
-    echo "subprocesses: "; pgrep -aP $$
-    export_compose_project_name
-    export_compose_file
-    docker ps
-    docker-compose ps
-    sleep 60
-  done
+  export parent_pids_path="$HOME/Downloads/$app_dir/Contents/MacOS/fake-path-that-follows-the-convention"
+  run_bundled_app_as_script
+  run_bundled_app_as_script install_app
+  run_bundled_app_as_script start_mdm_shell
+  env
+  echo "subprocesses: "; 
+  pgrep -aP $$ || :
+  echo "subprocesses #2: "; 
+  ps -o time,pid,ppid,cmd --forest -g -p $(pgrep -x bash)
+  docker-compose logs || :
+  export_compose_file
+  export_compose_project_name
+  docker-compose logs
 else
   warning_w_newlines "Test skipped."
 fi

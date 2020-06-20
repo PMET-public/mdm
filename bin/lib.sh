@@ -581,9 +581,9 @@ ensure_log_files_exist() {
 }
 
 run_bundled_app_as_script() {
-  local abs_path_to_script="$1" script_arg="$2"
-  # set this to match platypus paths; TODO make this less reliant on specific path
-  export parent_pids_path="${abs_path_to_script/\/Resources\//\/MacOS\/}"
+  [[ $parent_pids_path ]] || error "Parent path not set"
+  local script_arg="$1"
+  abs_path_to_script=${parent_pids_path/\/MacOS\/*/\/Resources\/script}
   # invoke in the same way platypus would
   if is_mac; then
     /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$abs_path_to_script $script_arg"
