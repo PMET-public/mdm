@@ -190,13 +190,12 @@ revert_to_prev_mdm() {
 }
 
 toggle_mdm_debug_mode() {
-  local app="${parent_pids_path/.app\/Contents\/MacOS\/*/.app}"
   kill $PPID
   if [[ $debug ]]; then
     unset debug
-    open "$app"
+    open "$apps_resources_dir/../../"
   else
-    debug=1 open "$app"
+    debug=1 open "$apps_resources_dir/../../"
   fi
 }
 
@@ -254,13 +253,13 @@ no_op() {
 
 start_shell_in_app() {
   run_in_new_terminal
-  cd "$resource_dir/app" || exit
+  cd "$apps_resources_dir/app" || exit
   docker-compose run --rm deploy bash
 }
 
 run_as_bash_cmds_in_app() {
   run_in_new_terminal
-  cd "$resource_dir/app" || exit
+  cd "$apps_resources_dir/app" || exit
   echo 'Running in Magento app:'
   msg '
     $1
@@ -330,7 +329,7 @@ start_mdm_shell() {
     services_status="$(warning_w_newlines "Magento app not installed yet.")"
   fi
   run_in_new_terminal
-  cd "$resource_dir/app" || exit
+  cd "$apps_resources_dir/app" || exit
   msg Running $COMPOSE_PROJECT_NAME from $(pwd)
   echo -e "\\n\\n$services_status"
   msg_w_newlines "
@@ -349,7 +348,7 @@ show_app_logs() {
 
 show_mdm_logs() {
   run_in_new_terminal
-  cd "$resource_dir" || exit
+  cd "$apps_resources_dir" || exit
   screen -c '$lib_dir/../.screenrc'
   exit
 }
@@ -361,7 +360,7 @@ uninstall_app() {
   exec 2> >(tee -ia "$handler_log_file" >&2)
   warning_w_newlines "THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!"
   confirm_or_exit
-  cd "$resource_dir/app" || exit
+  cd "$apps_resources_dir/app" || exit
   docker-compose down -v
 }
 

@@ -13,11 +13,7 @@ included_by_mdm() {
 
 [[ $debug ]] && ! included_by_mdm && set -x
 
-# establish $lib_dir for reference
-# N.B. when to use $resource_dir (references a specific platypus app instance) vs $lib_dir:
-# $lib_dir (the dir containing this file) should be used unless a specific running platypus app instance or 
-# its resources from $resource_dir are required to complete successfully.
-# this maximizes what can be used generically and from a shell
+
 
 # iterate thru BASH_SOURCE to find this lib.sh (should work even when debugging in IDE)
 bs_len=${#BASH_SOURCE[@]}
@@ -168,7 +164,7 @@ verify_mdm_cert_dir() {
 }
 
 is_standalone() {
-  [[ ! -d "$resource_dir/app" ]]
+  [[ ! -d "$apps_resources_dir/app" ]]
 }
 
 is_app_installed() {
@@ -236,12 +232,16 @@ invoked_mdm_without_args() {
   fi
 }
 
-# need way to distinguish being called from app or other script sourcing this lib (e.g. dockerize script)
-called_from_bundled_app() {
-  # allow parent_pids_path to be set by the env to debug a specific instance
-  # otherwise grab the actual exact path of the osx platypus app
-  parent_pids_path="${parent_pids_path:-$(ps -p $PPID -o command=)}"
-  [[ "$parent_pids_path" =~ .app/Contents/MacOS/ ]]
+# need way to distinguish being sourced for specific app or sourced for some other script (e.g. dockerize script)
+lib_sourced_for_specific_bundled_app() {
+  # if a specific apps_resources_dir is already set in env, then for specific app is true
+  [[ $apps_resources_dir ]] && return
+  # else is the sourcing process a specific app instance?
+  local parent_pids_path
+  parent_pids_path="$(ps -p $PPID -o command=)"
+  [[ "$parent_pids_path" =~ .app/Contents/MacOS/ ]] &&
+    apps_resources_dir="${parent_pids_path/\/MacOS\/*/\/Resources}" &&
+    export apps_resources_dir
 }
 
 lookup_latest_remote_sem_ver() {
@@ -351,8 +351,8 @@ ARE YOU SURE?! (y/n)
 ###
 
 get_host() {
-  [[ -f "$resource_dir/app/docker-compose.yml" ]] &&
-    perl -ne 's/.*VIRTUAL_HOST=\s*(.*)\s*/\1/ and print' "$resource_dir/app/docker-compose.yml" ||
+  [[ -f "$apps_resources_dir/app/docker-compose.yml" ]] &&
+    perl -ne 's/.*VIRTUAL_HOST=\s*(.*)\s*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml" ||
     error "Host not found"
 }
 
@@ -434,7 +434,7 @@ download_and_link_latest_release() {
 
 export_compose_project_name() {
   export COMPOSE_PROJECT_NAME
-  COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$resource_dir/app/docker-compose.yml")"
+  COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
 }
 
 export_compose_file() {
@@ -552,23 +552,21 @@ ensure_log_files_exist() {
 }
 
 run_bundled_app_as_script() {
-  [[ $parent_pids_path ]] || error "Parent path not set"
+  [[ $apps_resources_dir ]] || error "App's resources dir not set"
   local script_arg="$1"
-  abs_path_to_script=${parent_pids_path/\/MacOS\/*/\/Resources\/script}
   # invoke in the same way platypus would
   if is_mac; then
-    /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$abs_path_to_script $script_arg"
+    /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$apps_resources_dir/script $script_arg"
   else
-    /usr/bin/env bash -c "$abs_path_to_script $script_arg"
+    /usr/bin/env bash -c "$apps_resources_dir/script $script_arg"
   fi
 }
 
 init_app_specific_vars() {
-  resource_dir="${parent_pids_path/\.app\/Contents\/MacOS\/*/}.app/Contents/Resources"
   if is_standalone; then
     env_dir="$mdm_path/envs/standalone"
   else
-    cd "$resource_dir/app"
+    cd "$apps_resources_dir/app"
     # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
     export_compose_project_name
     export_compose_file
@@ -615,7 +613,7 @@ init_quit_detection() {
 #
 ##
 
-called_from_bundled_app && {
+lib_sourced_for_specific_bundled_app && {
   ensure_mdm_log_files_exist
   init_app_specific_vars
   [[ $debug ]] && init_mdm_logging

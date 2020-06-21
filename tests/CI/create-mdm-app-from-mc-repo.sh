@@ -15,7 +15,7 @@ if ! is_mac; then
   app_dir="${app_dir#$HOME/Downloads/}"
   
   # invoke it emulating platypus app method
-  export parent_pids_path="$HOME/Downloads/$app_dir/Contents/MacOS/fake-path-that-follows-the-convention"
+  export apps_resources_dir="$HOME/Downloads/$app_dir/Contents/Resources"
   run_bundled_app_as_script
   run_bundled_app_as_script install_app
   run_bundled_app_as_script start_mdm_shell
@@ -33,3 +33,4 @@ else
 fi
 
 exit 0
+ 

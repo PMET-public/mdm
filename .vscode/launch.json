@@ -28,8 +28,8 @@
         //"vsc_debugger_arg": "Install additional tools for additional features",
         "vsc_debugger_arg": "⚠️ Remove Magento images (breaks stopped apps)",
         "REPO_DIR": "${workspaceFolder}",
-        "parent_pids_path": 
-          "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
+        "apps_resources_dir": 
+          "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/Resources"
       },
       "args": []
     },
@@ -46,8 +46,8 @@
         //"vsc_debugger_arg": "install_additional_tools",
         "vsc_debugger_arg": "rm_magento_docker_images",
         "REPO_DIR": "${workspaceFolder}",
-        "parent_pids_path": 
-          "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
+        "apps_resources_dir": 
+          "${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/Resources"
       },
       "args": []
     },
@@ -61,9 +61,8 @@
         "debug": true,
       "vsc_debugger_arg": "n/a",
         "REPO_DIR": "${workspaceFolder}",
-        "parent_pids_path": 
-        //"${env:HOME}/Adobe Systems Incorporated/SITeam - docker/env-library-rc/ref-2.3.4.app/Contents/MacOS/blah"
-        "${env:HOME}/Downloads/ref-2.3.5-p1.app/Contents/Resources/script"
+        "apps_resources_dir":
+          "${env:HOME}/Downloads/ref-2.3.5-p1.app/Contents/Resources"
       },
       "args": []
     },
