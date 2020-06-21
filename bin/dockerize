@@ -278,13 +278,11 @@ if is_mac; then
     --mount type=bind,src=$HOME/.ssh/known_hosts,target=/root/.ssh/known_hosts"
 fi
 if is_CI; then
-  creeate_opts=""
   start_opts="-a"
 else
-  creeate_opts="-it"
   start_opts="-ai"
 fi
-cid=$(docker create $ssh_auth_opts $creeate_opts -v "$PWD:/app:delegated" \
+cid=$(docker create $ssh_auth_opts -v "$PWD:/app:delegated" \
   -e COMPOSER_AUTH -e COMPOSER_HOME=.composer \
   --user $(id -u):$(id -g) \
   pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1 /tmp/script_for_php_container)
