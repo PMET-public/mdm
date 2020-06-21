@@ -440,10 +440,10 @@ export_compose_project_name() {
 }
 
 export_compose_file() {
-  export COMPOSE_FILE="docker-compose.yml"
+  export COMPOSE_FILE="$apps_resources_dir/app/docker-compose.yml"
   # check for a CWD override file
-  [[ -f docker-compose.override.yml ]] && {
-    COMPOSE_FILE+=":docker-compose.override.yml"
+  [[ -f "$apps_resources_dir/docker-compose.override.yml" ]] && {
+    COMPOSE_FILE+=":$apps_resources_dir/app/docker-compose.override.yml"
   }
   # also use the global override file included with MDM
   [[  -f "$lib_dir/../docker-files/mcd.override.yml" ]] && {
