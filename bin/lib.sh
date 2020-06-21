@@ -21,7 +21,7 @@ for (( index=0; index < bs_len; ((index++)) )); do
   [[ "${BASH_SOURCE[$index]}" =~ /lib.sh$ ]] && {
     lib_dir="$(dirname "${BASH_SOURCE[$index]}")"
     # if lib_dir is relative, determine & use absolute path
-    [[ $lib_dir =~ ^\./ ]] && lib_dir="$(realpath .)/${lib_dir#./}"
+    [[ $lib_dir =~ ^\./ ]] && lib_dir="$(pwd)/${lib_dir#./}"
     break
   }
 done
