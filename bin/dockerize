@@ -272,22 +272,19 @@ EOF
 chmod +x "$script_for_tmp_php_container"
 # get php version of app
 app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml)
-if is_mac; then
-  SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
+# if using ssh, set ssh options
+[[ $SSH_AUTH_SOCK ]] && {
+  is_mac && SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
+  # home dir of container will /app
   ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
-    --mount type=bind,src=$HOME/.ssh/known_hosts,target=/root/.ssh/known_hosts"
-fi
-if is_CI; then
-  start_opts="-a"
-else
-  start_opts="-ai"
-fi
+    --mount type=bind,src=$HOME/.ssh/known_hosts,target=/app/.ssh/known_hosts"
+}
 cid=$(docker create $ssh_auth_opts -v "$PWD:/app:delegated" \
   -e COMPOSER_AUTH -e COMPOSER_HOME=.composer \
   --user $(id -u):$(id -g) \
   pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1 /tmp/script_for_php_container)
 docker cp "$script_for_tmp_php_container" $cid:/tmp/script_for_php_container
-docker start $start_opts $cid
+docker start -a $cid
 rm "$script_for_tmp_php_container"
 cp -r docker-compose*.yml .docker "$app_dir"
 # restore the original composer files for use in the build container later
