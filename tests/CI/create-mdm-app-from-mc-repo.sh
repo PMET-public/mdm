@@ -2,6 +2,7 @@
 
 set -e
 [[ $debug ]] && set -x
+unset apps_resources_dir
 
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
@@ -17,13 +18,19 @@ if ! is_mac; then
   # invoke it emulating platypus app method
   export apps_resources_dir="$HOME/Downloads/$app_dir/Contents/Resources"
   run_bundled_app_as_script
-  run_bundled_app_as_script install_app
-  run_bundled_app_as_script start_mdm_shell
   env
-  echo "subprocesses: "; 
-  pgrep -aP $$ || :
-  echo "subprocesses #2: "; 
-  ps -o time,pid,ppid,cmd --forest -g -p $(pgrep -x bash)
+  docker-compose -v
+  echo "pwd"
+  pwd
+  docker stats --no-stream --no-trunc
+  free -m 
+  run_bundled_app_as_script install_app || :
+  docker ps -a
+  # run_bundled_app_as_script start_mdm_shell
+  # echo "subprocesses: ";
+  # pgrep -aP $$ || :
+  # echo "subprocesses #2: "; 
+  # ps -o time,pid,ppid,cmd --forest -g -p $(pgrep -x bash)
   docker-compose logs || :
   export_compose_file
   export_compose_project_name

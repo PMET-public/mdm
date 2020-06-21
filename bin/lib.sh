@@ -13,8 +13,6 @@ included_by_mdm() {
 
 [[ $debug ]] && ! included_by_mdm && set -x
 
-
-
 # iterate thru BASH_SOURCE to find this lib.sh (should work even when debugging in IDE)
 bs_len=${#BASH_SOURCE[@]}
 for (( index=0; index < bs_len; ((index++)) )); do
@@ -253,14 +251,7 @@ lookup_latest_remote_sem_ver() {
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local more_recent_of_two stat_cmd sort_cmd
-  if is_mac; then
-    stat_cmd=gstat
-    sort_cmd=gsort
-  else
-    stat_cmd=stat
-    sort_cmd=sort
-  fi
+  local more_recent_of_two
   if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
@@ -294,6 +285,14 @@ is_advanced_mode() {
 # start util functions
 #
 ###
+
+if is_mac; then
+  stat_cmd=gstat
+  sort_cmd=gsort
+else
+  stat_cmd=stat
+  sort_cmd=sort
+fi
 
 error() {
   printf "\n%b%s%b\n\n" "$red" "$*" "$no_color" 1>&2 && exit 1
@@ -435,8 +434,18 @@ download_and_link_latest_release() {
 }
 
 export_compose_project_name() {
-  export COMPOSE_PROJECT_NAME
+  # if already set, skip
+  [[ $COMPOSE_PROJECT_NAME ]] && return
+  # dashes must be stripped out prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
+  local docker_compose_ver more_recent_of_two
+  docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
+  more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | "$sort_cmd" -V | tail -1)"
   COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
+  if [[ $more_recent_of_two != $docker_compose_ver ]]; then
+    COMPOSE_PROJECT_NAME="$(echo $COMPOSE_PROJECT_NAME | perl -pe 's/-//g')"
+  fi
+  echo "COMPOSE_PROJECT_NAME $COMPOSE_PROJECT_NAME"
+  export COMPOSE_PROJECT_NAME
 }
 
 export_compose_file() {
@@ -573,6 +582,9 @@ init_app_specific_vars() {
     export_compose_project_name
     export_compose_file
     export_image_vars_for_override_yml
+    echo "docker-compose ps"
+    docker-compose ps
+    env
     [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
     env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
   fi
