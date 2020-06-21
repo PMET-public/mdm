@@ -5,7 +5,7 @@
 # icons from https://material.io/resources/icons/
 
 is_dark_mode() {
-  [[ "$(defaults read -g AppleInterfaceStyle 2> /dev/null)" == "Dark" ]]
+  is_mac && [[ "$(defaults read -g AppleInterfaceStyle 2> /dev/null)" == "Dark" ]]
 }
 
 icon_color=$(is_dark_mode && echo "white" || echo "black")
