@@ -1,3 +1,2 @@
-.DS_Store
-.ackrc
-auth.json
+.vagrant
+*-console.log
