@@ -76,6 +76,8 @@ create_fake_platypus_app() {
 
 create_bundled_app() {
   local name="$1" contents_dir="$2"
+  # if old app exists, remove it
+  [[ -d "$contents_dir.app" ]] && rm -rf "$contents_dir.app"
   if has_platypus; then
     create_platypus_app "$name" "$contents_dir"
   elif is_mac; then
