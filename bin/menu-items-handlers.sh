@@ -125,7 +125,8 @@ install_app() {
     open "https://$(get_host)"
   #) >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
-  show_mdm_logs >> "$handler_log_file" 2>&1 &
+  # skip showing logs in new terminal for CI
+  is_CI || show_mdm_logs >> "$handler_log_file" 2>&1 &
   # last b/c of blocking wait 
   # can't run in background b/c child process can't "wait" for sibling proces only descendant processes
   set_status_and_wait_for_exit $background_install_pid "Installing Magento ..."
