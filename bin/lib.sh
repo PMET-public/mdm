@@ -1,8 +1,11 @@
 #!/bin/bash
 set -e
-set -E # If set, the ERR trap is inherited by shell functions.
 
-trap 'error "Command $BASH_COMMAND on line $LINENO failed with exit code $?."' ERR
+# don't trap errors while using VSC debugger
+[[ $VSCODE_PID ]] || {
+  set -E # If set, the ERR trap is inherited by shell functions.
+  trap 'error "Command $BASH_COMMAND on line $LINENO failed with exit code $?."' ERR
+}
 
 # this lib is used by dockerize, mdm, tests, etc. but logging to STDOUT is problematic for platypus apps
 # so need a way to check and if appropiate, defer until lib can bootstrap the appropiate logging
