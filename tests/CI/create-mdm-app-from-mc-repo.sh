@@ -18,7 +18,7 @@ if ! is_mac; then
   # invoke it emulating platypus app method
   export apps_resources_dir="$HOME/Downloads/$app_dir/Contents/Resources"
   # run_bundled_app_as_script
-  install_app
+  ./bin/launcher install_app
   docker ps -a
   export_compose_file
   export_compose_project_name
