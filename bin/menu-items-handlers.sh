@@ -355,7 +355,7 @@ show_app_logs() {
 show_mdm_logs() {
   run_in_new_terminal
   cd "$apps_resources_dir" || exit
-  screen -c '$lib_dir/../.screenrc'
+  screen -c "$lib_dir/../.screenrc"
   # exit
 }
 
