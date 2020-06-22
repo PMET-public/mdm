@@ -303,6 +303,11 @@ is_existing_cloud_env && {
 tar -zcf "$app_dir/.composer.tar.gz" .composer
 # del tmp dir
 cd "$app_dir" || exit
-rm -rf "$tmp_app_dir"
+# current magento php image run as root, so root owns the files if not on mac
+if is_mac; then
+  rm -rf "$tmp_app_dir"
+else
+  sudo rm -rf "$tmp_app_dir"
+fi
 
 create_bundled_app "$subdomain" "$app_dir"
