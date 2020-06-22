@@ -281,13 +281,15 @@ app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml
   ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
     --mount type=bind,src=$HOME/.ssh/known_hosts,target=/app/.ssh/known_hosts"
 }
+composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
+docker pull "$composer_image"
 # TODO should --user be set or not?
 cid=$(docker create $ssh_auth_opts -v "$PWD:/app:delegated" \
   -e COMPOSER_AUTH -e COMPOSER_HOME=.composer \
   --user $(id -u):$(id -g) \
-  pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1 /tmp/script_for_php_container)
+  "$composer_image" /tmp/script_for_php_container)
 docker cp "$script_for_tmp_php_container" $cid:/tmp/script_for_php_container
-docker start -a $cid
+docker start -a "$cid"
 rm "$script_for_tmp_php_container"
 cp -r docker-compose*.yml .docker "$app_dir"
 # restore the original composer files for use in the build container later
