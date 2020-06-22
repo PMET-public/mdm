@@ -99,7 +99,7 @@
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "Dockerize PMET's magento-cloud master git branch",
+      "name": "Dockerize PMET's magento-cloud cur ref git branch",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/dockerize",
       "env": {
