@@ -368,6 +368,7 @@ run_in_new_terminal() {
     script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
     echo "#!/usr/bin/env bash -l
 export REPO_DIR=\"${REPO_DIR}\"
+export apps_resources_dir=\"$apps_resources_dir\"
 $lib_dir/launcher $caller
 " > "$script"
     chmod u+x "$script"
