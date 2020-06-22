@@ -539,15 +539,6 @@ handle_mdm_input() {
     }
   done
 
-# maybe allow direct calls independent of context? or bad idea b/c could create impossible scenarios?
-#   for value in "${testable_menu[@]}"; do
-#     [[ "$mdm_input" = "$value" ]] && {
-#       warning_w_newlines "$mdm_input NOT FOUND in current menu BUT is testable menu option. Running anyway ..."
-#       "$mdm_input"
-#       exit
-#     }
-#   done
-
   error "Handler for $mdm_input was not found or valid in this context."
 
 }
@@ -569,7 +560,7 @@ run_bundled_app_as_script() {
   if is_mac; then
     /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$apps_resources_dir/script $script_arg"
   else
-    /usr/bin/env bash -c "$apps_resources_dir/script $script_arg"
+    /usr/bin/env bash -c "debug=1; set -x; env; $apps_resources_dir/script $script_arg"
   fi
 }
 
@@ -582,9 +573,6 @@ init_app_specific_vars() {
     export_compose_project_name
     export_compose_file
     export_image_vars_for_override_yml
-    echo "docker-compose ps"
-    docker-compose ps
-    env
     [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
     env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
   fi

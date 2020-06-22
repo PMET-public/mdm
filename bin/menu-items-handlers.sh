@@ -95,8 +95,13 @@ install_app() {
     docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
     # 2 options to start build & deploy
     # option 1 relies on default cmds in image or set by docker-compose.override.yml file
+    echo "khb1"
     docker-compose up build
-    docker-compose up deploy
+    echo "khb2"
+    docker-compose up deploy || :
+    echo "khb3"
+    docker-compose logs deploy
+    echo "khb3"
     # option 2 creates containers (when *_1 already exist) but doesn't have reliance on default cmds
     # docker-compose run --rm build cloud-build
     # docker-compose run --rm deploy cloud-deploy
