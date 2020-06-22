@@ -99,6 +99,23 @@
     {
       "type": "bashdb",
       "request": "launch",
+      "name": "Dockerize PMET's magento-cloud master git branch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/dockerize",
+      "env": {
+        "debug": true,
+      },
+      "args": [
+        "-g", "git@github.com:PMET-public/magento-cloud.git",
+        "-b", "pmet-2.3.5-ref",
+        "-n", "app-from-repo-test",
+        "-a", "${env:HOME}/.composer/auth.json",
+        "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
+      ]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
       "name": "Dockerize from current ref git branch (manually update branch in this conf)",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/dockerize",
