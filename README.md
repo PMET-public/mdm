@@ -16,7 +16,7 @@ In your test vm, there's are just a few remaining setup steps.
 
 ```
 $ sudo apt update && sudo apt upgrade -y
-$ sudo apt install docker-compose -y
+$ sudo apt install docker-compose php -y
 $ sudo usermod -aG docker vagrant
 $ sudo shutdown -r now
 ```
