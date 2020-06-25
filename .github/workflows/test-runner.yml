@@ -7,6 +7,7 @@ env:
   # set a default terminal for various cmds that expect it
   TERM: xterm
   COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+  SLACK_WEBHOOK_URL_FOR_TMATE_FROM_GITHUB_WORKFLOW: ${{ secrets.SLACK_WEBHOOK_URL_FOR_TMATE_FROM_GITHUB_WORKFLOW }}
 
 jobs:
   run-CI-tests:
@@ -42,4 +43,4 @@ jobs:
           ./tests/CI/check-homebrew.sh
       - name: keepalive to debug
         if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v2
+        uses: PMET-public/action-tmate@v2.0.1
