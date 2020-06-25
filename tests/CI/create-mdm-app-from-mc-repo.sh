@@ -9,8 +9,7 @@ source ./bin/lib.sh
 
 if ! is_mac; then
   app_name="app-from-repo-test"
-  # ./bin/dockerize -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.3.5-ref -n "$app_name"
-  ./bin/dockerize -g https://github.com/magento/magento-cloud.git -b master -n "$app_name"
+  ./bin/dockerize -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.3.5-ref -n "$app_name"
   msg_w_newlines "$app_name successfully created."
   # find newly create app
   app_dir="$(find "$HOME/Downloads" -name "$app_name*.app" -type d)"
