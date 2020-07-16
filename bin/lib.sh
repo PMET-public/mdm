@@ -263,6 +263,10 @@ is_advanced_mode() {
   [[ -f "$advanced_mode_flag_file" ]]
 }
 
+is_hostname_curlable() {
+  ! curl -I "http://$1" 2>&1 | grep -q illegal
+}
+
 ###
 #
 # end test functions
@@ -347,6 +351,12 @@ ARE YOU SURE?! (y/n)
 # end util functions
 #
 ###
+
+normalize_hostname() {
+  # convert user supplied name to a curlable one if possible
+  curl -sv -I "http://$1" 2>&1 >/dev/null | \
+    perl -ne 's/to connect to\s+([^\s]+)// and print "$1"; s/.*host:\s*//i and print'
+}
 
 get_host() {
   [[ -f "$apps_resources_dir/app/docker-compose.yml" ]] &&

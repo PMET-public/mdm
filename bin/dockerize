@@ -22,8 +22,6 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
 app_icon_path="$lib_dir/../icons/magento.icns"
 status_menu_icon_path="$lib_dir/../icons/magento-logo.png"
-rand_subdomain_suffix="$(head /dev/urandom | LC_ALL=C tr -dc 'a-z' | head -c 4)"
-tld="the1umastory.com"
 
 # Platypus is the OSX app bundler https://github.com/sveinbjornt/Platypus
 has_platypus() {
@@ -120,7 +118,7 @@ while getopts "b:e:g:hsp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
     b ) branch="$OPTARG" ;;
     t ) tag="$OPTARG" ;;
     m ) media_cache=true ;;
-    n ) app_name="$OPTARG" ;;
+    n ) app_hostname="$OPTARG" ;;
     a ) auth_json_path="$OPTARG" ;;
     i ) app_icon_path="$OPTARG" ;;
     \? )
@@ -131,8 +129,14 @@ while getopts "b:e:g:hsp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
   esac
 done
 
+if [[ $app_hostname ]]; then
+  app_hostname="$(normalize_hostname "$app_hostname")"
+  is_hostname_curlable "$app_hostname" ||
+    error "Provided name must be a valid hostname accepted by web browsers."
+fi
+
 [[ $standalone ]] && {
-  create_bundled_app "${app_name:-MDM}" "$HOME/Downloads/${app_name:-MDM}"
+  create_bundled_app "${app_hostname:-MDM}" "$HOME/Downloads/${app_hostname:-MDM}"
   exit 0
 }
 
@@ -158,21 +162,23 @@ You must provide either:
 [[ -n "$auth_json_path" && ! -f "$auth_json_path" ]] && error "Composer auth file not found: $auth_json_path"
 [[ ! -f "$app_icon_path" ]] && error "App icon not found: $app_icon_path"
 
-# if an app_name is provided, use it. otherwise, determine one based on other input.
-[[ $app_name ]] || {
+# if an app_hostname is provided, use it. otherwise, determine one based on other input.
+[[ $app_hostname ]] || {
   if is_existing_cloud_env; then
     magento-cloud -q || error "The magento-cloud CLI was not found. To install, run
     curl -svLS https://accounts.magento.cloud/cli/installer | php"
-    app_name="$pid-$env"
+    app_hostname="$pid-$env"
   else
     is_valid_git_url "$git_url" || error "Please check your git url."
     git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/\1/')
-    app_name="$git_repo-$branch$tag"
+    app_hostname="$git_repo-$branch$tag"
   fi
+  is_hostname_curlable "$app_hostname" ||
+    error "Could not create valid hostname from user inputs. Please specify one with the '-n' option."
 }
 
 # clone and then remove unwanted files from the git repo
-tmp_app_dir="$HOME/Downloads/$app_name"
+tmp_app_dir="$HOME/Downloads/$app_hostname"
 rm -rf "$tmp_app_dir" || :
 if is_existing_cloud_env; then
   magento-cloud get -e "$env" --depth=0 "$pid" "$tmp_app_dir"
@@ -192,8 +198,6 @@ ee_version=$(
 app_dir="$tmp_app_dir-$ee_version"
 rm -rf "$app_dir" || :
 cp -a "$tmp_app_dir" "$app_dir"
-subdomain=$(echo "$app_name-$ee_version-$rand_subdomain_suffix" | perl -pe 's/\./-/g' | tr '[:upper:]' '[:lower:]')
-host="$subdomain.$tld"
 
 # if cloning existing env, download the media dir minus the cache
 # this will cause significant redundancy of images until can be deduped
@@ -270,7 +274,7 @@ perl -i -pe 's/magento\/magento-cloud-docker.git/pmet-public\/magento-cloud-dock
 grep -q 'pmet-public/magento-cloud-docker' composer.json ||
   composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
 composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
-./vendor/bin/ece-docker build:compose --host="$host"
+./vendor/bin/ece-docker build:compose --host="$app_hostname"
 EOF
 chmod +x "$script_for_tmp_php_container"
 
@@ -318,4 +322,4 @@ else
   sudo rm -rf "$tmp_app_dir"
 fi
 
-create_bundled_app "$subdomain" "$app_dir"
+create_bundled_app "$app_hostname" "$app_dir"
