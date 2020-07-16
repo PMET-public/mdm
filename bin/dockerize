@@ -227,18 +227,7 @@ is_existing_cloud_env && {
 
 }
 
-# use default cloud integration env database configuration, so ece-tools deploy will work the same for docker and cloud
-grep -q DATABASE_CONFIGURATION "$app_dir/.magento.env.yaml" || perl -i -pe "s/^  deploy:\s*$/  deploy:
-    DATABASE_CONFIGURATION:
-      connection:
-        default:
-          username: user
-          host: database.internal
-          dbname: main
-          password: ''
-/" "$app_dir/.magento.env.yaml"
-
-# goals of following composer operations:
+# goals of the following composer operations:
 # 1. create a compressed tar file of the composer cache needed to install the app so
 #   a. smaller, more manageable distributable
 #   b. fast install during build
@@ -305,6 +294,19 @@ mv composer.lock.bak composer.lock
 
 # remove auth.json from distributable dir if it exists
 rm "$app_dir/auth.json" 2> /dev/null || :
+
+# use default cloud integration env database configuration, so ece-tools deploy will work the same for docker and cloud
+grep -q DATABASE_CONFIGURATION "$app_dir/.magento.env.yaml" || perl -i -pe "s/^  deploy:\s*$/  deploy:
+    DATABASE_CONFIGURATION:
+      connection:
+        default:
+          username: user
+          host: database.internal
+          dbname: main
+          password: ''
+/" "$app_dir/.magento.env.yaml"
+
+
 # special case: assuming some existing installed packages already have catalog imagery from modules in pub/media, we can delete that media
 # this can significantly reduce composer archive size
 is_existing_cloud_env && {
