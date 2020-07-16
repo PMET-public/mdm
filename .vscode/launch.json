@@ -59,7 +59,7 @@
       "program": "${workspaceFolder}/bin/launcher",
       "env": {
         "debug": true,
-      "vsc_debugger_arg": "n/a",
+        "vsc_debugger_arg": "n/a",
         "REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir":
           "${env:HOME}/Downloads/ref-2.3.5-p1.app/Contents/Resources"
