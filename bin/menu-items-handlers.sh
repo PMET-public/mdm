@@ -406,13 +406,14 @@ start_pwa() {
       COMPOSE_PROJECT_NAME="mdm" \
       COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml" \
       CLOUD_MODE="$cloud_mode"
+      app_domain_name="$app_domain_name"
     docker-compose pull
     docker-compose rm -sfv storystore-pwa storystore-pwa-prev
     docker-compose up -d storystore-pwa storystore-pwa-prev
     ! is_nginx_rev_proxy_running && reload_rev_proxy
     local index=1
-    until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.the1umastory.com/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
-    open "https://pwa.the1umastory.com/$pwa_path"
+    until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.$app_domain_name/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
+    open "https://pwa.$app_domain_name/$pwa_path"
   } >> "$handler_log_file" 2>&1 &
   set_status_and_wait_for_exit $! "(Re)starting PWA"
 }

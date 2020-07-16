@@ -51,6 +51,7 @@ docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.j
 repo_url="https://github.com/PMET-public/mdm"
 advanced_mode_flag_file="$mdm_path/advanced_mode_on"
 mdm_ver_file="$mdm_path/latest-sem-ver"
+app_domain_name="storystore.dev"
 
 ###
 #
