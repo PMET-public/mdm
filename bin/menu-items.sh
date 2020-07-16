@@ -124,21 +124,21 @@ is_update_available && {
     fi
   }
 
-  is_advanced_mode && ! is_app_running && {
-    key="TODO Sync Magento app to remote env"
-    keys+=("$key")
-    menu["$key-handler"]=sync_app_to_remote
-    menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
-    menu["$key-disabled"]=true
-  }
+  # is_advanced_mode && ! is_app_running && {
+  #   key="TODO Sync Magento app to remote env"
+  #   keys+=("$key")
+  #   menu["$key-handler"]=sync_app_to_remote
+  #   menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
+  #   menu["$key-disabled"]=true
+  # }
 
-  is_advanced_mode && ! is_app_running && {
-    key="TODO Clone to new Magento app"
-    keys+=("$key")
-    menu["$key-handler"]=clone_app
-    menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
-    menu["$key-disabled"]=true
-  }
+  # is_advanced_mode && ! is_app_running && {
+  #   key="TODO Clone to new Magento app"
+  #   keys+=("$key")
+  #   menu["$key-handler"]=clone_app
+  #   menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
+  #   menu["$key-disabled"]=true
+  # }
 
   is_app_installed && {
     key="Uninstall this Magento app"
