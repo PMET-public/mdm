@@ -2,44 +2,33 @@
 
 # N.B. be wary of colliding (repeating) keys where one is a top level menu item and another is a submenu
 
-# icons from https://material.io/resources/icons/
-
-is_dark_mode() {
-  is_mac && [[ "$(defaults read -g AppleInterfaceStyle 2> /dev/null)" == "Dark" ]]
-}
-
-icon_color=$(is_dark_mode && echo "white" || echo "black")
-
 declare -A menu
 
 ! is_docker_installed && is_docker_compatible && {
-  key="Complete Docker installation by running for first time"
+  key="▶️ Complete Docker installation by running for first time"
   keys+=("$key")
   menu["$key-handler"]=start_docker
-  menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
   return 0
 }
 
 has_status_msg && {
   key="$(show_status)"
-  keys+=("$key")
-  menu["$key-handler"]=clear_status
   # if status is disabled (i.e. still running), no icon. otherwise, show completed check mark
-  [[ "$key" =~ ^DISABLED ]] || menu["$key-icon"]="ic_check_${icon_color}_48dp.png"
+  [[ "$key" =~ ^DISABLED ]] || key="✅ $key"
+  keys=("$key")
+  menu["$key-handler"]=clear_status
 }
 
 ! are_additional_tools_installed && {
-  key="Install additional tools for additional features"
+  key="🔼 Install additional tools for additional features"
   keys+=("$key")
   menu["$key-handler"]=install_additional_tools
-  menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
 }
 
 is_adobe_system && ! is_onedrive_linked && {
-  key="Setup OneDrive -> Click 'Sync' button"
+  key="🔄 Setup OneDrive -> Click 'Sync' button"
   keys+=("$key")
   menu["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/Shared%20Documents/adobe-internal/docker"
-  menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
 }
 
 is_docker_compatible && {
@@ -47,19 +36,17 @@ is_docker_compatible && {
   is_mac && {
 
     is_docker_suboptimal && {
-      key="Adjust Docker for minimum requirements"
+      key="🎚 Adjust Docker for minimum requirements"
       keys+=("$key")
       menu["$key-display-condition"]=""
       menu["$key-handler"]=optimize_docker
-      menu["$key-icon"]="baseline_speed_${icon_color}_48dp.png"
       return 0
     }
 
     ! is_docker_running && {
-      key="Start Docker to continue"
+      key="▶️ Start Docker to continue"
       keys+=("$key")
       menu["$key-handler"]=start_docker
-      menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
       return 0
     }
 
@@ -70,56 +57,47 @@ is_docker_compatible && {
 }
 
 is_update_available && {
-  key="Update MDM"
+  key="🔄 Update MDM"
   keys+=("$key")
   menu["$key-handler"]=update_mdm
-  menu["$key-icon"]="ic_system_update_alt_${icon_color}_48dp.png"
 }
 
 ! is_standalone && {
 
   ! is_app_installed && {
     if is_network_state_ok; then
-      key="Install & open Magento app in browser"
+      key="🔼 Install & open Magento app in browser"
       keys+=("$key")
       menu["$key-handler"]=install_app
-      menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
-      # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
     else
-      key="Can't install. Local ports in use."
+      key="⚠️🔼 Can't install. Local ports in use."
       keys+=("$key")
       menu["$key-handler"]=no_op
-      menu["$key-icon"]="ic_present_to_all_${icon_color}_48dp.png"
-      # menu["$key-icon"]="ic_publish_${icon_color}_48dp.png"
       menu["$key-disabled"]=true
     fi
   }
 
   is_app_running && is_network_state_ok && {
-    key="Open Magento app in browser"
+    key="🚀 Open Magento app in browser"
     keys+=("$key")
     menu["$key-handler"]=open_app
-    menu["$key-icon"]="ic_launch_${icon_color}_48dp.png"
   }
 
   is_app_installed && is_app_running && {
-    key="Stop Magento app"
+    key="🛑 Stop Magento app"
     keys+=("$key")
     menu["$key-handler"]=stop_app
-    menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
   }
 
   is_app_installed && ! is_app_running && {
     if is_network_state_ok; then
-      key="Restart Magento app"
+      key="▶️ Restart Magento app"
       keys+=("$key")
       menu["$key-handler"]=restart_app
-      menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
     else 
-      key="Can't restart Magento app. Local ports in use."
+      key="⚠️▶️ Can't restart Magento app. Local ports in use."
       keys+=("$key")
       menu["$key-handler"]=no_op
-      menu["$key-icon"]="ic_play_arrow_${icon_color}_48dp.png"
       menu["$key-disabled"]=true
     fi
   }
@@ -128,7 +106,6 @@ is_update_available && {
   #   key="TODO Sync Magento app to remote env"
   #   keys+=("$key")
   #   menu["$key-handler"]=sync_app_to_remote
-  #   menu["$key-icon"]="ic_sync_${icon_color}_48dp.png"
   #   menu["$key-disabled"]=true
   # }
 
@@ -136,15 +113,13 @@ is_update_available && {
   #   key="TODO Clone to new Magento app"
   #   keys+=("$key")
   #   menu["$key-handler"]=clone_app
-  #   menu["$key-icon"]="ic_content_copy_${icon_color}_48dp.png"
   #   menu["$key-disabled"]=true
   # }
 
   is_app_installed && {
-    key="Uninstall this Magento app"
+    key="🚨 Uninstall this Magento app"
     keys+=("$key")
     menu["$key-handler"]=uninstall_app
-    menu["$key-icon"]="ic_delete_${icon_color}_48dp.png"
   }
 
   ###
@@ -163,7 +138,7 @@ is_update_available && {
       menu["$key-handler"]=no_op
     }
 
-    key="Start shell in Magento app"
+    key="💻 Start shell in Magento app"
     keys+=("$key")
     menu["$key-handler"]=start_shell_in_app
 
@@ -211,6 +186,8 @@ is_update_available && {
     # keys+=("$key")
     # menu["$key-handler"]=switch_to_developer_mode
 
+    keys+=("end submenu")
+
   }
 
   ###
@@ -220,35 +197,33 @@ is_update_available && {
   ###
 
   is_advanced_mode && {
-    key="Start MDM shell"
+    key="💻 Start MDM shell"
     keys+=("$key")
     menu["$key-handler"]=start_mdm_shell
-    menu["$key-icon"]="ic_code_${icon_color}_48dp.png"
   }
 
   ! is_advanced_mode && {
-    key="Show MDM logs"
+    key="📝 Show MDM logs"
     keys+=("$key")
     menu["$key-handler"]=show_mdm_logs
-    menu["$key-icon"]="ic_subject_${icon_color}_48dp.png"
   }
 
   is_docker_compatible && are_other_magento_apps_running && {
-    key="Stop all other Magento apps"
+    key="🛑 Stop all other Magento apps"
     keys+=("$key")
     menu["$key-handler"]=stop_other_apps
-    menu["$key-icon"]="ic_stop_${icon_color}_48dp.png"
   }
 
 }
 
-###
-#
-# start PWA submenu
-#
-###
 
 if is_network_state_ok; then
+
+  ###
+  #
+  # start PWA submenu
+  #
+  ###
 
   key="PWA"
   keys+=("$key")
@@ -276,21 +251,22 @@ if is_network_state_ok; then
   keys+=("$key")
   menu["$key-link"]="https://github.com/PMET-public/storystore-pwa/blob/master/README.md"
 
+  keys+=("end submenu")
+
+  ###
+  #
+  # end PWA subemenu
+  #
+  ###
+
 else
 
-  key="Can't run PWA. Local ports in use."
+  key="⚠️ Can't run PWA. Local ports in use."
   keys+=("$key")
   menu["$key-handler"]=no_op
-  menu["$key-icon"]="ic_warning_${icon_color}_48dp.png"
   menu["$key-disabled"]=true
 
 fi
-
-###
-#
-# end PWA subemenu
-#
-###
 
 ###
 #
@@ -318,6 +294,8 @@ menu["$key-link"]="https://support.magento.com/hc/en-us/requests"
 # key=""
 # keys+=("$key")
 # menu["$key-link"]=""
+
+keys+=("end submenu")
 
 ###
 #
@@ -375,6 +353,8 @@ is_adobe_system && {
   menu["$key-link"]="https://fieldreadiness-adobe.highspot.com/spots/5cba1d07659e93677419f707"
 } || :
 
+keys+=("end submenu")
+
 ###
 #
 # end Useful resources submenu
@@ -403,6 +383,8 @@ is_advanced_mode && {
   key="Docker Reference"
   keys+=("$key")
   menu["$key-link"]="https://docs.docker.com/reference/"
+
+  keys+=("end submenu")
 
 }
 
@@ -436,6 +418,8 @@ is_advanced_mode && {
   key="Show docker-compose logs"
   keys+=("$key")
   menu["$key-handler"]=show_mdm_logs
+
+  keys+=("end submenu")
 
 }
 
@@ -496,6 +480,7 @@ is_advanced_mode && {
 
   }
 
+  keys+=("end submenu")
 
 }
 
@@ -506,15 +491,13 @@ is_advanced_mode && {
 ###
 
 if is_advanced_mode; then
-  key="Advanced mode is ON"
+  key="💡Advanced mode is ON"
   keys+=("$key")
   menu["$key-handler"]=toggle_advanced_mode
-  menu["$key-icon"]="outline_toggle_on_${icon_color}_48dp.png"
 else
-  key="Advanced mode is OFF"
+  key="○ Advanced mode is OFF"
   keys+=("$key")
   menu["$key-handler"]=toggle_advanced_mode
-  menu["$key-icon"]="outline_toggle_off_${icon_color}_48dp.png"
 fi
 
 : # need to return true or will exit when sourced with "-e" and last test = false

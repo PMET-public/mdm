@@ -489,16 +489,24 @@ get_docker_compose_runtime_services() {
     perl -pe 's/build|deploy|generic|tls//g'
 }
 
+# if come across entry with no handler or link, entering submenu
+# 
 render_platypus_status_menu() {
   local key key_length menu_output is_submenu
   key_length=${#keys[@]}
   menu_output=""
   is_submenu=false
-  # based on Platypus menu syntax, submenu headers can not have icons and they are not seletctable
-  # (so they shouldn't have handler or link entries)
-  # submenu items also can not have icons but need handlers
+  # based on Platypus menu syntax, submenu headers are not seletctable so no handler or link entry
+  # but actual submenu items need a handler or link entry
   for (( index=0; index < key_length; index++ )); do
     key="${keys[$index]}"
+    if [[ $key = "end submenu" ]]; then
+      $is_submenu && {
+        is_submenu=false
+        menu_output+=$'\n'
+        continue
+      }
+    fi
     # no handler or link? must be a submenu heading
     [[ -z "${menu["$key-handler"]}" && -z "${menu["$key-link"]}" ]] && {
       # if menu has some output already & if a submenu heading, was the last char a newline? if not, add one to start new submenu
@@ -507,19 +515,14 @@ render_platypus_status_menu() {
       is_submenu=true
       continue
     }
-    # icon? starting a new top level menu item
-    if [[ -n "${menu["$key-icon"]}" ]]; then
-      $is_submenu && {
-        is_submenu=false
-        menu_output+=$'\n'
-      }
-      [[ ${menu["$key-disabled"]} ]] && menu_output+="DISABLED|"
-      menu_output+="MENUITEMICON|$lib_dir/../icons/${menu["$key-icon"]}|$key"$'\n'
+    [[ ${menu["$key-disabled"]} ]] && menu_output+="DISABLED|"
     # status menu at top of menu case - needs newline
-    elif [[ "$key" =~ ^DISABLED && "$key" =~ ---$ ]]; then
+    if [[ "$key" =~ ^DISABLED && "$key" =~ ---$ ]]; then
       menu_output+="$key"$'\n'
     else
-      menu_output+="|$key"
+      $is_submenu && menu_output+="|"
+      menu_output+="$key"
+      $is_submenu || menu_output+=$'\n'
     fi
   done
   printf "%s" "$menu_output"
