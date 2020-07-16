@@ -241,12 +241,12 @@ lookup_latest_remote_sem_ver() {
 is_update_available() {
   # check for a new version once a day (86400 secs)
   local more_recent_of_two
-  if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
+  if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $($stat_cmd -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using gsort -V
-    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | "$sort_cmd" -V | tail -1)"
+    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | $sort_cmd -V | tail -1)"
     [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
@@ -279,9 +279,11 @@ if is_mac; then
   # use homebrew's core utils
   stat_cmd=gstat
   sort_cmd=gsort
+  date_cmd=gdate
 else
   stat_cmd=stat
   sort_cmd=sort
+  date_cmd=date
   # on linux, some services require a min virtual memory map count and may need to be raised
   # https://devdocs.magento.com/cloud/docker/docker-containers-service.html#troubleshooting
   [[ $(sysctl vm.max_map_count | perl -pe 's/.*=\s*//') -lt 262144 ]] && {
@@ -435,7 +437,7 @@ export_compose_project_name() {
   # dashes must be stripped out prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
   local docker_compose_ver more_recent_of_two
   docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
-  more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | "$sort_cmd" -V | tail -1)"
+  more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | $sort_cmd -V | tail -1)"
   COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
   if [[ $more_recent_of_two != $docker_compose_ver ]]; then
     COMPOSE_PROJECT_NAME="$(echo $COMPOSE_PROJECT_NAME | perl -pe 's/-//g')"
