@@ -204,9 +204,9 @@ are_other_magento_apps_running() {
 }
 
 invoked_mdm_without_args() {
-  # determining whether mdm was called without args to display the menu or invoke a selection is difficult.
+  # it can be difficult to determine whether mdm was called without args to display the menu or invoke a selected menu item.
   # bash5 on mac and bash4 on linux report BASH_ARGC differently. the vsc debugger wraps the call in other args.
-  # modify carefully.
+  # so modify this carefully.
   # for debugging, bash vscode debugger changes normal invocation, so check for a special var 
   if [[ "$vsc_debugger_arg" == "n/a" ]]; then
     return 0

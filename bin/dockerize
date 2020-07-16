@@ -16,7 +16,7 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 #   - req before compose cache bundling for catalog media dedup if from existing
 # 5. the composer cache
 # 6. the docker-compose conf
-#   - req after unique subdomain determined based on install source + version + random nonce
+#   - req after composer install
 # 7. the launching script to install or use MDM
 #
 
