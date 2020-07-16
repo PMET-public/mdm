@@ -63,6 +63,7 @@ create_platypus_app() {
   msg_w_newlines "Successfully created $contents_dir.app"
 }
 
+# currently used for testing
 create_fake_platypus_app() {
   local name="$1" contents_dir="$2"
   mkdir -p "$contents_dir.app/Contents/Resources"
@@ -100,11 +101,11 @@ Options:
   -g git url                Git repository to install from
   -b branch                 Git branch for install (HEAD commit of branch will be used)
   -t tag                    Git tag for install (not compatible with '-b')
-  -n name                   A descriptive name for the specific Magento app (e.g. autoparts-b2b or fashion-b2c)
+  -n name                   A descriptive, valid hostname for the specific Magento app (e.g. autoparts-b2b or fashion-b2c)
   -a /path/to/auth.json     Optional path to auth.json file if required by composer
   -i /path/to/file.icns     Optional path to icon for Platyplus OSX app bundle (Apple .icns file preferred)
   -m                        Include complete media cache (larger size and longer time to run but image resizing already done)
-  -s                        Stand-alone app - no included Magento app - used for testing, bare PWA frontend, etc.
+  -s                        Stand-alone app - no incl. Magento app - can be used for testing, PWA frontend, etc.
 "
 }
 
@@ -152,7 +153,7 @@ done
 You must provide either:
   1) a project & environment id
 - OR -
-  2) a git url plus a specific branch or tag
+  2) a git url & a specific branch or tag
 "
 [[ -n "$auth_json_path" && ! -f "$auth_json_path" ]] && error "Composer auth file not found: $auth_json_path"
 [[ ! -f "$app_icon_path" ]] && error "App icon not found: $app_icon_path"
@@ -247,7 +248,7 @@ cd "$tmp_app_dir" || exit
   cp "$auth_json_path" "$tmp_app_dir"
 [[ ! -f "auth.json" && ! $COMPOSER_AUTH ]] && 
   warning_w_newlines "No auth.json OR COMPOSER_AUTH env var file detected! 
-Composer may be rate-limited and/or unable to download required packages.
+Composer may be rate-limited and/or be unable to download required packages.
   " &&
   sleep 5
 # backup for later restore
@@ -272,8 +273,10 @@ composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi
 ./vendor/bin/ece-docker build:compose --host="$host"
 EOF
 chmod +x "$script_for_tmp_php_container"
+
 # get php version of app
 app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml)
+
 # if using ssh, set ssh options
 [[ $SSH_AUTH_SOCK ]] && {
   is_mac && SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
@@ -281,6 +284,7 @@ app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml
   ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
     --mount type=bind,src=$HOME/.ssh/known_hosts,target=/app/.ssh/known_hosts"
 }
+
 composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
 docker pull "$composer_image"
 cid=$(docker create $ssh_auth_opts -v "$PWD:/app:delegated" \
@@ -290,9 +294,11 @@ docker cp "$script_for_tmp_php_container" $cid:/tmp/script_for_php_container
 docker start -a "$cid"
 rm "$script_for_tmp_php_container"
 cp -r docker-compose*.yml .docker "$app_dir"
+
 # restore the original composer files for use in the build container later
 mv composer.json.bak composer.json
 mv composer.lock.bak composer.lock
+
 # remove auth.json from distributable dir if it exists
 rm "$app_dir/auth.json" 2> /dev/null || :
 # special case: assuming some existing installed packages already have catalog imagery from modules in pub/media, we can delete that media
@@ -301,8 +307,10 @@ is_existing_cloud_env && {
   find .composer -path "*/catalog/product/*.jpg" -delete || :
 }
 tar -zcf "$app_dir/.composer.tar.gz" .composer
+
 # del tmp dir
 cd "$app_dir" || exit
+
 # current magento php image run as root, so root owns the files if not on mac
 if is_mac; then
   rm -rf "$tmp_app_dir"

@@ -290,6 +290,7 @@ is_advanced_mode() {
 ###
 
 if is_mac; then
+  # use homebrew's core utils
   stat_cmd=gstat
   sort_cmd=gsort
 else
