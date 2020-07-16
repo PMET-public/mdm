@@ -147,11 +147,6 @@ is_onedrive_linked() {
     [[ -d "$HOME/Adobe/SITeam - docker" ]]
 }
 
-reload_rev_proxy() {
-  # shellcheck source=nginx-rev-proxy-setup.sh
-  source "$lib_dir/nginx-rev-proxy-setup.sh"
-}
-
 is_standalone() {
   [[ ! -d "$apps_resources_dir/app" ]]
 }
@@ -265,6 +260,14 @@ is_advanced_mode() {
 
 is_hostname_curlable() {
   ! curl -I "http://$1" 2>&1 | grep -q illegal
+}
+
+is_valid_git_url() {
+  [[ "$1" =~ http.*\.git ]] || [[ "$1" =~ git.*\.git ]]
+}
+
+is_existing_cloud_env() {
+  [[ $env_is_existing_cloud ]]
 }
 
 ###
@@ -428,6 +431,11 @@ restart_docker_and_wait() {
   while ! is_docker_ready; do
     sleep 2
   done
+}
+
+reload_rev_proxy() {
+  # shellcheck source=nginx-rev-proxy-setup.sh
+  source "$lib_dir/nginx-rev-proxy-setup.sh"
 }
 
 download_and_link_latest_release() {
