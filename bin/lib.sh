@@ -462,11 +462,12 @@ download_and_link_latest_release() {
 export_compose_project_name() {
   # if already set, skip
   [[ $COMPOSE_PROJECT_NAME ]] && return
-  # dashes must be stripped out prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
+  # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
   local docker_compose_ver more_recent_of_two
   docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
   more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | $sort_cmd -V | tail -1)"
   COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
+  # now strip dashes if 1.21.0 is more recent
   if [[ $more_recent_of_two != $docker_compose_ver ]]; then
     COMPOSE_PROJECT_NAME="$(echo $COMPOSE_PROJECT_NAME | perl -pe 's/-//g')"
   fi
