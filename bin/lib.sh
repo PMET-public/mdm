@@ -505,8 +505,7 @@ render_platypus_status_menu() {
   key_length=${#keys[@]}
   menu_output=""
   is_submenu=false
-  # based on Platypus menu syntax, submenu headers are not seletctable so no handler or link entry
-  # but actual submenu items need a handler or link entry
+  # based on Platypus menu syntax, submenu headers are not seletctable so no handler or link entry unlike actual submenu items
   for (( index=0; index < key_length; index++ )); do
     key="${keys[$index]}"
     if [[ $key = "end submenu" ]]; then
