@@ -375,10 +375,10 @@ stop_other_apps() {
     msg_w_timestamp "${FUNCNAME[0]}"
     compose_project_names="$(
       docker ps -f "label=com.docker.compose.service=db" --format="{{ .Names  }}" | \
-      perl -pe 's/_db_1$//' | \
-      grep -v "^${COMPOSE_PROJECT_NAME}\$"
+      perl -pe 's/_db_1$//'
     )"
     for name in $compose_project_names; do
+      [[ $name == "COMPOSE_PROJECT_NAME" ]] && continue
       # shellcheck disable=SC2046
       docker stop $(docker ps -q -f "name=^${name}_")
     done
