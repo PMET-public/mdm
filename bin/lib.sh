@@ -461,7 +461,6 @@ export_compose_project_name() {
   if [[ $more_recent_of_two != $docker_compose_ver ]]; then
     COMPOSE_PROJECT_NAME="$(echo $COMPOSE_PROJECT_NAME | perl -pe 's/-//g')"
   fi
-  echo "COMPOSE_PROJECT_NAME $COMPOSE_PROJECT_NAME"
   export COMPOSE_PROJECT_NAME
 }
 
@@ -565,12 +564,6 @@ handle_mdm_input() {
 
 ensure_mdm_log_files_exist() {
   touch "$menu_log_file" "$handler_log_file"
-}
-
-ensure_log_files_exist() {
-  [[ ! -f "$menu_log_file" || ! -f "$handler_log_file" ]] && {
-    touch "$menu_log_file" "$handler_log_file"
-  }
 }
 
 run_bundled_app_as_script() {
