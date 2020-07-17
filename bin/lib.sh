@@ -561,7 +561,7 @@ handle_mdm_input() {
   for value in "${menu[@]}"; do
     [[ "$mdm_input" = "$value" ]] && {
       export MDM_DIRECT_HANDLER_CALL=true
-      msg_w_newlines "$mdm_input found in current menu. Running ..."
+      # msg_w_newlines "$mdm_input found in current menu. Running ..."
       "$mdm_input"
       exit
     }
