@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e # stop on errors
-[[ $debug ]] && set -x
+[[ $debug_launcher ]] && set -x
 
 # understanding the Platypus UX:
 #
