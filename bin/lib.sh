@@ -152,12 +152,12 @@ is_onedrive_linked() {
     [[ -d "$HOME/Adobe/SITeam - docker" ]]
 }
 
-is_standalone() {
+is_detached() {
   [[ ! -d "$apps_resources_dir/app" ]]
 }
 
 is_app_installed() {
-  is_standalone && return 1
+  is_detached && return 1
   # grep once and store result in var
   [[ -n "$app_is_installed" ]] ||
     {
@@ -168,7 +168,7 @@ is_app_installed() {
 }
 
 is_app_running() {
-  is_standalone && return 1
+  is_detached && return 1
   # grep once and store result in var
   [[ -n "$app_is_running" ]] || {
     echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_db_1 Up"
@@ -587,8 +587,7 @@ run_bundled_app_as_script() {
 }
 
 init_app_specific_vars() {
-  if is_standalone; then
-    env_dir="$mdm_path/envs/standalone"
+  if is_detached; then
   else
     cd "$apps_resources_dir/app"
     # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
@@ -641,7 +640,7 @@ lib_sourced_for_specific_bundled_app && {
   ensure_mdm_log_files_exist
   init_app_specific_vars
   [[ $debug ]] && init_mdm_logging
-  ! is_standalone && init_quit_detection
+  ! is_detached && init_quit_detection
 }
 
 : # need to return true or will exit when sourced with "-e" and last test = false

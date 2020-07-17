@@ -62,7 +62,7 @@ is_update_available && {
   menu["$key-handler"]=update_mdm
 }
 
-! is_standalone && {
+! is_detached && {
 
   ! is_app_installed && {
     if is_network_state_ok; then
@@ -230,7 +230,7 @@ if is_network_state_ok; then
 
   is_docker_compatible && {
 
-    ! is_standalone && {
+    ! is_detached && {
       if is_app_running; then
         key="(Re)start latest PWA using this Magento app"
       else
