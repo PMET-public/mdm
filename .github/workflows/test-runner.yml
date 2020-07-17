@@ -32,9 +32,9 @@ jobs:
       - name: docker tests
         run: |
           ./tests/CI/docker-menu-selections.sh
-      - name: create standalone mdm
+      - name: create detached mdm
         run: |
-          ./tests/CI/create-standalone-mdm.sh
+          ./tests/CI/create-detached-mdm.sh
       - name: create mdm app from mc repo
         run: |
           ./tests/CI/create-mdm-app-from-mc-repo.sh

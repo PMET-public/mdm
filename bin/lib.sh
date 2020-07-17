@@ -588,6 +588,7 @@ run_bundled_app_as_script() {
 
 init_app_specific_vars() {
   if is_detached; then
+    env_dir="$launched_apps_dir/standalone"
   else
     cd "$apps_resources_dir/app"
     # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined

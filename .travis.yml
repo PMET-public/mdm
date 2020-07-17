@@ -17,6 +17,6 @@ install:
 script:
   - "./tests/CI/non-docker-menu-selections.sh"
   - "./tests/CI/docker-menu-selections.sh"
-  - "./tests/CI/create-standalone-mdm.sh"
+  - "./tests/CI/create-detached-mdm.sh"
   - "./tests/CI/create-mdm-app-from-mc-repo.sh"
   - "./tests/CI/check-homebrew.sh"

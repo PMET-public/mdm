@@ -90,15 +90,15 @@ Options:
   -a /path/to/auth.json     Optional path to auth.json file if required by composer
   -i /path/to/file.icns     Optional path to icon for Platyplus OSX app bundle (Apple .icns file preferred)
   -m                        Include complete media cache (larger size and longer time to run but image resizing already done)
-  -s                        Stand-alone app - no incl. Magento app - can be used for testing, PWA frontend, etc.
+  -d                        Detached app - no incl. Magento app - can be used for testing, PWA frontend, etc.
 "
 }
 
 # parse options
-while getopts "b:e:g:hsp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
+while getopts "b:e:g:hdp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
   case "$opt" in
     h ) print_usage; exit 0 ;;
-    s ) standalone=true ;;
+    d ) detached=true ;;
     p ) pid="$OPTARG" ;;
     e ) env="$OPTARG" ;;
     g ) git_url="$OPTARG" ;;
@@ -122,7 +122,7 @@ if [[ $app_hostname ]]; then
     error "Provided name must be a valid hostname accepted by web browsers."
 fi
 
-[[ $standalone ]] && {
+[[ $detached ]] && {
   create_bundled_app "${app_hostname:-MDM}" "$HOME/Downloads/${app_hostname:-MDM}"
   exit 0
 }

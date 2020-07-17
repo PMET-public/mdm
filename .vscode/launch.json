@@ -69,14 +69,14 @@
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "Dockerize standalone MDM",
+      "name": "Dockerize detached MDM",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/dockerize",
       "env": {
         "debug": true,
       },
       "args": [
-        "-s"
+        "-d"
       ]
     },
     {
