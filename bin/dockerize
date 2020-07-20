@@ -124,7 +124,7 @@ if [[ $app_hostname ]]; then
 fi
 
 [[ $detached ]] && {
-  create_bundled_app "${app_hostname:-MDM}" "$HOME/Downloads/${app_hostname:-MDM}"
+  create_bundled_app "$detached_project_name" "$HOME/Downloads/$detached_project_name"
   exit 0
 }
 

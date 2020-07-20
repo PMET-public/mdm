@@ -403,7 +403,7 @@ start_pwa() {
   cloud_mode="$3"
   {
     export MAGENTO_URL="$magento_url" \
-      COMPOSE_PROJECT_NAME="mdm" \
+      COMPOSE_PROJECT_NAME="detached-mdm" \
       COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml" \
       CLOUD_MODE="$cloud_mode"
       app_domain_name="$app_domain_name"
