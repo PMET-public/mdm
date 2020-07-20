@@ -223,7 +223,7 @@ invoked_mdm_without_args() {
 
 # need way to distinguish being sourced for specific app or sourced for some other script (e.g. dockerize script)
 lib_sourced_for_specific_bundled_app() {
-  # if a specific apps_resources_dir is already set in env, then for lib was sourced for a specific app
+  # if a specific apps_resources_dir is already set in the env, then lib was sourced for a specific app
   if [[ $apps_resources_dir ]]; then
     # check that the dir was properly specified
     [[ ! -d $apps_resources_dir ]] && error "Exiting because $apps_resources_dir does not exist."

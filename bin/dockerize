@@ -87,6 +87,7 @@ Options:
   -b branch                 Git branch for install (HEAD commit of branch will be used)
   -t tag                    Git tag for install (not compatible with '-b')
   -n name                   A descriptive, valid hostname for the specific Magento app (e.g. autoparts-b2b or fashion-b2c)
+                            (ignored for detached app)
   -a /path/to/auth.json     Optional path to auth.json file if required by composer
   -i /path/to/file.icns     Optional path to icon for Platyplus OSX app bundle (Apple .icns file preferred)
   -m                        Include complete media cache (larger size and longer time to run but image resizing already done)
