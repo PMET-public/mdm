@@ -309,7 +309,7 @@ else
 fi
 
 error() {
-  printf "\n%b%s%b\n\n" "$red" "$*" "$no_color" 1>&2 && exit 1
+  printf "\n[%s] %b%s%b\n\n" "$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")" "$red" "Error: $*" "$no_color" 1>&2 && exit 1
 }
 
 warning() {
