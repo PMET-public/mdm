@@ -87,11 +87,11 @@ Options:
   -b branch                 Git branch for install (HEAD commit of branch will be used)
   -t tag                    Git tag for install (not compatible with '-b')
   -n name                   A descriptive, valid hostname for the specific Magento app (e.g. autoparts-b2b or fashion-b2c)
-                            (ignored for detached app)
+                            (invalid with detached app)
   -a /path/to/auth.json     Optional path to auth.json file if required by composer
   -i /path/to/file.icns     Optional path to icon for Platyplus OSX app bundle (Apple .icns file preferred)
   -m                        Include complete media cache (larger size and longer time to run but image resizing already done)
-  -d                        Detached app - no incl. Magento app - can be used for testing, PWA frontend, etc.
+  -d                        Detached app - no incl. Magento app - can be used for testing, our demo PWA frontend, etc.
 "
 }
 
@@ -117,15 +117,18 @@ while getopts "b:e:g:hdp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
   esac
 done
 
-if [[ $app_hostname ]]; then
-  app_hostname="$(normalize_hostname "$app_hostname")"
-  is_hostname_curlable "$app_hostname" ||
-    error "Provided name must be a valid hostname accepted by web browsers."
-fi
+[[ $detached && $app_hostname ]] && 
+  error "Name provided for magento app, but detached app also selected. Incompatible selection."
 
 [[ $detached ]] && {
   create_bundled_app "$detached_project_name" "$HOME/Downloads/$detached_project_name"
   exit 0
+}
+
+[[ $app_hostname ]] && {
+  app_hostname="$(normalize_hostname "$app_hostname")"
+  is_hostname_curlable "$app_hostname" ||
+    error "Provided name must be a valid hostname accepted by web browsers."
 }
 
 # additional error checking
