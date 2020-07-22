@@ -405,6 +405,10 @@ is_advanced_mode && {
   key="Logs"
   keys+=("$key")
 
+  key="Show errors from MDM logs"
+  keys+=("$key")
+  menu["$key-handler"]=show_errors_from_mdm_logs
+
   key="Show advanced MDM logs"
   keys+=("$key")
   menu["$key-handler"]=show_mdm_logs

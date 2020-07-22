@@ -352,6 +352,12 @@ show_app_logs() {
   :
 }
 
+show_errors_from_mdm_logs() {
+  run_in_new_terminal
+  # prefix output with spaces so the output won't match itself (and duplicate errors in output)
+  perl -ne '/^\[.*\].*error:/i and print "  $_"' "$handler_log_file"
+}
+
 show_mdm_logs() {
   run_in_new_terminal
   cd "$apps_resources_dir" || exit
