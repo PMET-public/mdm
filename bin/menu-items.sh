@@ -11,12 +11,11 @@ declare -A menu
   return 0
 }
 
-has_status_msg && {
-  key="$(show_status)"
-  # if status is disabled (i.e. still running), no icon. otherwise, show completed check mark
-  [[ "$key" =~ ^DISABLED ]] || key="✅ $key"
-  keys=("$key")
-  menu["$key-handler"]=clear_status
+has_uncleared_jobs_statuses && {
+  while read -r key; do
+    keys+=("$key")
+    menu["$key-handler"]=clear_job_statuses
+  done < <(get_job_statuses)
 }
 
 ! are_additional_tools_installed && {

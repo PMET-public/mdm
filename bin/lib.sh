@@ -69,8 +69,8 @@ detached_project_name="detached-mdm"
 #
 ###
 
-has_status_msg() {
-  [[ -f "$status_msg_file" ]]
+has_uncleared_jobs_statuses() {
+  [[ "$(find "$apps_mdm_dir/jobs" -type f -not -name "*.cleared" -print -quit)" ]]
 }
 
 is_magento_cloud_cli_installed() {
@@ -407,20 +407,29 @@ detect_quit_and_stop_app() {
   stop_app
 }
 
-set_status_and_wait_for_exit() {
-  local pid_to_wait_for status start exit_status_msg
+# background jobs invoked by a menu selection are tracked to relay info about their progress to the user.
+# the tracked info includes:
+# - the PID
+# - a msg
+# - the start and end timestamp
+# - current state: running or done
+# - result state: success or error
+# - UI state: ongoing, done, seen, or cleared
+#
+# this complexity could make it a candidate for a sqlite db but we'll defer that implementation for now
+# and just capture the info using the filesytem
+# the intial file will be DATE_STARTED.PID and
+# will become DATE_STARTED.PID.DATE_ENDED.EXIT_CODE.UI_STATE where UI_STATE is "new"
+# the UI_STATE can be updated to "seen" for errors and then "cleared" when clicked in the UI
+# successes aren't worth tracking so after displaying once "new" -> "cleared"
+track_job_status_and_wait_for_exit() {
+  local pid_to_wait_for msg job_file
   pid_to_wait_for="$1"
-  status="$2"
-  start="$(date +%s)"
-  # using some UTF icon characters for status but not the rest of the menu (didn't like available options)
-  echo "DISABLED|⏳ Please wait. $status" > "$status_msg_file"
-  if wait "$pid_to_wait_for"; then
-    exit_status_msg+="✅ Success. $status "
-  else
-    exit_status_msg+="❗Error! $status "
-  fi
-  exit_status_msg+="$(convert_secs_to_hms "$(seconds_since "$start")")"
-  printf "%s" "$exit_status_msg" > "$status_msg_file"
+  msg="$2"
+  job_file="$apps_mdm_dir/jobs/$($date_cmd +%s).$pid_to_wait_for"
+  echo "$msg" > "$job_file"
+  wait "$pid_to_wait_for" || exit_code=$?
+  mv "$job_file" "$job_file.$($date_cmd +%s).$exit_code.done"
 }
 
 extract_tar_to_docker() {

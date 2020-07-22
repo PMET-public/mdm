@@ -5,20 +5,59 @@
 #   2. requires user interaction (including long term monitoring of output), run in terminal
 #   3. should be completed in the background, run as child process and set non-blocking status
 
-clear_status() {
-  rm "$status_msg_file"
+# jobs will either be ongoing (no file extention), done (.done), seen but not cleared (.seen), or .cleared (.cleared)
+# when user selects a job status msg, clear all seen
+# if one of the cleared was an error, pop up a terminal with what that error was
+clear_job_statuses() {
+  local job_file job_msg job_start job_pid job_end job_exit_code job_ui_state unseen_error_msgs=""
+  pushd "$apps_mdm_dir/jobs" > /dev/null || return
+  for job_file in $(find * -type f -not -name "*.cleared"); do
+    mv "$job_file" "${job_file/%seen/cleared}"
+    [[ "$job_exit_code" != "0" ]] && unseen_error_msgs="true"
+  done
+  [[ $unseen_error_msgs ]] && {
+    show_errors_from_mdm_logs
+  }
+  popd > /dev/null || return
 }
 
-show_status() {
-  local status
-  status="$(<"$status_msg_file")"
-  # if status already has time, process completed
-  if [[ "$status" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]]; then
-    echo "$status"
-  else
-    echo "$status $(convert_secs_to_hms "$(( $(date +%s) - $(stat -f%c "$status_msg_file") ))")"
-  fi
+# get all non cleared jobs
+# display an icon to represent running, successful, or failed jobs
+# mark done jobs as seen
+# calculate the run time for each job
+get_job_statuses() {
+  local job_file job_msg job_start job_pid job_end job_exit_code job_ui_state
+  pushd "$apps_mdm_dir/jobs" > /dev/null || return
+  for job_file in $(find * -type f -not -name "*.cleared"); do
+    read -r job_start job_pid job_end job_exit_code job_ui_state <<<"$(echo "$job_file" | tr '.' ' ')"
+    job_msg="$(<"$job_file")"
+    case "$job_ui_state" in
+      done)
+        mv "$job_file" "${job_file/%done/seen}"
+        ;;
+      seen)
+        duration="$(convert_secs_to_hms "$(( $job_end - $job_start ))")"
+        ;;
+      "")
+        prefix="DISABLED|⏳ "
+        duration="$(convert_secs_to_hms "$(( $($date_cmd +%s) - $job_start ))")"
+        ;;
+    esac
+    if [[ "$job_ui_state" = "done" || "$job_ui_state" = "seen" ]]; then
+      duration="$(convert_secs_to_hms "$(( $job_end - $job_start ))")"
+      if [[ "$job_exit_code" = "0" ]]; then
+        prefix="✅ Success."
+      else
+        prefix="❗Error!"
+      fi
+    else
+      prefix="DISABLED|⏳"
+      duration="$(convert_secs_to_hms "$(( $($date_cmd +%s) - $job_start ))")"
+    fi
+    echo "$prefix $job_msg $duration"
+  done
   echo "---------"
+  popd > /dev/null || return
 }
 
 install_additional_tools() {
@@ -62,7 +101,7 @@ optimize_docker() {
     perl -i -pe "s/(\"analyticsEnabled\"\s*:\s*).*/\${1}false,/" "$docker_settings_file"
     restart_docker_and_wait
   } >> "$handler_log_file" 2>&1 &
-  set_status_and_wait_for_exit $! "Optimizing Docker VM ..."
+  track_job_status_and_wait_for_exit $! "Optimizing Docker VM ..."
 }
 
 start_docker() {
@@ -70,7 +109,7 @@ start_docker() {
     msg_w_timestamp "${FUNCNAME[0]}"
     restart_docker_and_wait
   } >> "$handler_log_file" 2>&1 &
-  set_status_and_wait_for_exit $! "Starting Docker VM ..."
+  track_job_status_and_wait_for_exit $! "Starting Docker VM ..."
 }
 
 update_mdm() {
@@ -134,7 +173,7 @@ install_app() {
   is_CI || show_mdm_logs >> "$handler_log_file" 2>&1 &
   # last b/c of blocking wait 
   # can't run in background b/c child process can't "wait" for sibling proces only descendant processes
-  set_status_and_wait_for_exit $background_install_pid "Installing Magento ..."
+  track_job_status_and_wait_for_exit $background_install_pid "Installing Magento ..."
 }
 
 open_app() {
@@ -148,7 +187,7 @@ stop_app() {
   } >> "$handler_log_file" 2>&1 &
   # if stopped indirectly (by quitting the app), don't bother to set the status and wait
   invoked_mdm_without_args ||
-    set_status_and_wait_for_exit $! "Stopping Magento ..."
+    track_job_status_and_wait_for_exit $! "Stopping Magento ..."
 }
 
 restart_app() {
@@ -161,7 +200,7 @@ restart_app() {
     docker-compose run --rm deploy magento-command cache:clean config_webservice
     open "https://$(get_host)"
   } >> "$handler_log_file" 2>&1 &
-  set_status_and_wait_for_exit $! "Starting Magento ..."
+  track_job_status_and_wait_for_exit $! "Starting Magento ..."
 }
 
 sync_app_to_remote() {
@@ -389,7 +428,7 @@ stop_other_apps() {
       docker stop $(docker ps -q -f "name=^${name}_")
     done
   } >> "$handler_log_file" 2>&1 &
-  set_status_and_wait_for_exit $! "Stopping other apps ..."
+  track_job_status_and_wait_for_exit $! "Stopping other apps ..."
 }
 
 
@@ -421,7 +460,7 @@ start_pwa() {
     until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa.$app_domain_name/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
     open "https://pwa.$app_domain_name/$pwa_path"
   } >> "$handler_log_file" 2>&1 &
-  set_status_and_wait_for_exit $! "(Re)starting PWA"
+  track_job_status_and_wait_for_exit $! "(Re)starting PWA"
 }
 
 
