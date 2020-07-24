@@ -280,6 +280,7 @@ is_existing_cloud_env() {
   [[ $env_is_existing_cloud ]]
 }
 
+}
 ###
 #
 # end test functions
