@@ -280,7 +280,19 @@ is_existing_cloud_env() {
   [[ $env_is_existing_cloud ]]
 }
 
+is_hostname_resolving_to_local() {
+  curl -vI "$1" 2>&1 | grep -q 127.0.0.1
 }
+
+is_interactive() {
+  [[ $- == *i* ]]
+}
+
+is_running_as_sudo() {
+  env | grep -q 'SUDO_USER='
+}
+
+
 ###
 #
 # end test functions
