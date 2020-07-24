@@ -308,7 +308,7 @@ tar -zcf "$app_dir/.composer.tar.gz" .composer
 # del tmp dir
 cd "$app_dir" || exit
 
-# current magento php image run as root, so root owns the files if not on mac
+# current magento php image run as root, so root owns the files if not using docker desktop for mac
 if is_mac; then
   rm -rf "$tmp_app_dir"
 else

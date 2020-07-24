@@ -61,7 +61,7 @@ get_job_statuses() {
 }
 
 install_additional_tools() {
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
 
   is_magento_cloud_cli_installed || {
     msg_w_newlines "Installing magento-cloud CLI ..."
@@ -224,7 +224,7 @@ revert_to_prev_mdm() {
     find . -type d -maxdepth 1 |
     perl -ne 's/.*\/// and /^[0-9.]+$/ and print' |
     grep -v '^0\.0\.' |
-    gsort -rV |
+    $sort_cmd -rV |
     xargs
   )"
   prev=$(echo "${vers/* $current / }" | perl -pe 's/.*?\b([0-9.]+).*/$1/')
@@ -245,7 +245,7 @@ toggle_mdm_debug_mode() {
 }
 
 rm_magento_docker_images() {
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   warning_w_newlines "This will delete all Magento images to force the download of the latest versions. 
 If a Magento app is stopped, it will NOT be preserved."
   confirm_or_exit
@@ -257,7 +257,7 @@ If a Magento app is stopped, it will NOT be preserved."
 }
 
 reset_docker() {
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   warning_w_newlines "This will delete all docker containers, volumes, and networks.
 Docker images will be preserved to avoid downloading all images from scratch."
   confirm_or_exit
@@ -278,7 +278,7 @@ Docker images will be preserved to avoid downloading all images from scratch."
 }
 
 wipe_docker() {
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   warning_w_newlines "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
   confirm_or_exit
   reset_docker
@@ -297,13 +297,13 @@ no_op() {
 }
 
 start_shell_in_app() {
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   cd "$apps_resources_dir/app" || exit
   docker-compose run --rm deploy bash
 }
 
 run_as_bash_cmds_in_app() {
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   cd "$apps_resources_dir/app" || exit
   echo 'Running in Magento app:'
   msg '
@@ -339,7 +339,7 @@ flush_cache() {
 warm_cache() {
   # compare to chrome extenstion function (keep the funcs synced)
   domain=$(get_host)
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   set -x
   domain=$domain
   url="https://$domain"
@@ -373,7 +373,7 @@ start_mdm_shell() {
   else
     services_status="$(warning_w_newlines "Magento app not installed yet.")"
   fi
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   cd "$apps_resources_dir/app" || exit
   msg Running $COMPOSE_PROJECT_NAME from $(pwd)
   echo -e "\\n\\n$services_status"
@@ -392,13 +392,13 @@ show_app_logs() {
 }
 
 show_errors_from_mdm_logs() {
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   # prefix output with spaces so the output won't match itself (and duplicate errors in output)
   perl -ne '/^\[.*\].*error:/i and print "  $_"' "$handler_log_file"
 }
 
 show_mdm_logs() {
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   cd "$apps_resources_dir" || exit
   screen -c "$lib_dir/../.screenrc"
   # exit
@@ -406,7 +406,7 @@ show_mdm_logs() {
 
 uninstall_app() {
   msg_w_timestamp "${FUNCNAME[0]}"
-  run_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal
   exec > >(tee -ia "$handler_log_file")
   exec 2> >(tee -ia "$handler_log_file" >&2)
   warning_w_newlines "THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!"

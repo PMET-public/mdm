@@ -246,11 +246,11 @@ lookup_latest_remote_sem_ver() {
 is_update_available() {
   # check for a new version once a day (86400 secs)
   local more_recent_of_two
-  if [[ -f "$mdm_ver_file" && "$(( $(date +%s) - $($stat_cmd -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
+  if [[ -f "$mdm_ver_file" && "$(( $($date_cmd +%s) - $($stat_cmd -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
-    # verify latest is more recent using gsort -V
+    # verify latest is more recent using sort -V
     more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | $sort_cmd -V | tail -1)"
     [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
   else
@@ -333,7 +333,7 @@ $*
 }
 
 msg_w_timestamp() {
-  msg "[$(date -u +%FT%TZ)] $*"
+  msg "[$($date_cmd -u +%FT%TZ)] $*"
 }
 
 convert_secs_to_hms() {
@@ -344,7 +344,7 @@ convert_secs_to_hms() {
 }
 
 seconds_since() {
-  echo "$(( $(date +%s) - $1 ))"
+  echo "$(( $($date_cmd +%s) - $1 ))"
 }
 
 confirm_or_exit() {
@@ -377,11 +377,12 @@ get_host() {
     error "Host not found"
 }
 
-# this function will invoke the caller in a new terminal if it was not already directly called
-run_in_new_terminal() {
+# this function enables menu item handlers to be run in a new interactive terminal
+# it also allows a menu item to invoke another similar to a user selecting a menu option themself (via the launcher)
+run_this_menu_item_handler_in_new_terminal() {
   local caller script
   [[ ! $MDM_DIRECT_HANDLER_CALL ]] && {
-    caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_in_new_terminal //; s/ .*//')"
+    caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_this_menu_item_handler_in_new_terminal //; s/ .*//')"
     script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
     echo "#!/usr/bin/env bash -l
 export REPO_DIR=\"${REPO_DIR}\"
