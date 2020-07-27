@@ -270,18 +270,19 @@ If a Magento app is stopped, it will NOT be preserved."
 
 reset_docker() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local container_ids volume_ids
     warning_w_newlines "This will delete all docker containers, volumes, and networks.
   Docker images will be preserved to avoid downloading all images from scratch."
     confirm_or_exit
     # remove containers
     container_ids="$(docker ps -qa)"
-    [[ $container_ids ]] && {
+    [[ "$container_ids" ]] && {
       docker stop $container_ids
       docker rm -fv $container_ids
     }
     # remove volumes
     volume_ids="$(docker volume ls -q)"
-    [[ $volume_ids ]] && {
+    [[ "$volume_ids" ]] && {
       docker volume rm -f $volume_ids
     }
     # remove networks
@@ -355,6 +356,7 @@ flush_cache() {
 # compare to chrome extenstion function (keep the funcs synced)
 warm_cache() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local domain tmp_file
     domain=$(get_host)
     set -x
     domain=$domain
