@@ -619,7 +619,13 @@ handle_mdm_input() {
     exit
   }
 
-  # not a handler or a link key? look for direct call (useful for testing)
+  # direct invocations of the launcher with currently valid, single menu item handlers are allowed 
+  # to facilitate testing (e.g. ./launcher some_menu_item_handler_function_name)
+  # N.B. a menu item is not "valid" if it does not appear in the current menu items 
+  # (so don't test options that wouldn't be available (invalid))
+  #
+  # an env var is exported to mark these calls in case changes in the handler behavior are appropiate for these calls
+  # (e.g. it's not appropiate to launch a new interactive OSX terminal)
   for value in "${menu[@]}"; do
     [[ "$mdm_input" = "$value" ]] && {
       export MDM_DIRECT_HANDLER_CALL=true
