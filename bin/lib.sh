@@ -307,13 +307,13 @@ is_running_as_sudo() {
 
 if is_mac; then
   # use homebrew's core utils
-  stat_cmd=gstat
-  sort_cmd=gsort
-  date_cmd=gdate
+  stat_cmd="gstat"
+  sort_cmd="gsort"
+  date_cmd="gdate"
 else
-  stat_cmd=stat
-  sort_cmd=sort
-  date_cmd=date
+  stat_cmd="stat"
+  sort_cmd="sort"
+  date_cmd="date"
   # on linux, some services require a min virtual memory map count and may need to be raised
   # https://devdocs.magento.com/cloud/docker/docker-containers-service.html#troubleshooting
   [[ $(sysctl vm.max_map_count | perl -pe 's/.*=\s*//') -lt 262144 ]] && {
