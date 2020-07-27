@@ -85,10 +85,15 @@ is_platypus_installed() {
   [[ -n "$(which platypus)" ]]
 }
 
+is_mkcert_installed() {
+  [[ -n "$(which mkcert)" ]]
+}
+
 are_additional_tools_installed() {
   is_mac && is_magento_cloud_cli_installed || return
   is_docker_compatible && is_docker_bash_completion_installed || return
   is_mac && is_platypus_installed || return
+  is_mkcert_installed || return
 }
 
 can_optimize_vm_cpus() {
@@ -292,6 +297,10 @@ is_running_as_sudo() {
   env | grep -q 'SUDO_USER='
 }
 
+is_mkcert_CA_installed() {
+  is_mkcert_installed && 
+    [[ ! "$(mkcert 2>&1)" =~ verification ]] # if "verification" matches output. then mkcert CA is NOT installed
+}
 
 ###
 #
