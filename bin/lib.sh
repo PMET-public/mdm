@@ -496,31 +496,56 @@ download_and_link_latest_release() {
   ln -sf "$latest_release_ver" current
 }
 
-export_compose_project_name() {
-  # if already set, skip
-  [[ $COMPOSE_PROJECT_NAME ]] && return
-  # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
+# "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
+adjust_compose_project_name_for_docker_compose_version() {
   local docker_compose_ver more_recent_of_two
   docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
   more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | $sort_cmd -V | tail -1)"
-  COMPOSE_PROJECT_NAME="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
   # now strip dashes if 1.21.0 is more recent
   if [[ $more_recent_of_two != $docker_compose_ver ]]; then
-    COMPOSE_PROJECT_NAME="$(echo $COMPOSE_PROJECT_NAME | perl -pe 's/-//g')"
+    echo $1 | perl -pe 's/-//g'
+  else
+    echo $1
+  fi
+}
+
+get_compose_project_name() {
+  local cpn_file="$apps_resources_dir/app/COMPOSE_PROJECT_NAME" name
+  # return previously written compose project name
+  [[ -f "$cpn_file" ]] && cat "$cpn_file" && return
+  # else create a unique one & write it to file
+  name="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
+  name+="-$(head /dev/urandom | LC_ALL=C tr -dc 'a-z' | head -c 4)"
+  name="$(adjust_compose_project_name_for_docker_compose_version "$name")"
+  printf "%s" "$name" | tee "$cpn_file"
+}
+
+export_compose_project_name() {
+  # if already set, skip
+  [[ $COMPOSE_PROJECT_NAME ]] && return
+  if is_detached; then
+    COMPOSE_PROJECT_NAME="$detached_project_name"
+  else
+    COMPOSE_PROJECT_NAME="$(get_compose_project_name)"
   fi
   export COMPOSE_PROJECT_NAME
 }
 
 export_compose_file() {
-  export COMPOSE_FILE="$apps_resources_dir/app/docker-compose.yml"
-  # check for a CWD override file
-  [[ -f "$apps_resources_dir/docker-compose.override.yml" ]] && {
-    COMPOSE_FILE+=":$apps_resources_dir/app/docker-compose.override.yml"
-  }
-  # also use the global override file included with MDM
-  [[  -f "$lib_dir/../docker-files/mcd.override.yml" ]] && {
-    COMPOSE_FILE+=":$lib_dir/../docker-files/mcd.override.yml"
-  }
+  if is_detached; then
+    COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml"
+  else
+    COMPOSE_FILE="$apps_resources_dir/app/docker-compose.yml"
+    # check for a CWD override file
+    [[ -f "$apps_resources_dir/docker-compose.override.yml" ]] && {
+      COMPOSE_FILE+=":$apps_resources_dir/app/docker-compose.override.yml"
+    }
+    # also use the global override file included with MDM
+    [[  -f "$lib_dir/../docker-files/mcd.override.yml" ]] && {
+      COMPOSE_FILE+=":$lib_dir/../docker-files/mcd.override.yml"
+    }
+  fi
+  export COMPOSE_FILE
 }
 
 export_image_vars_for_override_yml() {
