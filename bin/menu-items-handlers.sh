@@ -15,7 +15,7 @@ clear_job_statuses() {
     mv "$job_file" "${job_file/%seen/cleared}"
     [[ "$job_exit_code" != "0" ]] && unseen_error_msgs="true"
   done
-  [[ $unseen_error_msgs ]] && {
+  is_advanced_mode && [[ $unseen_error_msgs ]] && {
     show_errors_from_mdm_logs
   }
   popd > /dev/null || return
