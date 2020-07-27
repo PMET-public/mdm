@@ -38,6 +38,7 @@ done
 
 # in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when that specific dir is intended
 mdm_path="$HOME/.mdm"
+launched_apps_dir="$mdm_path/launched-apps"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
 menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
@@ -654,19 +655,14 @@ run_bundled_app_as_script() {
 }
 
 init_app_specific_vars() {
-  if is_detached; then
-    env_dir="$launched_apps_dir/standalone"
-  else
-    cd "$apps_resources_dir/app"
-    # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
-    export_compose_project_name
-    export_compose_file
+  # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
+  export_compose_project_name
+  export_compose_file
+  if ! is_detached; then
     export_image_vars_for_override_yml
-    [[ -n "$COMPOSE_PROJECT_NAME" ]] || error "Could not find COMPOSE_PROJECT_NAME"
-    env_dir="$mdm_path/envs/$COMPOSE_PROJECT_NAME"
   fi
-  mkdir -p "$env_dir"
-  status_msg_file="$env_dir/.status"
+  apps_mdm_dir="$launched_apps_dir/$COMPOSE_PROJECT_NAME"
+  mkdir -p "$apps_mdm_dir"
 }
 
 init_mdm_logging() {
@@ -689,9 +685,8 @@ init_mdm_logging() {
 }
 
 init_quit_detection() {
-  quit_detection_file="$env_dir/.$PPID-still_running"
+  quit_detection_file="$apps_mdm_dir/.$PPID-still_running"
   # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
-  # also ensure log files exist
   [[ ! -f "$quit_detection_file" ]] && {
     touch "$quit_detection_file"
     detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
