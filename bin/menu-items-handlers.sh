@@ -413,8 +413,7 @@ show_errors_from_mdm_logs() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local errors
     # prefix output with spaces so the output won't match itself (and duplicate errors in output)
-    # pattern starts with \e for the ansi color sequence at the beginning of the line
-    errors="$(perl -ne '/^\e.*\[.*\].*error:/i and print "  $_"' "$handler_log_file")"
+    errors="$(perl -ne '/^[^ ]+\[20.*\].*error:/i and print "  $_"' "$handler_log_file")"
     if [[ "$errors" ]]; then
       msg_w_newlines "These are the current errors in the MDM log:"
       echo "$errors"
