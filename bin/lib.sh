@@ -392,21 +392,24 @@ get_host() {
     error "Host not found"
 }
 
-# this function enables menu item handlers to be run in a new interactive terminal
-# it also allows a menu item to invoke another similar to a user selecting a menu option themself (via the launcher)
-run_this_menu_item_handler_in_new_terminal() {
+# some menu item handlers should open a terminal to receive user input or display output to the user
+# however, if MDM_DIRECT_HANDLER_CALL is true in function, then the calling function has already
+# opened a new terminal to rerun it and we should not open new terminal again (would lead to infinite recursion)
+# also, if this is not a mac, don't open a new "Terminal" and just run the calling function directly
+# TODO make this cross platform compatible by opening the corresponing terminal application
+run_this_menu_item_handler_in_new_terminal_if_applicable() {
+  [[ $MDM_DIRECT_HANDLER_CALL ]] && return 1
+  ! is_mac && return 1
   local caller script
-  [[ ! $MDM_DIRECT_HANDLER_CALL ]] && {
-    caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_this_menu_item_handler_in_new_terminal //; s/ .*//')"
-    script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
-    echo "#!/usr/bin/env bash -l
+  caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_this_menu_item_handler_in_new_terminal_if_applicable //; s/ .*//')"
+  script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
+  echo "#!/usr/bin/env bash -l
 export REPO_DIR=\"${REPO_DIR}\"
 export apps_resources_dir=\"$apps_resources_dir\"
 $lib_dir/launcher $caller
 " > "$script"
-    chmod u+x "$script"
-    open -a Terminal "$script"
-  } || :
+  chmod u+x "$script"
+  open -a Terminal "$script"
 }
 
 detect_quit_and_stop_app() {

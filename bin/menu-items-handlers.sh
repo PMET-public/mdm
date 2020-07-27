@@ -50,31 +50,32 @@ get_job_statuses() {
 }
 
 install_additional_tools() {
-  run_this_menu_item_handler_in_new_terminal
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
 
-  is_magento_cloud_cli_installed || {
-    msg_w_newlines "Installing magento-cloud CLI ..."
-    curl -sLS https://accounts.magento.cloud/cli/installer | php
+    is_magento_cloud_cli_installed || {
+      msg_w_newlines "Installing magento-cloud CLI ..."
+      curl -sLS https://accounts.magento.cloud/cli/installer | php
+    }
+
+    ! is_docker_bash_completion_installed && is_mac && {
+      msg_w_newlines "Installing shell completion support for Docker for Mac ..."
+      etc=/Applications/Docker.app/Contents/Resources/etc
+      ln -s $etc/docker.bash-completion $(brew --prefix)/etc/bash_completion.d/docker
+      ln -s $etc/docker-compose.bash-completion $(brew --prefix)/etc/bash_completion.d/docker-compose
+    }
+
+    is_mac && ! is_platypus_installed && {
+      msg_w_newlines "Installing Platypus ..."
+      brew cask install platypus
+      gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
+      mkdir -p /usr/local/share/platypus
+      cp -R /Applications/Platypus.app/Contents/Resources/PlatypusDefault.icns /Applications/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/
+      gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > /usr/local/share/platypus/ScriptExec
+      chmod +x /usr/local/bin/platypus /usr/local/share/platypus/ScriptExec
+    }
+
+    msg_w_newlines "Additional tools successfully installed."
   }
-
-  ! is_docker_bash_completion_installed && is_mac && {
-    msg_w_newlines "Installing shell completion support for Docker for Mac ..."
-    etc=/Applications/Docker.app/Contents/Resources/etc
-    ln -s $etc/docker.bash-completion $(brew --prefix)/etc/bash_completion.d/docker
-    ln -s $etc/docker-compose.bash-completion $(brew --prefix)/etc/bash_completion.d/docker-compose
-  }
-
-  is_mac && ! is_platypus_installed && {
-    msg_w_newlines "Installing Platypus ..."
-    brew cask install platypus
-    gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
-    mkdir -p /usr/local/share/platypus
-    cp -R /Applications/Platypus.app/Contents/Resources/PlatypusDefault.icns /Applications/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/
-    gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > /usr/local/share/platypus/ScriptExec
-    chmod +x /usr/local/bin/platypus /usr/local/share/platypus/ScriptExec
-  }
-
-  msg_w_newlines "Additional tools successfully installed."
 }
 
 optimize_docker() {
@@ -250,47 +251,50 @@ This will require your password.
 }
 
 rm_magento_docker_images() {
-  run_this_menu_item_handler_in_new_terminal
-  warning_w_newlines "This will delete all Magento images to force the download of the latest versions. 
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    warning_w_newlines "This will delete all Magento images to force the download of the latest versions. 
 If a Magento app is stopped, it will NOT be preserved."
-  confirm_or_exit
-  image_ids=$(docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}')
-  [[ $image_ids ]] && {
-    docker rmi -f $image_ids
+    confirm_or_exit
+    image_ids=$(docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}')
+    [[ $image_ids ]] && {
+      docker rmi -f $image_ids
+    }
+    msg_w_newlines "Magento docker images successfully removed."
   }
-  msg_w_newlines "Magento docker images successfully removed."
 }
 
 reset_docker() {
-  run_this_menu_item_handler_in_new_terminal
-  warning_w_newlines "This will delete all docker containers, volumes, and networks.
-Docker images will be preserved to avoid downloading all images from scratch."
-  confirm_or_exit
-  # remove containers
-  container_ids="$(docker ps -qa)"
-  [[ $container_ids ]] && {
-    docker stop $container_ids
-    docker rm -fv $container_ids
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    warning_w_newlines "This will delete all docker containers, volumes, and networks.
+  Docker images will be preserved to avoid downloading all images from scratch."
+    confirm_or_exit
+    # remove containers
+    container_ids="$(docker ps -qa)"
+    [[ $container_ids ]] && {
+      docker stop $container_ids
+      docker rm -fv $container_ids
+    }
+    # remove volumes
+    volume_ids="$(docker volume ls -q)"
+    [[ $volume_ids ]] && {
+      docker volume rm -f $volume_ids
+    }
+    # remove networks
+    docker network prune -f || :
+    msg_w_newlines "Docker reset successfully."
   }
-  # remove volumes
-  volume_ids="$(docker volume ls -q)"
-  [[ $volume_ids ]] && {
-    docker volume rm -f $volume_ids
-  }
-  # remove networks
-  docker network prune -f || :
-  msg_w_newlines "Docker reset successfully."
 }
 
 wipe_docker() {
-  run_this_menu_item_handler_in_new_terminal
-  warning_w_newlines "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
-  confirm_or_exit
-  reset_docker
-  docker rmi -f $(docker images -qa) || :
-  # also clean up envs artifacts
-  rm -rf "$mdm_path/envs/*" || :
-  msg_w_newlines "Docker wiped successfully."
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    warning_w_newlines "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
+    confirm_or_exit
+    reset_docker
+    docker rmi -f $(docker images -qa) || :
+    # also clean up envs artifacts
+    rm -rf "$mdm_path/envs/*" || :
+    msg_w_newlines "Docker wiped successfully."
+  }
 }
 
 clone_app() {
@@ -302,19 +306,21 @@ no_op() {
 }
 
 start_shell_in_app() {
-  run_this_menu_item_handler_in_new_terminal
-  cd "$apps_resources_dir/app" || exit
-  docker-compose run --rm deploy bash
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    cd "$apps_resources_dir/app" || exit
+    docker-compose run --rm deploy bash
+  }
 }
 
 run_as_bash_cmds_in_app() {
-  run_this_menu_item_handler_in_new_terminal
-  cd "$apps_resources_dir/app" || exit
-  echo 'Running in Magento app:'
-  msg '
-    $1
-'
-  docker-compose run --rm deploy bash -c '$1' 2> /dev/null
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    cd "$apps_resources_dir/app" || exit
+    echo 'Running in Magento app:'
+    msg '
+      $1
+  '
+    docker-compose run --rm deploy bash -c '$1' 2> /dev/null
+  }
 }
 
 reindex() {
@@ -341,21 +347,22 @@ flush_cache() {
   run_as_bash_cmds_in_app "/app/bin/magento cache:flush"
 }
 
+# compare to chrome extenstion function (keep the funcs synced)
 warm_cache() {
-  # compare to chrome extenstion function (keep the funcs synced)
-  domain=$(get_host)
-  run_this_menu_item_handler_in_new_terminal
-  set -x
-  domain=$domain
-  url="https://$domain"
-  tmp_file=$(mktemp)
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    domain=$(get_host)
+    set -x
+    domain=$domain
+    url="https://$domain"
+    tmp_file=$(mktemp)
 
-  msg Warming cache ...
+    msg Warming cache ...
 
-  # recursively get admin and store front
-  wget -nv -O $tmp_file -H --domains=$domain $url/admin
-  wget -nv -r -X static,media -l 1 -O $tmp_file -H --domains=$domain $url
-  rm $tmp_file
+    # recursively get admin and store front
+    wget -nv -O $tmp_file -H --domains=$domain $url/admin
+    wget -nv -r -X static,media -l 1 -O $tmp_file -H --domains=$domain $url
+    rm $tmp_file
+  }
 }
 
 resize_images() {
@@ -372,24 +379,25 @@ switch_to_developer_mode() {
 
 
 start_mdm_shell() {
-  local services_status
-  if is_app_installed; then
-    services_status="$(docker-compose ps)"
-  else
-    services_status="$(warning_w_newlines "Magento app not installed yet.")"
-  fi
-  run_this_menu_item_handler_in_new_terminal
-  cd "$apps_resources_dir/app" || exit
-  msg Running $COMPOSE_PROJECT_NAME from $(pwd)
-  echo -e "\\n\\n$services_status"
-  msg_w_newlines "
-You can run docker-compose cmds here, but it's recommend to use the MDM app to (un)install or
-start/stop the Magento app to ensure the proper application state.
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local services_status
+    if is_app_installed; then
+      services_status="$(docker-compose ps)"
+    else
+      services_status="$(warning_w_newlines "Magento app not installed yet.")"
+    fi
+    cd "$apps_resources_dir/app" || exit
+    msg Running $COMPOSE_PROJECT_NAME from $(pwd)
+    echo -e "\\n\\n$services_status"
+    msg_w_newlines "
+  You can run docker-compose cmds here, but it's recommend to use the MDM app to (un)install or
+  start/stop the Magento app to ensure the proper application state.
 
-Magento docker-compose reference: https://devdocs.magento.com/cloud/docker/docker-quick-reference.html
-Full docker-compose reference: https://docs.docker.com/compose/reference/overview/
-"
-  bash -l
+  Magento docker-compose reference: https://devdocs.magento.com/cloud/docker/docker-quick-reference.html
+  Full docker-compose reference: https://docs.docker.com/compose/reference/overview/
+  "
+    bash -l
+  }
 }
 
 show_app_logs() {
@@ -397,27 +405,37 @@ show_app_logs() {
 }
 
 show_errors_from_mdm_logs() {
-  run_this_menu_item_handler_in_new_terminal
-  # prefix output with spaces so the output won't match itself (and duplicate errors in output)
-  perl -ne '/^\[.*\].*error:/i and print "  $_"' "$handler_log_file"
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local errors
+    # prefix output with spaces so the output won't match itself (and duplicate errors in output)
+    # pattern starts with \e for the ansi color sequence at the beginning of the line
+    errors="$(perl -ne '/^\e.*\[.*\].*error:/i and print "  $_"' "$handler_log_file")"
+    if [[ "$errors" ]]; then
+      msg_w_newlines "These are the current errors in the MDM log:"
+      echo "$errors"
+    else
+      msg_w_newlines "No errors found in the MDM log."
+    fi
+  }
 }
 
 show_mdm_logs() {
-  run_this_menu_item_handler_in_new_terminal
-  cd "$apps_resources_dir" || exit
-  screen -c "$lib_dir/../.screenrc"
-  # exit
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    cd "$apps_resources_dir" || exit
+    screen -c "$lib_dir/../.screenrc"
+  }
 }
 
 uninstall_app() {
-  msg_w_timestamp "${FUNCNAME[0]}"
-  run_this_menu_item_handler_in_new_terminal
-  exec > >(tee -ia "$handler_log_file")
-  exec 2> >(tee -ia "$handler_log_file" >&2)
-  warning_w_newlines "THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!"
-  confirm_or_exit
-  cd "$apps_resources_dir/app" || exit
-  docker-compose down -v
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    msg_w_timestamp "${FUNCNAME[0]}"
+    exec > >(tee -ia "$handler_log_file")
+    exec 2> >(tee -ia "$handler_log_file" >&2)
+    warning_w_newlines "THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!"
+    confirm_or_exit
+    cd "$apps_resources_dir/app" || exit
+    docker-compose down -v
+  }
 }
 
 stop_other_apps() {
