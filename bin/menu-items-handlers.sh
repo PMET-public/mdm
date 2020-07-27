@@ -233,6 +233,22 @@ toggle_mdm_debug_mode() {
   fi
 }
 
+toggle_mkcert_CA_install() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    if is_mkcert_CA_installed; then
+      warning_w_newlines "Removing your local certificate authority. Your password is required to make these changes."
+      mkcert -uninstall
+      ! is_mkcert_CA_installed && msg_w_newlines "Successfully removed." || msg_w_newlines "Please try again."
+    else
+      warning_w_newlines "Please be careful when installing a local certificate authority and only continue if you understand the risks.
+This will require your password.
+      "
+      mkcert -install
+      is_mkcert_CA_installed && msg_w_newlines "Successfully installed." || msg_w_newlines "Please try again."
+    fi
+  }
+}
+
 rm_magento_docker_images() {
   run_this_menu_item_handler_in_new_terminal
   warning_w_newlines "This will delete all Magento images to force the download of the latest versions. 
