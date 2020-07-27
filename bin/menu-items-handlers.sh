@@ -74,6 +74,11 @@ install_additional_tools() {
       chmod +x /usr/local/bin/platypus /usr/local/share/platypus/ScriptExec
     }
 
+    ! is_mkcert_installed && {
+      msg_w_newlines "Installing mkcert ..."
+      brew install mkcert nss
+    }
+
     msg_w_newlines "Additional tools successfully installed."
   }
 }
