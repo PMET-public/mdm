@@ -31,28 +31,17 @@ get_job_statuses() {
   for job_file in $(find * -type f -not -name "*.cleared"); do
     read -r job_start job_pid job_end job_exit_code job_ui_state <<<"$(echo "$job_file" | tr '.' ' ')"
     job_msg="$(<"$job_file")"
-    case "$job_ui_state" in
-      done)
-        mv "$job_file" "${job_file/%done/seen}"
-        ;;
-      seen)
-        duration="$(convert_secs_to_hms "$(( $job_end - $job_start ))")"
-        ;;
-      "")
-        prefix="DISABLED|⏳ "
-        duration="$(convert_secs_to_hms "$(( $($date_cmd +%s) - $job_start ))")"
-        ;;
-    esac
+    [[ "$job_ui_state" = "done" ]] && mv "$job_file" "${job_file/%done/seen}"
     if [[ "$job_ui_state" = "done" || "$job_ui_state" = "seen" ]]; then
-      duration="$(convert_secs_to_hms "$(( $job_end - $job_start ))")"
+      duration=" ⌚️$(convert_secs_to_hms "$(( $job_end - $job_start ))")"
       if [[ "$job_exit_code" = "0" ]]; then
         prefix="✅ Success."
       else
         prefix="❗Error!"
       fi
     else
-      prefix="DISABLED|⏳"
-      duration="$(convert_secs_to_hms "$(( $($date_cmd +%s) - $job_start ))")"
+      prefix="DISABLED|⏳ "
+      duration=" $(convert_secs_to_hms "$(( $($date_cmd +%s) - $job_start ))")"
     fi
     echo "$prefix $job_msg $duration"
   done
