@@ -353,7 +353,9 @@ convert_secs_to_hms() {
   h="$(($1/3600))"
   m="$((($1%3600)/60))"
   s="$(($1%60))"
-  printf "%02d:%02d:%02d" "$h" "$m" "$s"
+  [[ "$h" != "0" ]]  && printf "%dh %dm %ds" "$h" "$m" "$s" && return
+  [[ "$m" != "0" ]]  && printf "%dm %ds" "$m" "$s" && return
+  printf "%ds" "$s" && return
 }
 
 seconds_since() {
