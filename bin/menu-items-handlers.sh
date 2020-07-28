@@ -158,10 +158,10 @@ install_app() {
     # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
     # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
     docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | \
-      perl -pe 's/ .*/ $(get_host)/' >> /etc/hosts;
+      perl -pe 's/ .*/ $(get_hostname_for_this_app)/' >> /etc/hosts;
       /app/bin/magento cache:enable
       cloud-post-deploy"
-    open "https://$(get_host)"
+    open "https://$(get_hostname_for_this_app)"
   #) >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
   # skip showing logs in new terminal for CI
@@ -172,7 +172,7 @@ install_app() {
 }
 
 open_app() {
-  open "https://$(get_host)"
+  open "https://$(get_hostname_for_this_app)"
 }
 
 stop_app() {
@@ -193,7 +193,7 @@ restart_app() {
     reload_rev_proxy
     # TODO another BUG where a cache has to be cleaned with a restart AND after a time delay. RACE CONDITION?!
     docker-compose run --rm deploy magento-command cache:clean config_webservice
-    open "https://$(get_host)"
+    open "https://$(get_hostname_for_this_app)"
   } >> "$handler_log_file" 2>&1 &
   track_job_status_and_wait_for_exit $! "Starting Magento ..."
 }
@@ -357,7 +357,7 @@ flush_cache() {
 warm_cache() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local domain tmp_file
-    domain=$(get_host)
+    domain=$(get_hostname_for_this_app)
     set -x
     domain=$domain
     url="https://$domain"
@@ -463,7 +463,7 @@ stop_other_apps() {
 
 # TODO change away positional pararms & is demo mode still used?
 start_pwa_with_app() {
-  start_pwa "https://$(get_host)" "" "false"
+  start_pwa "https://$(get_hostname_for_this_app)" "" "false"
 }
 
 start_pwa_with_remote() {

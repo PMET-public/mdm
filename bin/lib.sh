@@ -395,7 +395,7 @@ normalize_hostname() {
     perl -ne 's/to connect to\s+([^\s]+)// and print "$1"; s/.*host:\s*//i and print'
 }
 
-get_host() {
+get_hostname_for_this_app() {
   [[ -f "$apps_resources_dir/app/docker-compose.yml" ]] &&
     perl -ne 's/.*VIRTUAL_HOST=\s*(.*)\s*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml" ||
     error "Host not found"
