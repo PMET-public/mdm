@@ -330,6 +330,10 @@ else
   }
 fi
 
+trim() {
+  xargs $@
+}
+
 error() {
   printf "\n%b%s%b\n\n" "$red" "[$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")] Error: $*" "$no_color" 1>&2 && exit 1
 }
@@ -389,6 +393,13 @@ ARE YOU SURE?! (y/n)
 #
 ###
 
+###
+#
+# start network functions
+#
+###
+
+
 normalize_hostname() {
   # convert user supplied name to a curlable one if possible
   curl -sv -I "http://$1" 2>&1 >/dev/null | \
@@ -400,6 +411,120 @@ get_hostname_for_this_app() {
     perl -ne 's/.*VIRTUAL_HOST=\s*(.*)\s*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml" ||
     error "Host not found"
 }
+
+
+get_pwa_hostname() {
+  false && is_adobe_system && echo "pwa.storystore.dev" || echo "pwa"
+}
+
+get_pwa_prev_hostname() {
+  false && is_adobe_system && echo "pwa-prev.storystore.dev" || echo "pwa-prev"
+}
+
+find_networks() {
+  docker network ls -q --filter 'driver=bridge' --filter 'name=_default'
+}
+
+find_proxy_by_network() {
+  docker ps -a --filter "network=$1" \
+    --filter "label=com.docker.compose.service=varnish" --format "{{.Ports}}" | \
+    sed 's/.*://;s/-.*//'
+}
+
+find_hostname_by_network() {
+  local cid apps_resources_dir
+  cid="$(docker ps -a --filter "network=$1" \
+      --filter "label=com.docker.compose.service=web" --format "{{.ID}}")"
+  [[ "$cid" ]] &&
+    apps_resources_dir="$(docker inspect "$cid" | \
+      perl -ne 's/.*com.docker.compose.project.working_dir.*?(\/[^"]*).*/$1\/../ and print')"
+  [[ "$apps_resources_dir" ]] &&
+    perl -ne 's/.*VIRTUAL_HOST\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/docker-compose.yml" ||
+    :
+}
+
+find_hostnames() {
+  hostnames="$pwa_hostname $pwa_prev_hostname"
+  for network in $networks; do
+    hostnames+=" $(find_hostname_by_network "$network")"
+  done
+  echo "$hostnames" | trim
+}
+
+find_hostnames_not_resolving_to_local() {
+  local hostname
+  for hostname in $hostnames; do
+    [[ "$hostname" ]] && ! is_hostname_resolving_to_local "$hostname" && 
+      hostnames_not_resolving_to_local+=" $hostname"
+  done
+  echo $hostnames_not_resolving_to_local | trim
+}
+
+add_hostnames_to_hosts_file() {
+  local lines="" $error_msg="Could not update hosts files." tmp_hosts
+  for host in $hostnames_not_resolving_to_local; do
+    lines+="127.0.0.1 $host $hosts_file_line_marker"$'\n'
+  done
+  echo "Password may be required to modify /etc/hosts."
+  tmp_hosts=$(mktemp)
+  cat /etc/hosts <(echo "$lines") > "$tmp_hosts"
+  cp /etc/hosts "$mdm_path/hosts.bak"
+  if is_running_as_sudo; then
+    mv "$tmp_hosts" /etc/hosts || error "$error_msg"
+  elif is_interactive; then
+    sudo mv "$tmp_hosts" /etc/hosts || error "$error_msg"
+  elif is_mac; then
+    osascript -e "do shell script \"sudo mv $tmp_hosts /etc/hosts \" with administrator privileges" ||
+      error "$error_msg"
+  fi
+}
+
+does_cert_and_key_exist_for_host() {
+  local hostname="$1" cert_dir
+  cert_dir="$certs_dir/$hostname"
+  [[ -d "$cert_dir" && -f "$cert_dir/fullchain1.pem" && -f "$cert_dir/privkey1.pem" ]]
+}
+
+read_cert_for_hostname() {
+  openssl x509 -text -noout -in "$certs_dir/$1/fullchain1.pem"
+}
+
+get_cert_utc_end_date_for_hostname() {
+  end_date="$(read_cert_for_hostname "$1" | perl -ne 's/\s*not after :\s*//i and print')"
+  $date_cmd --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S"
+}
+
+is_cert_for_hostname_current() {
+  [[ "$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")" < "$(get_cert_utc_end_date_for_hostname "$1")" ]]
+}
+
+is_cert_for_hostname_expiring_soon() {
+  [[ "$($date_cmd --utc --date "+7 days" +"%Y-%m-%d %H:%M:%S")" < "$(get_cert_utc_end_date_for_hostname "$1")" ]]
+}
+
+wildcard_domain_for_hostname() {
+  # must have 2 '.' and then replace the 1st segment before the 1st dot with '*'
+  echo "$1" | perl -pe '/.+\..+\..+/ and s/.*?\./*./'
+}
+
+is_cert_match_for_hostname() {
+  local wildcard_domain="$(wildcard_domain_for_hostname "$1")"
+  read_cert_for_hostname "$1" | grep -q "DNS:$1" ||
+    read_cert_for_hostname "$1" | grep -q "DNS:$wildcard_domain"
+}
+
+is_new_cert_required_for_host() {
+  ! { does_cert_and_key_exist_for_host "$1" && is_cert_for_hostname_current "$1" && 
+    is_cert_match_for_hostname "$1" && ! is_cert_for_hostname_expiring_soon "$1"; }
+}
+
+###
+#
+# end network functions
+#
+###
+
+
 
 # some menu item handlers should open a terminal to receive user input or display output to the user
 # however, if MDM_DIRECT_HANDLER_CALL is true in function, then the calling function has already

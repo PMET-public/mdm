@@ -12,136 +12,35 @@ set -e
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
-trim() {
-  xargs $@
-}
-
-get_pwa_hostname() {
-  false && is_adobe_system && echo "pwa.storystore.dev" || echo "pwa"
-}
-
-get_pwa_prev_hostname() {
-  false && is_adobe_system && echo "pwa-prev.storystore.dev" || echo "pwa-prev"
-}
-
-find_networks() {
-  docker network ls -q --filter 'driver=bridge' --filter 'name=_default'
-}
-
-find_proxy_by_network() {
-  docker ps -a --filter "network=$1" \
-    --filter "label=com.docker.compose.service=varnish" --format "{{.Ports}}" | \
-    sed 's/.*://;s/-.*//'
-}
-
-find_hostname_by_network() {
-  local cid apps_resources_dir
-  cid="$(docker ps -a --filter "network=$1" \
-      --filter "label=com.docker.compose.service=web" --format "{{.ID}}")"
-  [[ "$cid" ]] &&
-    apps_resources_dir="$(docker inspect "$cid" | \
-      perl -ne 's/.*com.docker.compose.project.working_dir.*?(\/[^"]*).*/$1\/../ and print')"
-  [[ "$apps_resources_dir" ]] &&
-    perl -ne 's/.*VIRTUAL_HOST\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/docker-compose.yml" ||
-    :
-}
-
-find_hostnames() {
-  hostnames="$pwa_hostname $pwa_prev_hostname"
-  for network in $networks; do
-    hostnames+=" $(find_hostname_by_network "$network")"
-  done
-  echo "$hostnames" | trim
-}
-
-find_hostnames_not_resolving_to_local() {
-  local hostname
-  for hostname in $hostnames; do
-    [[ "$hostname" ]] && ! is_hostname_resolving_to_local "$hostname" && 
-      hostnames_not_resolving_to_local+=" $hostname"
-  done
-  echo $hostnames_not_resolving_to_local | trim
-}
-
-add_hostnames_to_hosts_file() {
-  local lines="" $error_msg="Could not update hosts files." tmp_hosts
-  for host in $hostnames_not_resolving_to_local; do
-    lines+="127.0.0.1 $host $hosts_file_line_marker"$'\n'
-  done
-  echo "Password may be required to modify /etc/hosts."
-  tmp_hosts=$(mktemp)
-  cat /etc/hosts <(echo "$lines") > "$tmp_hosts"
-  cp /etc/hosts "$mdm_path/hosts.bak"
-  if is_running_as_sudo; then
-    mv "$tmp_hosts" /etc/hosts || error "$error_msg"
-  elif is_interactive; then
-    sudo mv "$tmp_hosts" /etc/hosts || error "$error_msg"
-  elif is_mac; then
-    osascript -e "do shell script \"sudo mv $tmp_hosts /etc/hosts \" with administrator privileges" ||
-      error "$error_msg"
-  fi
-}
-
-does_cert_and_key_exist_for_host() {
-  local hostname="$1" cert_dir
-  cert_dir="$certs_dir/$hostname"
-  [[ -d "$cert_dir" && -f "$cert_dir/fullchain1.pem" && -f "$cert_dir/privkey1.pem" ]]
-}
-
-read_cert_for_hostname() {
-  openssl x509 -text -noout -in "$certs_dir/$1/fullchain1.pem"
-}
-
-get_cert_utc_end_date_for_hostname() {
-  end_date="$(read_cert_for_hostname "$1" | perl -ne 's/\s*not after :\s*//i and print')"
-  $date_cmd --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S"
-}
-
-is_cert_for_hostname_current() {
-  [[ "$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")" < "$(get_cert_utc_end_date_for_hostname "$1")" ]]
-}
-
-is_cert_for_hostname_expiring_soon() {
-  [[ "$($date_cmd --utc --date "+7 days" +"%Y-%m-%d %H:%M:%S")" < "$(get_cert_utc_end_date_for_hostname "$1")" ]]
-}
-
-wildcard_domain_for_hostname() {
-  # must have 2 '.' and then replace the 1st segment before the 1st dot with '*'
-  echo "$1" | perl -pe '/.+\..+\..+/ and s/.*?\./*./'
-}
-
-is_cert_match_for_hostname() {
-  local wildcard_domain="$(wildcard_domain_for_hostname "$1")"
-  read_cert_for_hostname "$1" | grep -q "DNS:$1" ||
-    read_cert_for_hostname "$1" | grep -q "DNS:$wildcard_domain"
-}
-
-are_certs_valid_for_host() {
-  :
-}
-
-are_certs_expired_for_hosts() {
-  :
-}
-
 prepare_cert_and_key_for_hostname() {
   local hostname="$1" cert_dir
   cert_dir="$certs_dir/$hostname"
   mkdir -p "$cert_dir"
   
-  # check for existing, valid cert & return
-  does_cert_and_key_exist_for_host "$hostname" && is_cert_for_hostname_current "$hostname" && 
-    is_cert_match_for_hostname "$hostname" && ! is_cert_for_hostname_expiring_soon "$hostname" && 
-    return
-  
+  is_new_cert_required_for_host "$hostname" || return
+
   # otherwise, if applicable, try to fetch a valid cert
-  is_adobe_system && :
+  # on other project, have certbot project push to private repo
+  # attempt fetch if failure
+  [[ "$hostname" =~ =~ \.storystore\.dev$ ]] && {
+    # is there already a valid wildcard cert
+    is_new_cert_required_for_host "storystore.dev"
+    cert_dir="$certs_dir/storystore.dev"
+    
+    
+    mkdir -p "$cert_dir"
+    get_github_file_contents "PMET-public/mdm-config" "storystore.dev/fullchain1.pem" > 
+  }
 
-  # otherwise, if mkcert is installed, create a cert
-  mkcert -cert-file "$cert_dir/fullchain1.pem" -key-file "$cert_dir/privkey1.pem" "$hostname"
+  if is_mkcert_installed; then
+    mkcert -cert-file "$cert_dir/fullchain1.pem" -key-file "$cert_dir/privkey1.pem" "$hostname"
+  else
+    # use a pregenerated insecure one included with MDM
+    cp -R "$certs_dir/localhost/" "$cert_dir"
+  fi
 
-  # otherwise, use a pregenerated insecure one
-  
+  does_cert_and_key_exist_for_host "$hostname" || error "Missing certificate or key for $hostname"
+
 }
 
 prepare_certs_and_keys() {
