@@ -275,7 +275,8 @@ is_advanced_mode() {
 }
 
 is_hostname_curlable() {
-  ! curl -I "http://$1" 2>&1 | grep -q illegal
+  # curl exit code 3 = bad url, so should be curlable if not equal to 3
+  curl -I "http://$1" || [[ "$?" -ne 3 ]]
 }
 
 is_valid_git_url() {
