@@ -55,6 +55,7 @@ docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.j
 repo_url="https://github.com/PMET-public/mdm"
 advanced_mode_flag_file="$mdm_path/advanced_mode_on"
 mdm_ver_file="$mdm_path/latest-sem-ver"
+mdm_demo_domain="the1umastory.com"
 detached_project_name="detached-mdm"
 
 ###
@@ -416,11 +417,11 @@ get_hostname_for_this_app() {
 
 
 get_pwa_hostname() {
-  false && is_adobe_system && echo "pwa.storystore.dev" || echo "pwa"
+  is_adobe_system && echo "pwa.$mdm_demo_domain" || echo "pwa"
 }
 
 get_pwa_prev_hostname() {
-  false && is_adobe_system && echo "pwa-prev.storystore.dev" || echo "pwa-prev"
+  is_adobe_system && echo "pwa-prev.$mdm_demo_domain" || echo "pwa-prev"
 }
 
 find_networks() {

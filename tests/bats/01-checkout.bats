@@ -134,14 +134,14 @@ load '../../bin/lib.sh'
   assert_output ""
 }
 
-@test 'is_hostname_resolving_to_local "pwa.storystore.dev"' {
-  run is_hostname_resolving_to_local "pwa.storystore.dev"
+@test 'is_hostname_resolving_to_local "pwa.$mdm_demo_domain"' {
+  run is_hostname_resolving_to_local "pwa.$mdm_demo_domain"
   assert_success
   assert_output ""
 }
 
-@test 'is_hostname_resolving_to_local "pwa-prev.storystore.dev"' {
-  run is_hostname_resolving_to_local "pwa-prev.storystore.dev"
+@test 'is_hostname_resolving_to_local "pwa-prev.$mdm_demo_domain"' {
+  run is_hostname_resolving_to_local "pwa-prev.$mdm_demo_domain"
   assert_success
   assert_output ""
 }

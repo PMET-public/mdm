@@ -24,12 +24,12 @@ prepare_cert_and_key_for_hostname() {
   # attempt fetch if failure
   [[ "$hostname" =~ =~ \.storystore\.dev$ ]] && {
     # is there already a valid wildcard cert
-    is_new_cert_required_for_host "storystore.dev"
-    cert_dir="$certs_dir/storystore.dev"
+    is_new_cert_required_for_host "$mdm_demo_domain"
+    cert_dir="$certs_dir/$mdm_demo_domain"
     
     
     mkdir -p "$cert_dir"
-    get_github_file_contents "PMET-public/mdm-config" "storystore.dev/fullchain1.pem" > 
+    get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/fullchain1.pem" > 
   }
 
   if is_mkcert_installed; then
