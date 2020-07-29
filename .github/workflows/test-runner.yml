@@ -48,4 +48,4 @@ jobs:
           ./tests/CI/check-homebrew.sh
       - name: keepalive to debug
         if: ${{ failure() }}
-        uses: PMET-public/action-tmate@v2.0.1
+        uses: PMET-public/action-tmate@master
