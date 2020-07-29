@@ -751,10 +751,7 @@ render_platypus_status_menu() {
 
 handle_mdm_input() {
   local key value
-  # if selected menu item matches an exit timer, clear exit timer status and exit
-  [[ "$mdm_input" =~ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] && clear_status && exit
-  
-  # otherwise check what type of menu item was selected
+  # check what type of menu item was selected
 
   # a handler?
   key="$mdm_input-handler"
