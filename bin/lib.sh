@@ -328,7 +328,7 @@ else
   # on linux, some services require a min virtual memory map count and may need to be raised
   # https://devdocs.magento.com/cloud/docker/docker-containers-service.html#troubleshooting
   [[ $(sysctl vm.max_map_count | perl -pe 's/.*=\s*//') -lt 262144 ]] && {
-    sudo sysctl -w vm.max_map_count=262144
+    sudo sysctl -w vm.max_map_count=262144 > /dev/null 2>&1
   }
 fi
 
