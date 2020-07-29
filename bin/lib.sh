@@ -561,15 +561,21 @@ run_this_menu_item_handler_in_new_terminal_if_applicable() {
   local caller script
   caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_this_menu_item_handler_in_new_terminal_if_applicable //; s/ .*//')"
   script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
+  # remember to escape in this string if you want it to be evaluated at RUN time vs when the script is written
+  # also env vars are appear to be overriden by disconnected instances of Mac's Terminal app
+  # (i.e. started by separate MDM apps)
+  # particularly watch out for COMPOSE_PROJECT_NAME. may have to evaluate each time. 
+  # see export_compose_project_name below
   echo "#!/usr/bin/env bash -l
-[[ \"$debug\" ]] && set -x
 export REPO_DIR=\"${REPO_DIR}\"
 export apps_resources_dir=\"$apps_resources_dir\"
+[[ \"$debug\" ]] && echo \"\$(env | $sort_cmd)\" && set -x
 printf '\e[8;45;180t' # terminal size
 $lib_dir/launcher $caller
 " > "$script"
   chmod u+x "$script"
   open -a Terminal "$script"
+  # open -F -n -a Terminal "$script"
 }
 
 detect_quit_and_stop_app() {
@@ -672,8 +678,6 @@ get_compose_project_name() {
 }
 
 export_compose_project_name() {
-  # if already set, skip
-  [[ $COMPOSE_PROJECT_NAME ]] && return
   if is_detached; then
     COMPOSE_PROJECT_NAME="$detached_project_name"
   else
