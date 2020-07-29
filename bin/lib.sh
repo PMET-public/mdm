@@ -53,7 +53,7 @@ hosts_file_line_marker="# added by MDM"
 mdm_path="$HOME/.mdm"
 launched_apps_dir="$mdm_path/launched-apps"
 certs_dir="$mdm_path/certs"
-mkdir -p "$launched_apps_dir $certs_dir"
+mkdir -p "$launched_apps_dir" "$certs_dir"
 
 menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
@@ -77,7 +77,7 @@ mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $
 ###
 
 has_uncleared_jobs_statuses() {
-  [[ "$(find "$apps_mdm_dir/jobs" -type f -not -name "*.cleared" -print -quit)" ]]
+  [[ -d "$apps_mdm_dir/jobs" && "$(find "$apps_mdm_dir/jobs" -type f -not -name "*.cleared" -print -quit)" ]]
 }
 
 is_magento_cloud_cli_installed() {

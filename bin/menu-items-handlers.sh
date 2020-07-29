@@ -112,7 +112,7 @@ update_mdm() {
 }
 
 install_app() {
-  #(
+  (
     msg_w_timestamp "${FUNCNAME[0]}"
     docker-compose pull # check for new versions
     # create containers but do not start
@@ -162,7 +162,7 @@ install_app() {
       /app/bin/magento cache:enable
       cloud-post-deploy"
     open "https://$(get_hostname_for_this_app)"
-  #) >> "$handler_log_file" 2>&1 &
+  ) >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
   # skip showing logs in new terminal for CI
   is_CI || show_mdm_logs >> "$handler_log_file" 2>&1 &
