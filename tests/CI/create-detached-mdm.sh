@@ -9,8 +9,7 @@ source ./bin/lib.sh
 if is_mac; then
   ./bin/dockerize -d
   open -a "$detached_project_name"
-  ps_output="$(ps aux | grep "$detached_project_name" || :)"
-  [[ $ps_output =~ Contents/MacOS/MDM$ ]] || error "Expected MDM process not found."
+  ps aux | grep -qE "$detached_project_name\$" || error "Expected MDM process not found."
 else
   warning_w_newlines "Test skipped."
 fi
