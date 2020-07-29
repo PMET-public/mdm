@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-[[ $debug ]] && set -x
+[[ "$debug" ]] && set -x
 unset apps_resources_dir
 
 # shellcheck source=../../bin/lib.sh

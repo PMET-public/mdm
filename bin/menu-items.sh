@@ -443,7 +443,7 @@ is_advanced_mode && {
   key="Maintenance"
   keys+=("$key")
 
-  if [[ $debug ]]; then
+  if [[ "$debug" ]]; then
     key="MDM debugging is ON"
   else
     key="MDM debugging is OFF"

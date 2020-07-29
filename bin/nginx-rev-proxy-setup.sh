@@ -7,7 +7,7 @@
 # - write the nginx conf and start the nginx container
 
 set -e
-[[ $debug ]] && set -x
+[[ "$debug" ]] && set -x
 
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :

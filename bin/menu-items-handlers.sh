@@ -231,7 +231,7 @@ revert_to_prev_mdm() {
 
 toggle_mdm_debug_mode() {
   kill $PPID
-  if [[ $debug ]]; then
+  if [[ "$debug" ]]; then
     unset debug
     open "$apps_resources_dir/../../"
   else

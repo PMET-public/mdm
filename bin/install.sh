@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e # stop on errors
-[[ $debug ]] && set -x
+[[ "$debug" ]] && set -x
 
 red='\033[0;31m'
 yellow='\033[1;33m'

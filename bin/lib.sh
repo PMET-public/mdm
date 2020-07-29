@@ -17,7 +17,7 @@ included_by_mdm() {
   [[ "${BASH_SOURCE[@]}" =~ /bin/mdm ]]
 }
 
-[[ $debug ]] && ! included_by_mdm && set -x
+[[ "$debug" ]] && ! included_by_mdm && set -x
 
 # iterate thru BASH_SOURCE to find this lib.sh (should work even when debugging in IDE)
 bs_len=${#BASH_SOURCE[@]}
@@ -852,7 +852,7 @@ init_quit_detection() {
 lib_sourced_for_specific_bundled_app && {
   ensure_mdm_log_files_exist
   init_app_specific_vars
-  [[ $debug ]] && init_mdm_logging
+  [[ "$debug" ]] && init_mdm_logging
   ! is_detached && init_quit_detection
 }
 

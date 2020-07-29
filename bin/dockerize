@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-[[ $debug ]] && set -x
+[[ "$debug" ]] && set -x
 
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :

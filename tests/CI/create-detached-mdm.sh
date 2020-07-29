@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-[[ $debug ]] && set -x
+[[ "$debug" ]] && set -x
 
 # shellcheck source=../../bin/lib.sh
 source ./bin/lib.sh
