@@ -28,5 +28,6 @@ load '../../bin/lib.sh'
   shopt -s nocasematch
   run ./bin/launcher install_additional_tools
   assert_success
-  assert_output -e "magento-cloud.*mkcert.*installed"
+  assert_output -p "magento-cloud"
+  assert_output -p "installed"
 }

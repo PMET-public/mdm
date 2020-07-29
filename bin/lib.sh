@@ -37,11 +37,6 @@ done
 ###
 
 # in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when that specific dir is intended
-mdm_path="$HOME/.mdm"
-launched_apps_dir="$mdm_path/launched-apps"
-mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
-menu_log_file="$mdm_path/current/menu.log"
-handler_log_file="$mdm_path/current/handler.log"
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[1;33m'
@@ -51,12 +46,23 @@ recommended_vm_mem_mb=4096
 recommended_vm_swap_mb=2048
 recommended_vm_disk_mb=64000
 bytes_in_mb=1048576
-docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
-repo_url="https://github.com/PMET-public/mdm"
-advanced_mode_flag_file="$mdm_path/advanced_mode_on"
-mdm_ver_file="$mdm_path/latest-sem-ver"
 mdm_demo_domain="the1umastory.com"
 detached_project_name="detached-mdm"
+hosts_file_line_marker="# added by MDM"
+
+mdm_path="$HOME/.mdm"
+launched_apps_dir="$mdm_path/launched-apps"
+certs_dir="$mdm_path/certs"
+mkdir -p "$launched_apps_dir $certs_dir"
+
+menu_log_file="$mdm_path/current/menu.log"
+handler_log_file="$mdm_path/current/handler.log"
+docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
+advanced_mode_flag_file="$mdm_path/advanced_mode_on"
+mdm_ver_file="$mdm_path/latest-sem-ver"
+
+repo_url="https://github.com/PMET-public/mdm"
+mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
 
 ###
 #
