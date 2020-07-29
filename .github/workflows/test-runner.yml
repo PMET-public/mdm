@@ -26,12 +26,11 @@ jobs:
         with:
           submodules: 'recursive'
       - name: requires checkout
-          run: |
-            ./tests/bats/requires-checkout.bats
+        run: |
+          ./tests/bats/requires-checkout.bats
       - name: install
         run: |
           ./tests/CI/install-deps-and-mdm.sh
-
       - name: non-docker tests
         run: |
           ./tests/CI/non-docker-menu-selections.sh
