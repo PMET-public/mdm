@@ -25,12 +25,15 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
-      - name: requires checkout
+      - name: checkout
         run: |
-          debug="" ./tests/bats/requires-checkout.bats
+          ./tests/bats/01-checkout.bats
       - name: install
         run: |
-          ./tests/CI/install-deps-and-mdm.sh
+          ./tests/bats/02-install.bats
+      - name: install
+        run: |
+          ./tests/bats/03-post-install.bats
       - name: non-docker tests
         run: |
           ./tests/CI/non-docker-menu-selections.sh
