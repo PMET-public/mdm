@@ -23,6 +23,8 @@ jobs:
       debug: ${{ matrix.value }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
       - name: install
         run: |
           ./tests/CI/install-deps-and-mdm.sh
