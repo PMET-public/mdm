@@ -111,7 +111,7 @@
       },
       "args": [
         "-g", "git@github.com:PMET-public/magento-cloud.git",
-        "-b", "pmet-2.3.5-ref",
+        "-b", "pmet-2.4.0-ref",
         "-n", "app-from-repo-test",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
