@@ -24,10 +24,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: 'recursive'
+          submodules: 'true'
       - name: requires checkout
         run: |
-          ./tests/bats/requires-checkout.bats
+          debug="" ./tests/bats/requires-checkout.bats
       - name: install
         run: |
           ./tests/CI/install-deps-and-mdm.sh
