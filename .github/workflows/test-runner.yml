@@ -26,6 +26,9 @@ jobs:
       - name: install
         run: |
           ./tests/CI/install-deps-and-mdm.sh
+      - name: bats/lib-only
+        run: |
+          ./tests/bats/lib-only.bats
       - name: non-docker tests
         run: |
           ./tests/CI/non-docker-menu-selections.sh
