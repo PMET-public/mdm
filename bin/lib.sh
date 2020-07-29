@@ -123,7 +123,7 @@ is_mac() {
 }
 
 is_CI() {
-  [[ $GITHUB_WORKSPACE || $TRAVIS ]]
+  [[ "$GITHUB_WORKSPACE" || "$TRAVIS" ]]
 }
 
 # this exists for CI testing of some functionality even when docker is n/a (e.g. travis and github ci with a mac)
@@ -286,10 +286,12 @@ is_existing_cloud_env() {
 }
 
 is_hostname_resolving_to_local() {
-  curl -vI "$1" 2>&1 | grep -q 127.0.0.1
+  local curl_output
+  curl_output="$(curl -vI "$1" 2>&1 >/dev/null | grep Trying)"
+  [[ "$curl_output" =~ ::1 || "$curl_output" =~ 127\.0\.0\.1 ]]
 }
 
-is_interactive() {
+is_terminal_interactive() {
   [[ $- == *i* ]]
 }
 
@@ -331,7 +333,7 @@ else
 fi
 
 trim() {
-  xargs $@
+  echo "$@" | xargs
 }
 
 error() {
@@ -471,7 +473,7 @@ add_hostnames_to_hosts_file() {
   cp /etc/hosts "$mdm_path/hosts.bak"
   if is_running_as_sudo; then
     mv "$tmp_hosts" /etc/hosts || error "$error_msg"
-  elif is_interactive; then
+  elif is_terminal_interactive; then
     sudo mv "$tmp_hosts" /etc/hosts || error "$error_msg"
   elif is_mac; then
     osascript -e "do shell script \"sudo mv $tmp_hosts /etc/hosts \" with administrator privileges" ||
@@ -486,31 +488,47 @@ does_cert_and_key_exist_for_host() {
 }
 
 read_cert_for_hostname() {
-  openssl x509 -text -noout -in "$certs_dir/$1/fullchain1.pem"
+  openssl x509 -text -noout -in "$certs_dir/$1/fullchain1.pem" || error "Could not read cert for $1"
 }
 
 get_cert_utc_end_date_for_hostname() {
+  local end_date
   end_date="$(read_cert_for_hostname "$1" | perl -ne 's/\s*not after :\s*//i and print')"
-  $date_cmd --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S"
+  [[ "$end_date" ]] && $date_cmd --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S" ||
+    error "Could not retrieve end date"
 }
 
 is_cert_for_hostname_current() {
-  [[ "$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")" < "$(get_cert_utc_end_date_for_hostname "$1")" ]]
+  local end_date
+  end_date="$(get_cert_utc_end_date_for_hostname "$1")"
+  [[ "$end_date" && "$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")" < "$end_date" ]] ||
+    error "Could not determine if cert is current"
 }
 
 is_cert_for_hostname_expiring_soon() {
-  [[ "$($date_cmd --utc --date "+7 days" +"%Y-%m-%d %H:%M:%S")" < "$(get_cert_utc_end_date_for_hostname "$1")" ]]
+  local end_date
+  end_date="$(get_cert_utc_end_date_for_hostname "$1")"
+  [[ "$end_date" && "$($date_cmd --utc --date "+7 days" +"%Y-%m-%d %H:%M:%S")" > "$end_date" ]]
+}
+
+has_valid_wildcard_domain() {
+  [[ "$1" =~ .+\..+ ]]
 }
 
 wildcard_domain_for_hostname() {
-  # must have 2 '.' and then replace the 1st segment before the 1st dot with '*'
-  echo "$1" | perl -pe '/.+\..+\..+/ and s/.*?\./*./'
+  has_valid_wildcard_domain "$1" &&
+    echo "$1" | perl -pe '/.+\..+/ and s/.*?\./*./'
 }
 
 is_cert_match_for_hostname() {
-  local wildcard_domain="$(wildcard_domain_for_hostname "$1")"
-  read_cert_for_hostname "$1" | grep -q "DNS:$1" ||
-    read_cert_for_hostname "$1" | grep -q "DNS:$wildcard_domain"
+  local wildcard_domain
+  if has_valid_wildcard_domain "$1"; then
+    wildcard_domain="$(wildcard_domain_for_hostname "$1")"
+    read_cert_for_hostname "$1" | grep -q "DNS:$1" ||
+      read_cert_for_hostname "$1" | grep -q "DNS:$wildcard_domain"
+  else
+    read_cert_for_hostname "$1" | grep -q "DNS:$1"
+  fi
 }
 
 is_new_cert_required_for_host() {
@@ -523,8 +541,6 @@ is_new_cert_required_for_host() {
 # end network functions
 #
 ###
-
-
 
 # some menu item handlers should open a terminal to receive user input or display output to the user
 # however, if MDM_DIRECT_HANDLER_CALL is true in function, then the calling function has already
