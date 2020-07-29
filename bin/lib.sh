@@ -562,6 +562,7 @@ run_this_menu_item_handler_in_new_terminal_if_applicable() {
   caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_this_menu_item_handler_in_new_terminal_if_applicable //; s/ .*//')"
   script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
   echo "#!/usr/bin/env bash -l
+[[ \"$debug\" ]] && set -x
 export REPO_DIR=\"${REPO_DIR}\"
 export apps_resources_dir=\"$apps_resources_dir\"
 printf '\e[8;45;180t' # terminal size
