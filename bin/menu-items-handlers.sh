@@ -112,8 +112,9 @@ update_mdm() {
 }
 
 install_app() {
-  (
+  {
     msg_w_timestamp "${FUNCNAME[0]}"
+    cd "$apps_resources_dir/app" || exit
     docker-compose pull # check for new versions
     # create containers but do not start
     docker-compose up --no-start
@@ -129,23 +130,19 @@ install_app() {
     docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
     # 2 options to start build & deploy
     # option 1 relies on default cmds in image or set by docker-compose.override.yml file
-    echo "khb1"
-    docker-compose up build
-    echo "khb2"
-    docker-compose up deploy || :
-    echo "khb3"
-    docker-compose logs deploy
-    echo "khb3"
+      # docker-compose up build
+      # docker-compose up deploy || :
+      # docker-compose logs deploy
     # option 2 creates containers (when *_1 already exist) but doesn't have reliance on default cmds
-    # docker-compose run --rm build cloud-build
-    # docker-compose run --rm deploy cloud-deploy
+    docker-compose run build cloud-build
+    docker-compose run deploy cloud-deploy
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
     # this command causes indexer to be set in app/etc/env.php but without the expected values for host/username
     docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
     # TODO remove this hack that fixes this bug https://github.com/magento/magento2/issues/2852
     docker-compose run --rm deploy perl -i -pe \
       "s/'model' => 'mysql4',/
-      'username' => 'user', 
+      'username' => 'user',
       'host' => 'database.internal',
       'dbname' => 'main',
       'password' => '',
@@ -162,7 +159,7 @@ install_app() {
       /app/bin/magento cache:enable
       cloud-post-deploy"
     open "https://$(get_hostname_for_this_app)"
-  ) >> "$handler_log_file" 2>&1 &
+  } >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
   # skip showing logs in new terminal for CI
   is_CI || show_mdm_logs >> "$handler_log_file" 2>&1 &
