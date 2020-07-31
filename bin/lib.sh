@@ -393,6 +393,19 @@ ARE YOU SURE?! (y/n)
   }
 }
 
+get_github_token() {
+  perl -ne '/github.com".*?"([^"]*)"/ and print "$1"' "$HOME/.composer/auth.json" 2> /dev/null
+}
+
+get_github_file_contents() {
+  local project="$1" path="$2" ref="$3" token
+  token="$(get_github_token)"
+  [[ "$token" ]] &&
+    curl -L -H 'Accept: application/vnd.github.v3.raw' \
+      -H "Authorization: token $token" \
+      "https://api.github.com/repos/$project/contents/$path?ref=${ref:-master}"
+}
+
 ###
 #
 # end util functions
