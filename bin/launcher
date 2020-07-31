@@ -71,7 +71,9 @@ else
   else
 
     installer=$(mktemp)
-    curl -sL "https://raw.githubusercontent.com/PMET-public/mdm/${REPO_BRANCH:-master}/bin/install.sh" > "$installer"
+    curl -sL "https://raw.githubusercontent.com/PMET-public/mdm/${REPO_BRANCH:-master}/bin/lib.sh" > "$installer"
+    # call the self_install function
+    echo "self_install" >> "$installer"
     chmod +x "$installer"
     if is_mac && ! is_CI; then
       open -a Terminal "$installer"

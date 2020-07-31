@@ -9,6 +9,11 @@ load '../libs/bats-file/load'
 
 load '../../bin/lib.sh'
 
+@test "self_install" {
+  run self_install
+  assert_success
+}
+
 @test './bin/launcher' {
   shopt -s nocasematch
   run ./bin/launcher
