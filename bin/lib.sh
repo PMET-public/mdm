@@ -643,14 +643,14 @@ reload_rev_proxy() {
 }
 
 download_and_link_latest_release() {
-  local latest_release_ver
-  latest_release_ver=$(lookup_latest_remote_sem_ver)
+  local latest_ver
+  latest_ver=$(lookup_latest_remote_sem_ver)
   cd "$mdm_path"
-  curl -svLO "$repo_url/archive/$latest_release_ver.tar.gz"
-  mkdir -p "$latest_release_ver"
-  tar -zxf "$latest_release_ver.tar.gz" --strip-components 1 -C "$latest_release_ver"
-  rm "$latest_release_ver.tar.gz" current || : # cleanup and remove old link
-  ln -sf "$latest_release_ver" current
+  curl -svLO "$repo_url/archive/$latest_ver.tar.gz"
+  mkdir -p "$latest_ver"
+  tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver"
+  rm "$latest_ver.tar.gz" current || : # cleanup and remove old link
+  ln -sf "$latest_ver" current
 }
 
 # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210

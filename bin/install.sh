@@ -40,20 +40,33 @@ is_CI() {
 printf '\e[8;50;140t'
 
 
-# grab latest mdm release and link it
+# needed for testing
+if [[ $GITHUB_WORKSPACE ]]; then
+  REPO_BRANCH="${GITHUB_REF#refs/heads/}"
+elif [[ $TRAVIS ]]; then
+  REPO_BRANCH="$TRAVIS_BRANCH"
+fi
+
+# grab latest mdm release/branch head and link it
 # this code should closely mirror download_and_link_latest_release func in lib.sh
 # but must also exist here to bootstrap mdm
 repo_url="https://github.com/PMET-public/mdm"
 mdm_path="$HOME/.mdm"
 mkdir -p "$mdm_path"
 cd "$mdm_path"
-latest_release_ver=$(curl -s "$repo_url/releases" | \
-  perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1')
-curl -sLO "$repo_url/archive/$latest_release_ver.tar.gz"
-mkdir -p "$latest_release_ver"
-tar -zxf "$latest_release_ver.tar.gz" --strip-components 1 -C "$latest_release_ver"
-rm "$latest_release_ver.tar.gz" current 2> /dev/null || : # cleanup and remove old link
-ln -sf "$latest_release_ver" current
+# testing should grab the latest head of the branch
+# unless master which would be equivalent to the latest release so use/test that instead
+if [[ "$REPO_BRANCH" && "$REPO_BRANCH" != "master" ]]; then
+  latest_ver="$REPO_BRANCH"
+else
+  latest_ver=$(curl -s "$repo_url/releases" | \
+    perl -ne 'BEGIN{undef $/;} /archive\/(.*)\.tar\.gz/ and print $1')
+fi
+curl -sLO "$repo_url/archive/$latest_ver.tar.gz"
+mkdir -p "$latest_ver"
+tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver"
+rm "$latest_ver.tar.gz" current 2> /dev/null || : # cleanup and remove old link
+ln -sf "$latest_ver" current
 
 set +x # if we make it this far, turn off the debugging output for the rest
 clear
