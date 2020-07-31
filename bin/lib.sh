@@ -302,7 +302,7 @@ is_valid_git_url() {
 }
 
 is_existing_cloud_env() {
-  [[ $env_is_existing_cloud ]]
+  [[ "$env_is_existing_cloud" ]]
 }
 
 is_hostname_resolving_to_local() {
@@ -476,11 +476,11 @@ find_hostnames_not_resolving_to_local() {
     [[ "$hostname" ]] && ! is_hostname_resolving_to_local "$hostname" && 
       hostnames_not_resolving_to_local+=" $hostname"
   done
-  echo $hostnames_not_resolving_to_local | trim
+  echo "$hostnames_not_resolving_to_local" | trim
 }
 
 add_hostnames_to_hosts_file() {
-  local lines="" $error_msg="Could not update hosts files." tmp_hosts
+  local lines="" error_msg="Could not update hosts files." tmp_hosts
   for host in $hostnames_not_resolving_to_local; do
     lines+="127.0.0.1 $host $hosts_file_line_marker"$'\n'
   done
@@ -671,10 +671,10 @@ adjust_compose_project_name_for_docker_compose_version() {
   docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
   more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | $sort_cmd -V | tail -1)"
   # now strip dashes if 1.21.0 is more recent
-  if [[ $more_recent_of_two != $docker_compose_ver ]]; then
-    echo $1 | perl -pe 's/-//g'
+  if [[ "$more_recent_of_two" != "$docker_compose_ver" ]]; then
+    echo "$1" | perl -pe 's/-//g'
   else
-    echo $1
+    echo "$1"
   fi
 }
 

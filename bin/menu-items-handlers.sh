@@ -60,8 +60,8 @@ install_additional_tools() {
     ! is_docker_bash_completion_installed && is_mac && {
       msg_w_newlines "Installing shell completion support for Docker for Mac ..."
       etc=/Applications/Docker.app/Contents/Resources/etc
-      ln -s $etc/docker.bash-completion $(brew --prefix)/etc/bash_completion.d/docker
-      ln -s $etc/docker-compose.bash-completion $(brew --prefix)/etc/bash_completion.d/docker-compose
+      ln -s "$etc/docker.bash-completion" "$(brew --prefix)/etc/bash_completion.d/docker"
+      ln -s "$etc/docker-compose.bash-completion" "$(brew --prefix)/etc/bash_completion.d/docker-compose"
     }
 
     is_mac && ! is_platypus_installed && {
@@ -209,7 +209,7 @@ revert_to_prev_mdm() {
   # should only happen on dev machine, right?
   # have version determined by path only so it's authoritative?
   local current vers
-  cd "$mdm_path"
+  cd "$mdm_path" || exit
   current="$(readlink current)"
   # find available version not including 0.0.x
   vers="$(
@@ -220,9 +220,9 @@ revert_to_prev_mdm() {
     xargs
   )"
   prev=$(echo "${vers/* $current / }" | perl -pe 's/.*?\b([0-9.]+).*/$1/')
-  [[ -d $prev ]] && {
+  [[ -d "$prev" ]] && {
     rm current
-    ln -sf $prev current
+    ln -sf "$prev" current
   }
 }
 
@@ -319,10 +319,10 @@ run_as_bash_cmds_in_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     cd "$apps_resources_dir/app" || exit
     echo 'Running in Magento app:'
-    msg '
+    msg "
       $1
-  '
-    docker-compose run --rm deploy bash -c '$1' 2> /dev/null
+"
+    docker-compose run --rm deploy bash -c "$1" 2> /dev/null
   }
 }
 
@@ -363,9 +363,9 @@ warm_cache() {
     msg Warming cache ...
 
     # recursively get admin and store front
-    wget -nv -O $tmp_file -H --domains=$domain $url/admin
-    wget -nv -r -X static,media -l 1 -O $tmp_file -H --domains=$domain $url
-    rm $tmp_file
+    wget -nv -O "$tmp_file" -H --domains="$domain" "$url/admin"
+    wget -nv -r -X static,media -l 1 -O "$tmp_file" -H --domains="$domain" "$url"
+    rm "$tmp_file"
   }
 }
 
@@ -391,7 +391,7 @@ start_mdm_shell() {
       services_status="$(warning_w_newlines "Magento app not installed yet.")"
     fi
     cd "$apps_resources_dir/app" || exit
-    msg Running $COMPOSE_PROJECT_NAME from $(pwd)
+    msg "Running $COMPOSE_PROJECT_NAME from $(pwd)"
     echo -e "\\n\\n$services_status"
     msg_w_newlines "
   You can run docker-compose cmds here, but it's recommend to use the MDM app to (un)install or

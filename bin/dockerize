@@ -271,10 +271,10 @@ app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml
 
 composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
 docker pull "$composer_image"
-cid=$(docker create $ssh_auth_opts -v "$PWD:/app:delegated" \
+cid="$(docker create $ssh_auth_opts -v "$PWD:/app:delegated" \
   -e COMPOSER_AUTH -e COMPOSER_HOME=.composer -e DEBUG=true \
-  "$composer_image" /tmp/script_for_php_container)
-docker cp "$script_for_tmp_php_container" $cid:/tmp/script_for_php_container
+  "$composer_image" /tmp/script_for_php_container)"
+docker cp "$script_for_tmp_php_container" "$cid:/tmp/script_for_php_container"
 docker start -a "$cid"
 rm "$script_for_tmp_php_container"
 cp -r docker-compose*.yml .docker "$app_dir"

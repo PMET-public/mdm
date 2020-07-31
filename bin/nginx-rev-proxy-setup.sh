@@ -124,10 +124,10 @@ docker_nginx_image="pmetpublic/nginx-with-pagespeed:1.0"
 docker pull "$docker_nginx_image"
 
 cid=$(docker create --label mdm-nginx-rev-proxy -v "$mdm_path/certs":/etc/letsencrypt/certs -p 443:443 -p 80:80 --network mdm_default "$docker_nginx_image")
-docker cp $tmp_nginx_conf_dir/. $cid:/etc/nginx/conf.d
+docker cp "$tmp_nginx_conf_dir/." "$cid:/etc/nginx/conf.d"
 
-rm -rf $tmp_nginx_conf_dir
+rm -rf "$tmp_nginx_conf_dir"
 # delete exited or currently running nginx rev proxies
 old_cid="$(docker ps -qa --filter 'label=mdm-nginx-rev-proxy' --filter 'status=running' --filter 'status=exited')"
-[[ $old_cid ]] && docker rm -f $old_cid
-docker start $cid
+[[ "$old_cid" ]] && docker rm -f "$old_cid"
+docker start "$cid"
