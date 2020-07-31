@@ -617,9 +617,11 @@ track_job_status_and_wait_for_exit() {
   mv "$job_file" "$job_file.$($date_cmd +%s).$exit_code.done"
 }
 
-extract_tar_to_docker() {
+extract_tar_to_existing_container_path() {
   # extract tar to tmp dir then stream to docker build container
   # N.B. `tar -xf some.tar -O` is stream of file _contents_; `tar -cf -` is tar formatted stream (handles metadata)
+  [[ "$1" && "$2" && ( "$1" =~ \.tar$ || "$1" =~ \.tar\.gz$ ) && "$2" =~ : ]] ||
+    error "${FUNCNAME[0]} missing or bad required params"
   local src_tar container_dest tmp_dir
   src_tar="$1"
   container_dest="$2"
