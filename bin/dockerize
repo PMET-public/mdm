@@ -227,7 +227,7 @@ is_existing_cloud_env && {
 # 3. do not run the composer.json install scripts (also to speed up the composer cache creation)
 # 4. use modified version of magento-cloud-docker to create modified docker-compose files
 # 5. restore original composer.json and composer.lock to ensure originals are used for deployment in containers
-cd "$tmp_app_dir" || exit
+cd "$tmp_app_dir" || exit 1
 [[ ! -z "$auth_json_path" ]] && # if auth.json provided, use it
   cp "$auth_json_path" "$tmp_app_dir"
 [[ ! -f "auth.json" && ! $COMPOSER_AUTH ]] && 
@@ -306,7 +306,7 @@ is_existing_cloud_env && {
 tar -zcf "$app_dir/.composer.tar.gz" .composer
 
 # del tmp dir
-cd "$app_dir" || exit
+cd "$app_dir" || exit 1
 
 # current magento php image run as root, so root owns the files if not using docker desktop for mac
 if is_mac; then

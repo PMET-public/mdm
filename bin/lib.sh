@@ -656,7 +656,7 @@ reload_rev_proxy() {
 download_and_link_latest() {
   local latest_ver
   latest_ver="${1:-$(lookup_latest_remote_sem_ver)}"
-  cd "$mdm_path"
+  cd "$mdm_path" || exit 1
   curl -sLO "$repo_url/archive/$latest_ver.tar.gz"
   mkdir -p "$latest_ver"
   tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver"

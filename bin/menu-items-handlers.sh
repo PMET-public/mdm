@@ -114,7 +114,7 @@ update_mdm() {
 install_app() {
   {
     msg_w_timestamp "${FUNCNAME[0]}"
-    cd "$apps_resources_dir/app" || exit
+    cd "$apps_resources_dir/app" || exit 1
     docker-compose pull # check for new versions
     # create containers but do not start
     docker-compose up --no-start
@@ -209,7 +209,7 @@ revert_to_prev_mdm() {
   # should only happen on dev machine, right?
   # have version determined by path only so it's authoritative?
   local current vers
-  cd "$mdm_path" || exit
+  cd "$mdm_path" || exit 1
   current="$(readlink current)"
   # find available version not including 0.0.x
   vers="$(
@@ -310,14 +310,14 @@ no_op() {
 
 start_shell_in_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    cd "$apps_resources_dir/app" || exit
+    cd "$apps_resources_dir/app" || exit 1
     docker-compose run --rm deploy bash
   }
 }
 
 run_as_bash_cmds_in_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    cd "$apps_resources_dir/app" || exit
+    cd "$apps_resources_dir/app" || exit 1
     echo 'Running in Magento app:'
     msg "
       $1
@@ -390,7 +390,7 @@ start_mdm_shell() {
     else
       services_status="$(warning_w_newlines "Magento app not installed yet.")"
     fi
-    cd "$apps_resources_dir/app" || exit
+    cd "$apps_resources_dir/app" || exit 1
     msg "Running $COMPOSE_PROJECT_NAME from $(pwd)"
     echo -e "\\n\\n$services_status"
     msg_w_newlines "
@@ -424,7 +424,7 @@ show_errors_from_mdm_logs() {
 
 show_mdm_logs() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    cd "$apps_resources_dir" || exit
+    cd "$apps_resources_dir" || exit 1
     screen -c "$lib_dir/../.screenrc"
   }
 }
@@ -436,7 +436,7 @@ uninstall_app() {
     exec 2> >(tee -ia "$handler_log_file" >&2)
     warning_w_newlines "THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!"
     confirm_or_exit
-    cd "$apps_resources_dir/app" || exit
+    cd "$apps_resources_dir/app" || exit 1
     docker-compose down -v
   }
 }
