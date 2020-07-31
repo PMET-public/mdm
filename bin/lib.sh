@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 # don't trap errors while using VSC debugger
@@ -230,20 +230,13 @@ invoked_mdm_without_args() {
   elif [[ -n "$vsc_debugger_arg" ]]; then
     mdm_input="$vsc_debugger_arg"
     return 1
-  elif [[ ${BASH_ARGV[-1]} =~ /bin/mdm$ ]]; then
+  elif [[ "${BASH_ARGV[-1]}" =~ /bin/mdm$ ]]; then
     return 0
   else
     mdm_input="${BASH_ARGV[-1]}"
     return 1
   fi
 }
-
-# if docker is up and the current launcher innovaction is constructing the current menu, then cache this docker output
-# to parse for additional options
-is_docker_ready && invoked_mdm_without_args && formatted_cached_docker_ps_output="$(
-  docker ps -a -f "label=com.docker.compose.service=db" --format "{{.Names}} {{.Status}}" | \
-    perl -pe 's/ (Up|Exited) .*/ \1/'
-)"
 
 # need way to distinguish being sourced for specific app or sourced for some other script (e.g. dockerize script)
 lib_sourced_for_specific_bundled_app() {
@@ -930,7 +923,7 @@ Once all requirements are installed and validated, this script will not need to 
 }
 
 self_uninstall() {
-  [[ -d "$mdm_path" && -f "$mdm_path/current/bin/lib.sh" ]] && rm -rf "$mdm_path"
+  [[ -d "$mdm_path" && -f "$mdm_path/current/bin/lib.sh" ]] && rm -rf "$mdm_path" || :
 }
 
 lib_sourced_for_specific_bundled_app && {
@@ -938,6 +931,12 @@ lib_sourced_for_specific_bundled_app && {
   init_app_specific_vars
   [[ "$debug" ]] && init_mdm_logging
   ! is_detached && init_quit_detection
+  # if docker is up and the current launcher innovaction is constructing the current menu, then cache this docker output
+  # to parse for additional options
+  is_docker_ready && invoked_mdm_without_args && formatted_cached_docker_ps_output="$(
+    docker ps -a -f "label=com.docker.compose.service=db" --format "{{.Names}} {{.Status}}" | \
+      perl -pe 's/ (Up|Exited) .*/ \1/'
+  )"
 }
 
 : # need to return true or will exit when sourced with "-e" and last test = false
