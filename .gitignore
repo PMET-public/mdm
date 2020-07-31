@@ -1,2 +1,4 @@
 .vagrant
 *-console.log
+certs
+tests/libs
