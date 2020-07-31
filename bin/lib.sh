@@ -642,7 +642,7 @@ reload_rev_proxy() {
   source "$lib_dir/nginx-rev-proxy-setup.sh"
 }
 
-download_and_link_latest_release() {
+download_and_link_latest() {
   local latest_ver
   latest_ver=$(lookup_latest_remote_sem_ver)
   cd "$mdm_path"
@@ -651,6 +651,7 @@ download_and_link_latest_release() {
   tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver"
   rm "$latest_ver.tar.gz" current || : # cleanup and remove old link
   ln -sf "$latest_ver" current
+  cp -r current/certs/ certs/ # cp/replace over any new certs
 }
 
 # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210

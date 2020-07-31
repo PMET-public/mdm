@@ -108,7 +108,7 @@ start_docker() {
 }
 
 update_mdm() {
-  download_and_link_latest_release
+  download_and_link_latest
 }
 
 install_app() {
