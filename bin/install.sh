@@ -67,7 +67,7 @@ mkdir -p "$latest_ver"
 tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver"
 rm "$latest_ver.tar.gz" current 2> /dev/null || : # cleanup and remove old link
 ln -sf "$latest_ver" current
-cp -r current/certs/ certs/ # cp/replace over any new certs
+rsync -az current/certs/ certs/ # cp/replace over any new certs
 
 set +x # if we make it this far, turn off the debugging output for the rest
 clear

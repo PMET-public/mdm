@@ -651,7 +651,7 @@ download_and_link_latest() {
   tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver"
   rm "$latest_ver.tar.gz" current || : # cleanup and remove old link
   ln -sf "$latest_ver" current
-  cp -r current/certs/ certs/ # cp/replace over any new certs
+  rsync -az current/certs/ certs/ # cp/replace over any new certs
 }
 
 # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
