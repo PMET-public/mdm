@@ -169,3 +169,23 @@ load '../../bin/lib.sh'
   assert_success
   assert_output "*.www.test.com"
 }
+
+
+@test "lookup_latest_remote_sem_ver" {
+  run lookup_latest_remote_sem_ver
+  assert_success
+  assert_output -e ".+\..+\..+"
+}
+
+@test "download_and_link_latest" {
+  ver="$(lookup_latest_remote_sem_ver)"
+  run download_and_link_latest
+  assert_success
+  assert_symlink_to "$HOME/.mdm/$ver" "$HOME/.mdm/current"
+}
+
+@test "download_and_link_latest develop" {
+  run download_and_link_latest develop
+  assert_success
+  assert_symlink_to "$HOME/.mdm/develop" "$HOME/.mdm/current"
+}
