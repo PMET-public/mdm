@@ -77,7 +77,7 @@ mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $
 ###
 
 has_uncleared_jobs_statuses() {
-  [[ -d "$apps_mdm_dir/jobs" && "$(find "$apps_mdm_dir/jobs" -type f -not -name "*.cleared" -print -quit)" ]]
+  [[ -d "$apps_mdm_jobs_dir" && "$(find "$apps_mdm_jobs_dir" -type f -not -name "*.cleared" -print -quit)" ]]
 }
 
 is_magento_cloud_cli_installed() {
@@ -611,7 +611,7 @@ track_job_status_and_wait_for_exit() {
   local pid_to_wait_for msg job_file
   pid_to_wait_for="$1"
   msg="$2"
-  job_file="$apps_mdm_dir/jobs/$($date_cmd +%s).$pid_to_wait_for"
+  job_file="$apps_mdm_jobs_dir/$($date_cmd +%s).$pid_to_wait_for"
   echo "$msg" > "$job_file"
   wait "$pid_to_wait_for" || exit_code=$?
   mv "$job_file" "$job_file.$($date_cmd +%s).$exit_code.done"
@@ -814,7 +814,8 @@ init_app_specific_vars() {
     export_image_vars_for_override_yml
   fi
   apps_mdm_dir="$launched_apps_dir/$COMPOSE_PROJECT_NAME"
-  mkdir -p "$apps_mdm_dir"
+  apps_mdm_jobs_dir="$apps_mdm_dir/jobs"
+  mkdir -p "$apps_mdm_jobs_dir"
 }
 
 init_mdm_logging() {

@@ -10,7 +10,7 @@
 # if one of the cleared was an error, pop up a terminal with what that error was
 clear_job_statuses() {
   local job_file job_msg job_start job_pid job_end job_exit_code job_ui_state unseen_error_msgs=""
-  pushd "$apps_mdm_dir/jobs" > /dev/null || return
+  pushd "$apps_mdm_jobs_dir" > /dev/null || return
   for job_file in $(find * -type f -not -name "*.cleared"); do
     mv "$job_file" "${job_file/%seen/cleared}"
     [[ "$job_exit_code" != "0" ]] && unseen_error_msgs="true"
@@ -27,7 +27,7 @@ clear_job_statuses() {
 # calculate the run time for each job
 get_job_statuses() {
   local job_file job_msg job_start job_pid job_end job_exit_code job_ui_state
-  pushd "$apps_mdm_dir/jobs" > /dev/null || return
+  pushd "$apps_mdm_jobs_dir" > /dev/null || return
   for job_file in $(find * -type f -not -name "*.cleared"); do
     read -r job_start job_pid job_end job_exit_code job_ui_state <<<"$(echo "$job_file" | tr '.' ' ')"
     job_msg="$(<"$job_file")"
