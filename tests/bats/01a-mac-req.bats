@@ -7,6 +7,7 @@ load '../libs/bats-file/load'
 load '../../bin/lib.sh'
 
 setup() {
+  shopt -s nocasematch
   is_docker_installed && is_docker_ready || error "Docker missing."
 }
 

@@ -9,28 +9,34 @@ load '../libs/bats-file/load'
 
 load '../../bin/lib.sh'
 
+setup() {
+  shopt -s nocasematch
+}
+
 @test "self_install" {
+  self_uninstall
   run self_install
   assert_success
+  assert_output -p "installed"
+  assert_output -p "terminal"
 }
 
 @test './bin/launcher' {
-  shopt -s nocasematch
+  self_uninstall
   run ./bin/launcher
   assert_success
   assert_output -e "install.*missing"
 }
 
 @test './bin/launcher with initial output' {
-  shopt -s nocasematch
+
   output="$(./bin/launcher)"
   run ./bin/launcher "$output"
   assert_success
-  assert_output -e "installed"
+  assert_output -p "installed"
 }
 
 @test './bin/launcher install_additional_tools' {
-  shopt -s nocasematch
   run ./bin/launcher install_additional_tools
   assert_success
   assert_output -p "magento-cloud"

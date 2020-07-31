@@ -9,6 +9,10 @@ load '../libs/bats-file/load'
 
 load '../../bin/lib.sh'
 
+setup() {
+  shopt -s nocasematch
+}
+
 @test 'convert_secs_to_hms "3599"' {
   run convert_secs_to_hms "3599"
   assert_equal "${lines[0]}" '59m 59s'

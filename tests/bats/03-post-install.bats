@@ -9,9 +9,9 @@ load '../libs/bats-file/load'
 
 load '../../bin/lib.sh'
 
-
-# requires installation
-
+setup() {
+  shopt -s nocasematch
+}
 
 @test 'does_cert_and_key_exist_for_host "localhost"' {
   run does_cert_and_key_exist_for_host "localhost"

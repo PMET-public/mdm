@@ -926,9 +926,12 @@ Once all requirements are installed and validated, this script will not need to 
 
   You may close this terminal.
   "
-  }
+  } || :
 }
 
+self_uninstall() {
+  [[ -d "$mdm_path" && -f "$mdm_path/current/bin/lib.sh" ]] && rm -rf "$mdm_path"
+}
 
 lib_sourced_for_specific_bundled_app && {
   ensure_mdm_log_files_exist
