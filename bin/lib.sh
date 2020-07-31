@@ -654,12 +654,13 @@ reload_rev_proxy() {
 }
 
 download_and_link_latest() {
-  local latest_ver
+  local latest_ver latest_ver_dir
   latest_ver="${1:-$(lookup_latest_remote_sem_ver)}"
-  cd "$mdm_path" || exit 1
+  latest_ver_dir="$mdm_path/latest_ver"
+  mkdir -p "$latest_ver_dir"
+  cd "$mdm_path"
   curl -sLO "$repo_url/archive/$latest_ver.tar.gz"
-  mkdir -p "$latest_ver"
-  tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver"
+  tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver_dir"
   rm "$latest_ver.tar.gz" current || : # cleanup and remove old link
   ln -sf "$latest_ver" current
   [[ -d current/certs ]] && rsync -az current/certs/ certs/ || : # cp over any new certs if the exist
