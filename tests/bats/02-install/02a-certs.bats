@@ -3,11 +3,11 @@
 # bats will loop indefinitely with debug mode on (i.e. set -x)
 unset debug
 
-load '../libs/bats-assert/load'
-load '../libs/bats-support/load'
-load '../libs/bats-file/load'
+load '../../libs/bats-assert/load'
+load '../../libs/bats-support/load'
+load '../../libs/bats-file/load'
 
-load '../../bin/lib.sh'
+load '../../../bin/lib.sh'
 
 setup() {
   shopt -s nocasematch

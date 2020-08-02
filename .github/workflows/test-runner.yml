@@ -28,34 +28,25 @@ jobs:
           submodules: 'true'
       - name: 1 checkout
         run: |
-          ./tests/bats/01-checkout.bats
-      - name: 1a mac required
-          run: |
-            ./tests/bats/01a-mac-required.bats
-      - name: 1b docker required
-          run: |
-            ./tests/bats/01b-docker-required.bats
+          ./tests/bats/01-checkout/*.bats
       - name: 2 install
         run: |
-          ./tests/bats/02-install.bats
-      - name: 2a certs tests
-        run: |
-          ./tests/bats/02a-certs.bat
-      - name: non-docker tests
-        run: |
-          ./tests/CI/non-docker-menu-selections.sh
-      - name: docker tests
-        run: |
-          ./tests/CI/docker-menu-selections.sh
-      - name: create detached mdm
-        run: |
-          ./tests/CI/create-detached-mdm.sh
-      - name: create mdm app from mc repo
-        run: |
-          ./tests/CI/create-mdm-app-from-mc-repo.sh
-      - name: check homebrew dependency behavior
-        run: |
-          ./tests/CI/check-homebrew.sh
-      - name: keepalive to debug
-        if: ${{ failure() }}
-        uses: PMET-public/action-tmate@master
+          ./tests/bats/02-install/*.bats
+      # - name: non-docker tests
+      #   run: |
+      #     ./tests/CI/non-docker-menu-selections.sh
+      # - name: docker tests
+      #   run: |
+      #     ./tests/CI/docker-menu-selections.sh
+      # - name: create detached mdm
+      #   run: |
+      #     ./tests/CI/create-detached-mdm.sh
+      # - name: create mdm app from mc repo
+      #   run: |
+      #     ./tests/CI/create-mdm-app-from-mc-repo.sh
+      # - name: check homebrew dependency behavior
+      #   run: |
+      #     ./tests/CI/check-homebrew.sh
+      # - name: keepalive to debug
+      #   if: ${{ failure() }}
+      #   uses: PMET-public/action-tmate@master

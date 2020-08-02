@@ -1,10 +1,10 @@
 #!/usr/bin/env ./tests/libs/bats/bin/bats
 
-load '../libs/bats-assert/load'
-load '../libs/bats-support/load'
-load '../libs/bats-file/load'
+load '../../libs/bats-assert/load'
+load '../../libs/bats-support/load'
+load '../../libs/bats-file/load'
 
-load '../../bin/lib.sh'
+load '../../../bin/lib.sh'
 
 setup() {
   shopt -s nocasematch
