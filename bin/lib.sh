@@ -386,15 +386,19 @@ ARE YOU SURE?! (y/n)
   }
 }
 
-get_github_token() {
-  perl -ne '/github.com".*?"([^"]*)"/ and print "$1"' "$HOME/.composer/auth.json" 2> /dev/null
+# look in env and fallback to expected home path
+get_github_token_from_composer_auth() {
+  echo "$COMPOSER_AUTH" && cat "$HOME/.composer/auth.json" | 
+    perl -ne '/github.com".*?"([^"]*)"/ and print "$1"' |
+    head -1
 }
 
 get_github_file_contents() {
   local project="$1" path="$2" ref="$3" token
-  token="$(get_github_token)"
+  token="$(get_github_token_from_composer_auth)"
+  echo "https://api.github.com/repos/$project/contents/$path?ref=${ref:-master}"
   [[ "$token" ]] &&
-    curl -L -H 'Accept: application/vnd.github.v3.raw' \
+    curl --fail -L -H 'Accept: application/vnd.github.v3.raw' \
       -H "Authorization: token $token" \
       "https://api.github.com/repos/$project/contents/$path?ref=${ref:-master}"
 }
