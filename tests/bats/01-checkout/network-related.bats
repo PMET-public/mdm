@@ -13,7 +13,6 @@ setup() {
   shopt -s nocasematch
 }
 
-
 @test 'normalize_hostname "a?" -> "a"' {
   run normalize_hostname "a?"
   assert_output 'a'
