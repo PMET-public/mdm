@@ -29,12 +29,18 @@ jobs:
       - name: 1 checkout
         run: |
           ./tests/bats/01-checkout.bats
+      - name: 1a mac required
+          run: |
+            ./tests/bats/01a-mac-required.bats
+      - name: 1b docker required
+          run: |
+            ./tests/bats/01b-docker-required.bats
       - name: 2 install
         run: |
           ./tests/bats/02-install.bats
-      - name: 3 post install
+      - name: 2a certs tests
         run: |
-          ./tests/bats/03-post-install.bats
+          ./tests/bats/02a-certs.bat
       - name: non-docker tests
         run: |
           ./tests/CI/non-docker-menu-selections.sh
