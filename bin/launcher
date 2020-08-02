@@ -80,7 +80,7 @@ else
     else
       "$installer"
     fi
-
+    echo "Successfully installed missing requirements on this computer"
   fi
 
 fi

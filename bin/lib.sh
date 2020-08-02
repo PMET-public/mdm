@@ -649,7 +649,7 @@ reload_rev_proxy() {
 download_and_link_latest() {
   local latest_ver latest_ver_dir
   latest_ver="${1:-$(lookup_latest_remote_sem_ver)}"
-  latest_ver_dir="$mdm_path/latest_ver"
+  latest_ver_dir="$mdm_path/$latest_ver"
   mkdir -p "$latest_ver_dir"
   cd "$mdm_path"
   curl -sLO "$repo_url/archive/$latest_ver.tar.gz"
