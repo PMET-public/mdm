@@ -590,6 +590,11 @@ get_wildcard_cert_and_key_for_mdm_demo_domain() {
   }
 }
 
+mkcert_for_domain() {
+  is_valid_hostname "$1" || error "Invalid name $1"
+  mkcert -cert-file "$certs_dir/$1/fullchain1.pem" -key-file "certs/$1/privkey1.pem" $1
+}
+
 cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain() {
   local subdomain="$1"
   [[ "$subdomain" =~ $mdm_demo_domain$ ]] && is_new_cert_required_for_domain "$subdomain" && {
@@ -603,6 +608,24 @@ cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain() {
 # end network functions
 #
 ###
+
+sudo_run_bash_cmds() {
+  local script
+  script="$(mktemp)"
+  echo "#!/usr/bin/env bash -l
+    $*
+  " > "$script"
+  chmod u+x "$script"
+  # echo "Running $script ..."
+  if is_running_as_sudo; then
+    "$script"
+  elif is_terminal_interactive; then
+    sudo "$script"
+  elif is_mac; then
+    # osascript -e "do shell script \"sudo mv $tmp_hosts /etc/hosts \" with administrator privileges" ||
+    osascript -e "do shell script \"$script\" with administrator privileges"
+  fi
+}
 
 # some menu item handlers should open a terminal to receive user input or display output to the user
 # however, if MDM_DIRECT_HANDLER_CALL is true in function, then the calling function has already
