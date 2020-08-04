@@ -46,7 +46,7 @@ recommended_vm_mem_mb=4096
 recommended_vm_swap_mb=2048
 recommended_vm_disk_mb=64000
 bytes_in_mb=1048576
-mdm_demo_domain="the1umastory.com"
+mdm_demo_domain="storystore.dev"
 detached_project_name="detached-mdm"
 hosts_file_line_marker="# added by MDM"
 
@@ -495,38 +495,21 @@ add_hostnames_to_hosts_file() {
   fi
 }
 
-does_cert_and_key_exist_for_host() {
-  local hostname="$1" cert_dir
-  cert_dir="$certs_dir/$hostname"
-  [[ -d "$cert_dir" && -f "$cert_dir/fullchain1.pem" && -f "$cert_dir/privkey1.pem" ]]
-}
 
-read_cert_for_hostname() {
-  openssl x509 -text -noout -in "$certs_dir/$1/fullchain1.pem" || error "Could not read cert for $1"
-}
+# for certificate functions, a wildcard domain parameter should be passed as "*.example.com" or ".example.com"
+# if a domain name consisting of 2 parts is the full, desired hostname, then it should only 
+# contain those 2 parts e.g. example.com
+#
+# N.B. most browsers will not accept a wildcard certificate for "*.example.com" as valid for "example.com",
+# but a certificate can explicitly designate both "*.example.com" and "example.com" as valid 
+# in the common names section of a cert
 
-get_cert_utc_end_date_for_hostname() {
-  local end_date
-  end_date="$(read_cert_for_hostname "$1" | perl -ne 's/\s*not after :\s*//i and print')"
-  [[ "$end_date" ]] && $date_cmd --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S" ||
-    error "Could not retrieve end date"
-}
-
-is_cert_for_hostname_current() {
-  local end_date
-  end_date="$(get_cert_utc_end_date_for_hostname "$1")"
-  [[ "$end_date" && "$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")" < "$end_date" ]] ||
-    error "Could not determine if cert is current"
-}
-
-is_cert_for_hostname_expiring_soon() {
-  local end_date
-  end_date="$(get_cert_utc_end_date_for_hostname "$1")"
-  [[ "$end_date" && "$($date_cmd --utc --date "+7 days" +"%Y-%m-%d %H:%M:%S")" > "$end_date" ]]
+normalize_domain_if_wildcard() {
+  echo "${1/#\*/}"
 }
 
 has_valid_wildcard_domain() {
-  [[ "$1" =~ .+\..+ ]]
+  [[ "$1" =~ .+\..+ ]] # need at least 2 part domain name, and thus a "."
 }
 
 wildcard_domain_for_hostname() {
@@ -534,20 +517,77 @@ wildcard_domain_for_hostname() {
     echo "$1" | perl -pe '/.+\..+/ and s/.*?\./*./'
 }
 
-is_cert_match_for_hostname() {
-  local wildcard_domain
-  if has_valid_wildcard_domain "$1"; then
-    wildcard_domain="$(wildcard_domain_for_hostname "$1")"
-    read_cert_for_hostname "$1" | grep -q "DNS:$1" ||
-      read_cert_for_hostname "$1" | grep -q "DNS:$wildcard_domain"
-  else
-    read_cert_for_hostname "$1" | grep -q "DNS:$1"
-  fi
+does_cert_and_key_exist_for_domain() {
+  local domain cert_dir
+  domain="$(normalize_domain_if_wildcard "$1")"
+  cert_dir="$certs_dir/$domain"
+  [[ -d "$cert_dir" && -f "$cert_dir/fullchain1.pem" && -f "$cert_dir/privkey1.pem" ]]
 }
 
-is_new_cert_required_for_host() {
-  ! { does_cert_and_key_exist_for_host "$1" && is_cert_for_hostname_current "$1" && 
-    is_cert_match_for_hostname "$1" && ! is_cert_for_hostname_expiring_soon "$1"; }
+read_cert_for_domain() {
+  local domain cert_dir
+  domain="$(normalize_domain_if_wildcard "$1")"
+  cert_dir="$certs_dir/$domain"
+  openssl x509 -text -noout -in "$cert_dir/fullchain1.pem" || error "Could not read cert for $domain"
+}
+
+get_cert_utc_end_date_for_domain() {
+  local end_date
+  end_date="$(read_cert_for_domain "$1" | perl -ne 's/\s*not after :\s*//i and print')"
+  [[ "$end_date" ]] && $date_cmd --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S" ||
+    error "Could not retrieve end date"
+}
+
+is_cert_current_for_domain() {
+  local end_date
+  end_date="$(get_cert_utc_end_date_for_domain "$1")"
+  [[ "$end_date" && "$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")" < "$end_date" ]] ||
+    error "Could not determine if cert is current"
+}
+
+is_cert_for_domain_expiring_soon() {
+  local end_date
+  end_date="$(get_cert_utc_end_date_for_domain "$1")"
+  [[ "$end_date" && "$($date_cmd --utc --date "+7 days" +"%Y-%m-%d %H:%M:%S")" > "$end_date" ]]
+}
+
+
+# .domain.com/ must contain a wildcard cert for "*.domain.com"
+# my.domain.com/ must contain a cert for "my.domain.com" or a cert for "*.domain.com"
+does_cert_follow_convention() { 
+  local domain cert
+  domain="$(normalize_domain_if_wildcard "$1")"
+  cert="$(read_cert_for_domain "$domain")"
+  if [[ "$domain" =~ ^\. ]]; then
+    [[ "$cert" =~ DNS:\*$domain ]] && return
+  else
+    wildcard_domain="$(wildcard_domain_for_hostname "$1")"
+    [[ "$cert" =~ DNS:.*$domain || "$cert" =~ DNS:\*$wildcard_domain ]] && return
+  fi
+  return 1
+}
+
+is_new_cert_required_for_domain() {
+  ! { does_cert_and_key_exist_for_domain "$1" && is_cert_current_for_domain "$1" && 
+    does_cert_follow_convention "$1" && ! is_cert_for_domain_expiring_soon "$1"; }
+}
+
+
+get_wildcard_cert_and_key_for_mdm_demo_domain() {
+  is_new_cert_required_for_domain ".$mdm_demo_domain" && {
+    cert_dir="$certs_dir/.$mdm_demo_domain"
+    mkdir -p "$cert_dir"
+    get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/fullchain1.pem" > "$cert_dir/fullchain1.pem"
+    get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/privkey1.pem" > "$cert_dir/privkey1.pem"
+  }
+}
+
+cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain() {
+  local subdomain="$1"
+  [[ "$subdomain" =~ $mdm_demo_domain$ ]] && is_new_cert_required_for_domain "$subdomain" && {
+    is_new_cert_required_for_domain ".$mdm_demo_domain" && get_wildcard_cert_and_key_for_mdm_demo_domain
+    rsync -az "$certs_dir/.$mdm_demo_domain/" "$certs_dir/$subdomain/"
+  }
 }
 
 ###

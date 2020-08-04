@@ -12,34 +12,32 @@ set -e
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
+cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain "pwa.$mdm_demo_domain"
+
 prepare_cert_and_key_for_hostname() {
   local hostname="$1" cert_dir
   cert_dir="$certs_dir/$hostname"
   mkdir -p "$cert_dir"
   
-  is_new_cert_required_for_host "$hostname" || return
+  is_new_cert_required_for_domain "$hostname" || return
 
   # otherwise, if applicable, try to fetch a valid cert
   # on other project, have certbot project push to private repo
   # attempt fetch if failure
-  [[ "$hostname" =~ \.storystore\.dev$ ]] && {
+  [[ "$hostname" =~ "$mdm_demo_domain" ]] && {
     # is there already a valid wildcard cert
-    is_new_cert_required_for_host "$mdm_demo_domain"
-    cert_dir="$certs_dir/$hostname"
-    
-    
-    mkdir -p "$cert_dir"
-    get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/fullchain1.pem" > "$cert_dir/fullchain1.pem"
+    is_new_cert_required_for_domain "$mdm_demo_domain"
+    get_wildcard_cert_and_key_for_mdm_demo_domain
   }
 
   if is_mkcert_installed; then
     mkcert -cert-file "$cert_dir/fullchain1.pem" -key-file "$cert_dir/privkey1.pem" "$hostname"
   else
-    # use a pregenerated insecure one included with MDM
+    # use a pregenerated insecure one created during MDM install
     cp -R "$certs_dir/localhost/" "$cert_dir"
   fi
 
-  does_cert_and_key_exist_for_host "$hostname" || error "Missing certificate or key for $hostname"
+  does_cert_and_key_exist_for_domain "$hostname" || error "Missing certificate or key for $hostname"
 
 }
 
@@ -55,7 +53,7 @@ prepare_certs_and_keys() {
 write_nginx_config_for_host_at_port() {
   local hostname="$1" web_port="$2" cert_dir
   [[ ! $hostname || ! $web_port ]] && error "Missing config option for nginx."
-  does_cert_and_key_exist_for_host "$hostname" ||
+  does_cert_and_key_exist_for_domain "$hostname" ||
     error "Missing necessary certificate or private key for $hostname."
   cat << EOF
     server {
@@ -84,8 +82,8 @@ write_nginx_configs() {
     # dirs_to_check=("$mdm_path/certs/$cur_wildcard_for_hostname" "$mdm_path/certs/$cur_magento_hostname")
     # for cur_dir in "${dirs_to_check[@]}"; do
     #   if [[ -d "$cur_dir" && -f "$cur_dir/fullchain1.pem" && -f "$cur_dir/privkey1.pem" ]]; then
-    #     is_cert_for_hostname_expiring_soon "$cur_dir/fullchain1.pem" && get_apps_certs
-    #     if is_cert_for_hostname_current "$cur_dir/fullchain1.pem"; then
+    #     is_cert_for_domain_expiring_soon "$cur_dir/fullchain1.pem" && get_apps_certs
+    #     if is_cert_current_for_domain "$cur_dir/fullchain1.pem"; then
     #       :
     #     else
     #       :
