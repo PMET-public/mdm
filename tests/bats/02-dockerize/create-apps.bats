@@ -11,10 +11,20 @@ load '../../../bin/lib.sh'
 
 setup() {
   shopt -s nocasematch
-  is_docker_installed && is_docker_ready || error "Docker missing."
 }
 
-@test "is_mac" {
-  run is_mac
+@test 'create detached app' {
+  run "$lib_dir/dockerize" -d
   assert_success
+  assert_output -e "created.*$detached_project_name"
 }
+
+@test 'open detached app' {
+  is_mac || skip
+  run open -a "$detached_project_name"
+  assert_success
+  assert_output ''
+}
+
+
+#  run ps aux | grep -qE "$detached_project_name\$"

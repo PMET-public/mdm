@@ -15,16 +15,19 @@ setup() {
 }
 
 @test "extract_tar_to_existing_container_path some.tar" {
+  is_docker_compatible || skip
   run extract_tar_to_existing_container_path some.tar.gz
   assert_failure
 }
 
 @test "extract_tar_to_existing_container_path some.tar some_container" {
+  is_docker_compatible || skip
   run extract_tar_to_existing_container_path some.tar.gz some_container
   assert_failure
 }
 
 @test "extract_tar_to_existing_container_path some.tar some_container:/some_dir" {
+  is_docker_compatible || skip
   mkdir -p a/1 a/2
   msg="hello, world!"
   echo "$msg" > a/1/file1
@@ -38,12 +41,14 @@ setup() {
 }
 
 @test "are_required_ports_free with no running containers" {
+  is_docker_compatible || skip
   docker stop $(docker ps -qa)
   run are_required_ports_free
   assert_success
 }
 
 @test "are_required_ports_free 80" {
+  is_docker_compatible || skip
   docker stop $(docker ps -qa)
   docker run -p 80:80 -d nginx
   sleep 5 # docker background process may take a moment
@@ -52,6 +57,7 @@ setup() {
 }
 
 @test "are_required_ports_free 443" {
+  is_docker_compatible || skip
   docker stop $(docker ps -qa)
   docker run -p 443:443 -d nginx
   sleep 5 # docker background process may take a moment
