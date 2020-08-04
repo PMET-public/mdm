@@ -384,7 +384,7 @@ confirm_or_exit() {
 ARE YOU SURE?! (y/n)
 
 "
-  read -p ''
+  read -r -p ''
   [[ $REPLY =~ ^[Yy]$ ]] || {
     msg_w_newlines "Exiting unchanged." && exit
   }
@@ -623,7 +623,7 @@ run_this_menu_item_handler_in_new_terminal_if_applicable() {
   echo "#!/usr/bin/env bash -l
 export REPO_DIR=\"${REPO_DIR}\"
 export apps_resources_dir=\"$apps_resources_dir\"
-[[ \"$debug\" ]] && echo \"\$(env | "$sort_cmd")\" && set -x
+[[ \"$debug\" ]] && echo \"\$(env | $sort_cmd)\" && set -x
 printf '\e[8;45;180t' # terminal size
 $lib_dir/launcher $caller
 " > "$script"
