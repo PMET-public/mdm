@@ -285,9 +285,12 @@ is_advanced_mode() {
   [[ -f "$advanced_mode_flag_file" ]]
 }
 
-is_hostname_curlable() {
-  # curl exit code 3 = bad url, so should be curlable if not equal to 3
-  curl -I "http://$1" || [[ "$?" -ne 3 ]]
+is_valid_hostname() {
+  # do not allow names to start with "."
+  # curl exit code 3 = bad/illegal url
+  [[ "$1" =~ ^\. ]] && {
+    curl -I "http://$1" || [[ "$?" -ne 3 ]]
+  }
 }
 
 is_valid_git_url() {

@@ -127,7 +127,7 @@ done
 
 [[ $app_hostname ]] && {
   app_hostname="$(normalize_hostname "$app_hostname")"
-  is_hostname_curlable "$app_hostname" ||
+  is_valid_hostname "$app_hostname" ||
     error "Provided name must be a valid hostname accepted by web browsers."
 }
 
@@ -164,7 +164,7 @@ You must provide either:
     git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/\1/')
     app_hostname="$git_repo-$branch$tag"
   fi
-  is_hostname_curlable "$app_hostname" ||
+  is_valid_hostname "$app_hostname" ||
     error "Could not create valid hostname from user inputs. Please specify one with the '-n' option."
 }
 
