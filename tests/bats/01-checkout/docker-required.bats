@@ -32,7 +32,7 @@ setup() {
   cid="$(docker create alpine)"
   extract_tar_to_existing_container_path some.tar.gz "$cid:/tmp"
   docker cp "$cid:/tmp/a/1/file1" file1
-  run cat file1
+  run cat file1 && rm -rf a some.tar.gz file1
   assert_success
   assert_output "$msg"
 }
