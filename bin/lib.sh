@@ -6,7 +6,7 @@ set -e
   set -E # If set, the ERR trap is inherited by shell functions.
   trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE.
 Env when error occurred:
-$(env | $sort_cmd)
+$(env | "$sort_cmd")
 "' ERR
 }
 
@@ -263,12 +263,12 @@ lookup_latest_remote_sem_ver() {
 is_update_available() {
   # check for a new version once a day (86400 secs)
   local more_recent_of_two
-  if [[ -f "$mdm_ver_file" && "$(( $($date_cmd +%s) - $($stat_cmd -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
+  if [[ -f "$mdm_ver_file" && "$(( $("$date_cmd" +"%s") - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
     local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using sort -V
-    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | $sort_cmd -V | tail -1)"
+    more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | "$sort_cmd" -V | tail -1)"
     [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
   else
     # get info in the background to prevent latency in menu rendering
@@ -337,7 +337,7 @@ trim() {
 }
 
 error() {
-  printf "\n%b%s%b\n\n" "$red" "[$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")] Error: $*" "$no_color" 1>&2 && exit 1
+  printf "\n%b%s%b\n\n" "$red" "[$("$date_cmd" --utc +"%Y-%m-%d %H:%M:%S")] Error: $*" "$no_color" 1>&2 && exit 1
 }
 
 warning() {
@@ -361,7 +361,7 @@ $*
 }
 
 msg_w_timestamp() {
-  msg "[$($date_cmd -u +%FT%TZ)] $*"
+  msg "[$("$date_cmd" -u +%FT%TZ)] $*"
 }
 
 convert_secs_to_hms() {
@@ -374,7 +374,7 @@ convert_secs_to_hms() {
 }
 
 seconds_since() {
-  echo "$(( $($date_cmd +%s) - $1 ))"
+  echo "$(( $("$date_cmd" +"%s") - $1 ))"
 }
 
 confirm_or_exit() {
@@ -527,21 +527,21 @@ read_cert_for_domain() {
 get_cert_utc_end_date_for_domain() {
   local end_date
   end_date="$(read_cert_for_domain "$1" | perl -ne 's/\s*not after :\s*//i and print')"
-  [[ "$end_date" ]] && $date_cmd --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S" ||
+  [[ "$end_date" ]] && "$date_cmd" --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S" ||
     error "Could not retrieve end date"
 }
 
 is_cert_current_for_domain() {
   local end_date
   end_date="$(get_cert_utc_end_date_for_domain "$1")"
-  [[ "$end_date" && "$($date_cmd --utc +"%Y-%m-%d %H:%M:%S")" < "$end_date" ]] ||
+  [[ "$end_date" && "$("$date_cmd" --utc +"%Y-%m-%d %H:%M:%S")" < "$end_date" ]] ||
     error "Could not determine if cert is current"
 }
 
 is_cert_for_domain_expiring_soon() {
   local end_date
   end_date="$(get_cert_utc_end_date_for_domain "$1")"
-  [[ "$end_date" && "$($date_cmd --utc --date "+7 days" +"%Y-%m-%d %H:%M:%S")" > "$end_date" ]]
+  [[ "$end_date" && "$("$date_cmd" --utc --date "+7 days" +"%Y-%m-%d %H:%M:%S")" > "$end_date" ]]
 }
 
 
@@ -615,7 +615,7 @@ run_this_menu_item_handler_in_new_terminal_if_applicable() {
   echo "#!/usr/bin/env bash -l
 export REPO_DIR=\"${REPO_DIR}\"
 export apps_resources_dir=\"$apps_resources_dir\"
-[[ \"$debug\" ]] && echo \"\$(env | $sort_cmd)\" && set -x
+[[ \"$debug\" ]] && echo \"\$(env | "$sort_cmd")\" && set -x
 printf '\e[8;45;180t' # terminal size
 $lib_dir/launcher $caller
 " > "$script"
@@ -657,10 +657,10 @@ track_job_status_and_wait_for_exit() {
   local pid_to_wait_for msg job_file
   pid_to_wait_for="$1"
   msg="$2"
-  job_file="$apps_mdm_jobs_dir/$($date_cmd +%s).$pid_to_wait_for"
+  job_file="$apps_mdm_jobs_dir/$("$date_cmd" +"%s").$pid_to_wait_for"
   echo "$msg" > "$job_file"
   wait "$pid_to_wait_for" || exit_code=$?
-  mv "$job_file" "$job_file.$($date_cmd +%s).$exit_code.done"
+  mv "$job_file" "$job_file.$("$date_cmd" +"%s").$exit_code.done"
 }
 
 extract_tar_to_existing_container_path() {
@@ -707,7 +707,7 @@ download_and_link_latest() {
 adjust_compose_project_name_for_docker_compose_version() {
   local docker_compose_ver more_recent_of_two
   docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
-  more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | $sort_cmd -V | tail -1)"
+  more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | "$sort_cmd" -V | tail -1)"
   # now strip dashes if 1.21.0 is more recent
   if [[ "$more_recent_of_two" != "$docker_compose_ver" ]]; then
     echo "$1" | perl -pe 's/-//g'

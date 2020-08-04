@@ -33,7 +33,7 @@ get_job_statuses() {
     job_msg="$(<"$job_file")"
     [[ "$job_ui_state" = "done" ]] && mv "$job_file" "${job_file/%done/seen}"
     if [[ "$job_ui_state" = "done" || "$job_ui_state" = "seen" ]]; then
-      duration=" ⌚️$(convert_secs_to_hms "$(( $job_end - $job_start ))")"
+      duration=" ⌚️$(convert_secs_to_hms "$(( "$job_end" - "$job_start" ))")"
       if [[ "$job_exit_code" = "0" ]]; then
         prefix="✅ Success."
       else
@@ -41,7 +41,7 @@ get_job_statuses() {
       fi
     else
       prefix="DISABLED|⏳ "
-      duration=" $(convert_secs_to_hms "$(( $($date_cmd +%s) - $job_start ))")"
+      duration=" $(convert_secs_to_hms "$(( $("$date_cmd" +"%s") - "$job_start" ))")"
     fi
     echo "$prefix $job_msg $duration"
   done
@@ -216,7 +216,7 @@ revert_to_prev_mdm() {
     find . -type d -maxdepth 1 |
     perl -ne 's/.*\/// and /^[0-9.]+$/ and print' |
     grep -v '^0\.0\.' |
-    $sort_cmd -rV |
+    "$sort_cmd" -rV |
     xargs
   )"
   prev=$(echo "${vers/* $current / }" | perl -pe 's/.*?\b([0-9.]+).*/$1/')
