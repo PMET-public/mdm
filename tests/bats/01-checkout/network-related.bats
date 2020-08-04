@@ -23,13 +23,23 @@ setup() {
   assert_output ''
 }
 
-@test 'is_hostname_curlable "?a"' {
-  run is_hostname_curlable "?a"
+@test 'normalize_hostname ".a" -> ""' {
+  run normalize_hostname ".a"
+  assert_output ''
+}
+
+@test 'is_valid_hostname "?a"' {
+  run is_valid_hostname "?a"
   assert_failure
 }
 
-@test 'is_hostname_curlable "a?"' {
-  run is_hostname_curlable "a?"
+@test 'is_valid_hostname ".a"' {
+  run is_valid_hostname ".a"
+  assert_failure
+}
+
+@test 'is_valid_hostname "a?"' {
+  run is_valid_hostname "a?"
   assert_success
 }
 
