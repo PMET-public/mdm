@@ -634,7 +634,7 @@ run_this_menu_item_handler_in_new_terminal_if_applicable() {
   ! is_mac && return 1
   local caller script
   caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_this_menu_item_handler_in_new_terminal_if_applicable //; s/ .*//')"
-  script=$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller") || exit
+  script="$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller")" || exit
   # remember to escape in this string if you want it to be evaluated at RUN time vs when the script is written
   # also env vars are appear to be overriden by disconnected instances of Mac's Terminal app
   # (i.e. started by separate MDM apps)
