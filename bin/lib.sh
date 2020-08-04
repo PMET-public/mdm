@@ -53,6 +53,7 @@ hosts_file_line_marker="# added by MDM"
 mdm_path="$HOME/.mdm"
 launched_apps_dir="$mdm_path/launched-apps"
 certs_dir="$mdm_path/certs"
+hosts_backup_dir="$mdm_path/hosts.bak"
 
 menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
@@ -469,6 +470,10 @@ find_hostnames_not_resolving_to_local() {
   echo "$hostnames_not_resolving_to_local" | trim
 }
 
+get_hosts_backup_filename() {
+  echo "$hosts_backup_dir/hosts.$("$date_cmd" "+%s")"
+}
+
 add_hostnames_to_hosts_file() {
   local lines="" error_msg="Could not update hosts files." tmp_hosts
   for host in $hostnames_not_resolving_to_local; do
@@ -477,7 +482,7 @@ add_hostnames_to_hosts_file() {
   echo "Password may be required to modify /etc/hosts."
   tmp_hosts=$(mktemp)
   cat /etc/hosts <(echo "$lines") > "$tmp_hosts"
-  cp /etc/hosts "$mdm_path/hosts.bak"
+  cp /etc/hosts "$(get_hosts_backup_filename)"
   if is_running_as_sudo; then
     mv "$tmp_hosts" /etc/hosts || error "$error_msg"
   elif is_terminal_interactive; then
@@ -488,6 +493,9 @@ add_hostnames_to_hosts_file() {
   fi
 }
 
+rm_added_hostnames_from_hosts_file() {
+  sudo perl -i "$(get_hosts_backup_filename)" -ne "print unless /$hosts_file_line_marker/" /etc/hosts
+}
 
 # for certificate functions, a wildcard domain parameter should be passed as "*.example.com" or ".example.com"
 # if a domain name consisting of 2 parts is the full, desired hostname, then it should only 
@@ -913,7 +921,7 @@ self_install() {
   }
 
   # create expected directory structure
-  mkdir -p "$launched_apps_dir" "$certs_dir"
+  mkdir -p "$launched_apps_dir" "$certs_dir" "$hosts_backup_dir"
   
   # if in CI/CD env, use current branch
   if [[ $GITHUB_WORKSPACE ]]; then
