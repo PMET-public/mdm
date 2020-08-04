@@ -923,7 +923,7 @@ self_install() {
   msg_w_newlines "
 Once all requirements are installed and validated, this script will not need to run again."
 
-  is_mac && {
+  if is_mac; then
     # install homebrew
     [[ -f /usr/local/bin/brew ]] || {
       warning_w_newlines "This script installs Homebrew, which may require your password. If you're
@@ -956,11 +956,11 @@ Once all requirements are installed and validated, this script will not need to 
       open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
     }
 
-    msg_w_newlines "CLI dependencies successfully installed. If you downloaded and installed Docker Desktop for Mac, this script should not need to run again.
+    msg_w_newlines "CLI dependencies successfully installed. Once you download and install Docker Desktop for Mac, this script should not run again."
 
-  You may close this terminal.
-  "
-  } || :
+  fi
+
+  msg_w_newlines "You may close this terminal."
 }
 
 self_uninstall() {
