@@ -52,6 +52,7 @@ if [[
   ( -n "$(which brew)" || ! "$(is_mac)" ) && \
   ${BASH_VERSINFO[0]} -ge 4 && \
   -n "$(which realpath)" && \
+  -n "$(which mkcert)" && \
   ( -n "$(which docker)" || ! "$(is_docker_compatible)" )
 
 ]]; then
