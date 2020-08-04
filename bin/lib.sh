@@ -454,7 +454,7 @@ find_hostname_by_network() {
 }
 
 find_hostnames() {
-  hostnames="$pwa_hostname $pwa_prev_hostname"
+  local hostnames="$pwa_hostname $pwa_prev_hostname"
   for network in $networks; do
     hostnames+=" $(find_hostname_by_network "$network")"
   done
@@ -462,7 +462,7 @@ find_hostnames() {
 }
 
 find_hostnames_not_resolving_to_local() {
-  local hostname
+  local hostname hostnames_not_resolving_to_local
   for hostname in $hostnames; do
     [[ "$hostname" ]] && ! is_hostname_resolving_to_local "$hostname" && 
       hostnames_not_resolving_to_local+=" $hostname"
@@ -470,31 +470,28 @@ find_hostnames_not_resolving_to_local() {
   echo "$hostnames_not_resolving_to_local" | trim
 }
 
-get_hosts_backup_filename() {
-  echo "$hosts_backup_dir/hosts.$("$date_cmd" "+%s")"
+backup_hosts() {
+  cp /etc/hosts "$hosts_backup_dir/hosts.$("$date_cmd" "+%s")"
 }
 
 add_hostnames_to_hosts_file() {
-  local lines="" error_msg="Could not update hosts files." tmp_hosts
-  for host in $hostnames_not_resolving_to_local; do
+  local hostnames="$1" lines="" error_msg="Could not update hosts files." tmp_hosts
+  for host in $hostnames; do
     lines+="127.0.0.1 $host $hosts_file_line_marker"$'\n'
   done
   echo "Password may be required to modify /etc/hosts."
   tmp_hosts=$(mktemp)
   cat /etc/hosts <(echo "$lines") > "$tmp_hosts"
-  cp /etc/hosts "$(get_hosts_backup_filename)"
-  if is_running_as_sudo; then
-    mv "$tmp_hosts" /etc/hosts || error "$error_msg"
-  elif is_terminal_interactive; then
-    sudo mv "$tmp_hosts" /etc/hosts || error "$error_msg"
-  elif is_mac; then
-    osascript -e "do shell script \"sudo mv $tmp_hosts /etc/hosts \" with administrator privileges" ||
-      error "$error_msg"
-  fi
+  backup_hosts
+  sudo_run_bash_cmds "
+    mv \"$tmp_hosts\" /etc/hosts
+    chmod 644 /etc/hosts
+  " || error "$error_msg"
 }
 
 rm_added_hostnames_from_hosts_file() {
-  sudo perl -i "$(get_hosts_backup_filename)" -ne "print unless /$hosts_file_line_marker/" /etc/hosts
+  backup_hosts
+  sudo_run_bash_cmds "perl -i -ne \"print unless /$hosts_file_line_marker/\" /etc/hosts"
 }
 
 # for certificate functions, a wildcard domain parameter should be passed as "*.example.com" or ".example.com"
