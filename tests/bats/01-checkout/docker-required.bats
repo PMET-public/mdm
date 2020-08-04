@@ -46,6 +46,7 @@ setup() {
 @test "are_required_ports_free 80" {
   docker stop $(docker ps -qa)
   docker run -p 80:80 -d nginx
+  sleep 5 # docker background process may take a moment
   run are_required_ports_free
   assert_failure
 }
@@ -53,6 +54,7 @@ setup() {
 @test "are_required_ports_free 443" {
   docker stop $(docker ps -qa)
   docker run -p 443:443 -d nginx
+  sleep 5 # docker background process may take a moment
   run are_required_ports_free
   assert_failure
 }

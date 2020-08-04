@@ -288,8 +288,9 @@ is_advanced_mode() {
 
 is_valid_hostname() {
   # do not allow names to start with "."
+  # only allow [a-zA-Z0-9] for last char
   # curl exit code 3 = bad/illegal url
-  [[ "$1" =~ ^\. ]] && {
+  [[ ! "$1" =~ ^\. ]] && [[ "$1" =~ [a-zA-Z0-9]$ ]] && {
     curl -I "http://$1" || [[ "$?" -ne 3 ]]
   }
 }
@@ -408,13 +409,6 @@ get_github_token_from_composer_auth() {
 # start network functions
 #
 ###
-
-
-normalize_hostname() {
-  # convert user supplied name to a curlable one if possible
-  curl -sv -I "http://$1" 2>&1 >/dev/null | \
-    perl -ne 's/to connect to\s+([^\s]+)// and print "$1"; s/.*host:\s*//i and print'
-}
 
 get_hostname_for_this_app() {
   [[ -f "$apps_resources_dir/app/docker-compose.yml" ]] &&

@@ -13,21 +13,6 @@ setup() {
   shopt -s nocasematch
 }
 
-@test 'normalize_hostname "a?" -> "a"' {
-  run normalize_hostname "a?"
-  assert_output 'a'
-}
-
-@test 'normalize_hostname "?a" -> ""' {
-  run normalize_hostname "?a"
-  assert_output ''
-}
-
-@test 'normalize_hostname ".a" -> ""' {
-  run normalize_hostname ".a"
-  assert_output ''
-}
-
 @test 'is_valid_hostname "?a"' {
   run is_valid_hostname "?a"
   assert_failure
@@ -40,8 +25,14 @@ setup() {
 
 @test 'is_valid_hostname "a?"' {
   run is_valid_hostname "a?"
-  assert_success
+  assert_failure
 }
+
+@test 'is_valid_hostname "a."' {
+  run is_valid_hostname "a."
+  assert_failure
+}
+
 
 @test 'is_hostname_resolving_to_local "localhost"' {
   run is_hostname_resolving_to_local "localhost"
@@ -50,12 +41,14 @@ setup() {
 }
 
 @test 'is_hostname_resolving_to_local "pwa.$mdm_demo_domain"' {
+  skip
   run is_hostname_resolving_to_local "pwa.$mdm_demo_domain"
   assert_success
   assert_output ""
 }
 
 @test 'is_hostname_resolving_to_local "pwa-prev.$mdm_demo_domain"' {
+  skip
   run is_hostname_resolving_to_local "pwa-prev.$mdm_demo_domain"
   assert_success
   assert_output ""
