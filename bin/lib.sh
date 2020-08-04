@@ -388,19 +388,9 @@ ARE YOU SURE?! (y/n)
 
 # look in env and fallback to expected home path
 get_github_token_from_composer_auth() {
-  echo "$COMPOSER_AUTH" && cat "$HOME/.composer/auth.json" | 
-    perl -ne '/github.com".*?"([^"]*)"/ and print "$1"' |
+  ( echo "$COMPOSER_AUTH" && cat "$HOME/.composer/auth.json" ) |
+    perl -ne '/github.com".*?"([^"]*)"/ and print "$1\n"' |
     head -1
-}
-
-get_github_file_contents() {
-  local project="$1" path="$2" ref="$3" token
-  token="$(get_github_token_from_composer_auth)"
-  echo "https://api.github.com/repos/$project/contents/$path?ref=${ref:-master}"
-  [[ "$token" ]] &&
-    curl --fail -L -H 'Accept: application/vnd.github.v3.raw' \
-      -H "Authorization: token $token" \
-      "https://api.github.com/repos/$project/contents/$path?ref=${ref:-master}"
 }
 
 ###
@@ -572,6 +562,13 @@ is_new_cert_required_for_domain() {
     does_cert_follow_convention "$1" && ! is_cert_for_domain_expiring_soon "$1"; }
 }
 
+get_github_file_contents() {
+  local project="$1" path="$2" ref="$3" token url
+  token="$(get_github_token_from_composer_auth)"
+  url="https://api.github.com/repos/$project/contents/$path?ref=${ref:-master}"
+  [[ "$token" ]] && token=("-H" "Authorization: token $token")
+  curl --fail -vL -H 'Accept: application/vnd.github.v3.raw' "${token[@]}" "$url"
+}
 
 get_wildcard_cert_and_key_for_mdm_demo_domain() {
   is_new_cert_required_for_domain ".$mdm_demo_domain" && {
