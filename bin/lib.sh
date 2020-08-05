@@ -707,6 +707,14 @@ restart_docker_and_wait() {
   done
 }
 
+find_magento_docker_image_ids() {
+  docker images | grep -E '^(magento|pmetpublic)/' | awk '{print $3}'
+}
+
+find_non_default_networks() {
+  docker network ls --format '{{.Name}}' | perl -ne 'print unless /^(bridge|host|none)$/'
+}
+
 reload_rev_proxy() {
   # shellcheck source=nginx-rev-proxy-setup.sh
   source "$lib_dir/nginx-rev-proxy-setup.sh"
