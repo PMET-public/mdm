@@ -20,23 +20,32 @@ setup() {
   assert_output -p "installed"
 }
 
-@test '$lib_dir/launcher' {
+@test 'launcher' {
   self_uninstall
   run "$lib_dir/launcher"
   assert_success
   assert_output -e "install missing"
 }
 
-@test '$lib_dir/launcher with initial output' {
+@test 'launcher with initial output' {
   output="$($lib_dir/launcher)"
   run "$lib_dir/launcher" "$output"
   assert_success
   assert_output -e "installed missing"
+  assert_file_exist "$HOME/.mdm/bin/lib.sh"
 }
 
-@test '$lib_dir/launcher install_additional_tools' {
+@test '[CI] launcher install_additional_tools' {
+  is_CI || skip
   run "$lib_dir/launcher" install_additional_tools
   assert_success
   assert_output -p "magento-cloud"
+  assert_output -p "installed"
+}
+
+@test '[dev] launcher install_additional_tools' {
+  is_CI && skip
+  run "$lib_dir/launcher" install_additional_tools
+  assert_success
   assert_output -p "installed"
 }

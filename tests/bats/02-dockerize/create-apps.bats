@@ -19,7 +19,7 @@ setup() {
   assert_output -e "created.*$detached_project_name"
 }
 
-@test 'open detached app' {
+@test '[osx] open detached app' {
   is_mac || skip
   run open -a "$detached_project_name"
   assert_success
