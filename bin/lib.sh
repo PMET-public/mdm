@@ -97,9 +97,11 @@ is_mkcert_installed() {
 }
 
 are_additional_tools_installed() {
-  is_mac && is_magento_cloud_cli_installed || return
-  is_docker_compatible && is_docker_bash_completion_installed || return
-  is_mac && is_platypus_installed || return
+  is_magento_cloud_cli_installed || return
+  is_mac && {
+    is_docker_compatible && is_docker_bash_completion_installed || return
+    is_platypus_installed || return
+  }
   is_mkcert_installed || return
 }
 
@@ -165,7 +167,7 @@ is_docker_running() {
     # this is faster on mac and speed is important for menu rendering
     pgrep -q com.docker.hyperkit
   else
-    docker ps > /dev/null 2>&1
+    docker ps > /dev/null 2>&1 || return 1
   fi
 }
 

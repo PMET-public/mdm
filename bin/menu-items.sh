@@ -42,13 +42,13 @@ is_docker_compatible && {
       return 0
     }
 
-    ! is_docker_running && {
-      key="▶️ Start Docker to continue"
-      keys+=("$key")
-      menu["$key-handler"]=start_docker
-      return 0
-    }
+  }
 
+  ! is_docker_running && {
+    key="▶️ Start Docker to continue"
+    keys+=("$key")
+    menu["$key-handler"]=start_docker
+    return 0
   }
 
   ! is_docker_ready && return 0
