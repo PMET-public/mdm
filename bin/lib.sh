@@ -134,7 +134,7 @@ is_mac() {
 # if the core_utils are installed (should always be true after initial install), use the GNU tools
 # there may be some inconsistencies prior to install.
 # if they are significant, hopefully testing finds them and will be accounted for
-if is_mac && [[ -n "$(which gdate)" ]]; then
+if is_mac && [[ -d /usr/local/Cellar/coreutils ]]; then
   # use homebrew's core utils
   stat_cmd="gstat"
   sort_cmd="gsort"
