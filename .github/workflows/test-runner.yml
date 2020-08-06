@@ -26,12 +26,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
-      - name: 1 checkout
+      - name: bats tests
         run: |
-          ./tests/bats/01-checkout/*.bats
-      - name: 2 install
-        run: |
-          ./tests/bats/02-install/*.bats
+          ./tests/bats/**/*.bats
+      # - name: 2 install
+      #   run: |
+      #     ./tests/bats/02-install/*.bats
       # - name: non-docker tests
       #   run: |
       #     ./tests/CI/non-docker-menu-selections.sh
