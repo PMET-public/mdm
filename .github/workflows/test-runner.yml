@@ -29,24 +29,6 @@ jobs:
       - name: bats tests
         run: |
           ./tests/bats/**/*.bats
-      # - name: 2 install
-      #   run: |
-      #     ./tests/bats/02-install/*.bats
-      # - name: non-docker tests
-      #   run: |
-      #     ./tests/CI/non-docker-menu-selections.sh
-      # - name: docker tests
-      #   run: |
-      #     ./tests/CI/docker-menu-selections.sh
-      # - name: create detached mdm
-      #   run: |
-      #     ./tests/CI/create-detached-mdm.sh
-      # - name: create mdm app from mc repo
-      #   run: |
-      #     ./tests/CI/create-mdm-app-from-mc-repo.sh
-      # - name: check homebrew dependency behavior
-      #   run: |
-      #     ./tests/CI/check-homebrew.sh
-      # - name: keepalive to debug
-      #   if: ${{ failure() }}
-      #   uses: PMET-public/action-tmate@master
+      - name: keepalive to debug
+        if: ${{ failure() }}
+        uses: PMET-public/action-tmate@master
