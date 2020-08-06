@@ -13,18 +13,6 @@ setup() {
   shopt -s nocasematch
 }
 
-@test 'normalize_domain_if_wildcard "test.com"' {
-  run normalize_domain_if_wildcard "test.com"
-  assert_success
-  assert_output "test.com"
-}
-
-@test 'normalize_domain_if_wildcard "*.test.com"' {
-  run normalize_domain_if_wildcard "*.test.com"
-  assert_success
-  assert_output ".test.com"
-}
-
 @test 'remove certs & test does_cert_and_key_exist_for_domain' {
   rm -rf "$certs_dir/localhost" "$certs_dir/.$mdm_demo_domain"
   run does_cert_and_key_exist_for_domain "localhost" || does_cert_and_key_exist_for_domain ".$mdm_demo_domain"

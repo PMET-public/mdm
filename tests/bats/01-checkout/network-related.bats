@@ -33,7 +33,6 @@ setup() {
   assert_failure
 }
 
-
 @test 'is_hostname_resolving_to_local "localhost"' {
   run is_hostname_resolving_to_local "localhost"
   assert_success
@@ -78,6 +77,17 @@ setup() {
   assert_output "*.www.test.com"
 }
 
+@test 'normalize_domain_if_wildcard "test.com"' {
+  run normalize_domain_if_wildcard "test.com"
+  assert_success
+  assert_output "test.com"
+}
+
+@test 'normalize_domain_if_wildcard "*.test.com"' {
+  run normalize_domain_if_wildcard "*.test.com"
+  assert_success
+  assert_output ".test.com"
+}
 
 @test "lookup_latest_remote_sem_ver" {
   run lookup_latest_remote_sem_ver
