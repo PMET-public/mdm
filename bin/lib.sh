@@ -622,7 +622,7 @@ sudo_run_bash_cmds() {
   # echo "Running $script ..."
   if is_running_as_sudo; then
     "$script"
-  elif is_terminal_interactive; then
+  elif is_terminal_interactive || is_CI; then
     sudo "$script"
   elif is_mac; then
     # osascript -e "do shell script \"sudo mv $tmp_hosts /etc/hosts \" with administrator privileges" ||
