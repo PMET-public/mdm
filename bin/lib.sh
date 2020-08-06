@@ -710,6 +710,9 @@ extract_tar_to_existing_container_path() {
 start_docker_service() {
   if is_mac; then
     open --background -a Docker
+    while ! is_docker_ready; do
+      sleep 1
+    done
   else
     sudo systemctl start docker
   fi
@@ -719,6 +722,9 @@ start_docker_service() {
 stop_docker_service() {
   if is_mac; then
     osascript -e 'quit app "Docker"'
+    while is_docker_running; do
+      sleep 1
+    done
   else
     sudo systemctl stop docker
   fi
@@ -727,9 +733,6 @@ stop_docker_service() {
 restart_docker_and_wait() {
   stop_docker_service
   start_docker_service
-  while ! is_docker_ready; do
-    sleep 2
-  done
 }
 
 find_magento_docker_image_ids() {

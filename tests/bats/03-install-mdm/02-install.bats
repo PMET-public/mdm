@@ -35,6 +35,16 @@ setup() {
   assert_file_exist "$HOME/.mdm/current/bin/lib.sh"
 }
 
+# additional tools part 1
+@test 'launcher after initial install' {
+  # remove a inconsequential tool to run this test locally
+  rm "$(brew --prefix)"/etc/bash_completion.d/docker* || :
+  run "$lib_dir/launcher"
+  assert_success
+  assert_output -p "additional tools"
+}
+
+# additional tools part 2 opt a
 @test '[CI] launcher install_additional_tools' {
   is_CI || skip
   run "$lib_dir/launcher" install_additional_tools
@@ -43,15 +53,15 @@ setup() {
   assert_output -p "installed"
 }
 
+# additional tools part 2 opt b
 @test '[dev] launcher install_additional_tools' {
   is_CI && skip
-  # remove a inconsequential tool to run this test locally
-  rm "$(brew --prefix)"/etc/bash_completion.d/docker* || :
   run "$lib_dir/launcher" install_additional_tools
   assert_success
   assert_output -p "installed"
 }
 
+# if docker is not running, a message should ask the user to start docker
 @test '[docker] launcher needs running docker to continue' {
   is_docker_compatible || skip
   stop_docker_service
@@ -59,4 +69,13 @@ setup() {
   assert_success
   assert_output -e "start docker"
   refute_output -p "advanced"
+}
+
+# start docker and the normal menu should display
+@test '[docker] launcher start_docker' {
+  is_docker_compatible || skip
+  "$lib_dir/launcher" start_docker
+  run "$lib_dir/launcher"
+  assert_success
+  assert_output -e "advanced"
 }
