@@ -600,10 +600,10 @@ mkcert_for_domain() {
 
 cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain() {
   local subdomain="$1"
-  [[ "$subdomain" =~ $mdm_demo_domain$ ]] && is_new_cert_required_for_domain "$subdomain" && {
-    is_new_cert_required_for_domain ".$mdm_demo_domain" && get_wildcard_cert_and_key_for_mdm_demo_domain
-    rsync -az "$certs_dir/.$mdm_demo_domain/" "$certs_dir/$subdomain/"
-  }
+  [[ "$subdomain" =~ $mdm_demo_domain$ ]] || error "$domain is not a subdomain of $mdm_demo_domain"
+  is_new_cert_required_for_domain "$subdomain" || return 0 # still valid
+  is_new_cert_required_for_domain ".$mdm_demo_domain" && get_wildcard_cert_and_key_for_mdm_demo_domain
+  rsync -az "$certs_dir/.$mdm_demo_domain/" "$certs_dir/$subdomain/"
 }
 
 ###
