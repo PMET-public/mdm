@@ -158,7 +158,12 @@ is_docker_suboptimal() {
 }
 
 is_docker_running() {
-  pgrep -q com.docker.hyperkit
+  if is_mac; then
+    # this is faster on mac and speed is important for menu rendering
+    pgrep -q com.docker.hyperkit
+  else
+    docker ps > /dev/null 2>&1
+  fi
 }
 
 is_docker_ready() {
@@ -703,7 +708,7 @@ start_docker_service() {
   if is_mac; then
     open --background -a Docker
   else
-    :
+    sudo systemctl start docker
   fi
 }
 
@@ -712,7 +717,7 @@ stop_docker_service() {
   if is_mac; then
     osascript -e 'quit app "Docker"'
   else
-    :
+    sudo systemctl stop docker
   fi
 }
 
