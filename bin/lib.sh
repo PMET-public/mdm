@@ -628,7 +628,7 @@ sudo_run_bash_cmds() {
     sudo "$script"
   elif is_mac; then
     # osascript -e "do shell script \"sudo mv $tmp_hosts /etc/hosts \" with administrator privileges" ||
-    osascript -e "do shell script \"$script\" with administrator privileges"
+    osascript -e "do shell script \"sudo $script\" with administrator privileges"
   fi
 }
 
