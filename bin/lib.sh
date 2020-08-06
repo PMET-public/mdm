@@ -613,9 +613,11 @@ cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain() {
 ###
 
 sudo_run_bash_cmds() {
-  local script
+  local script bash_cmd
   script="$(mktemp)"
-  echo "#!/usr/bin/env bash -l
+  bash_cmd="bash"
+  is_mac && bash_cmd="bash -l"
+  echo "#!/usr/bin/env $bash_cmd
     $*
   " > "$script"
   chmod u+x "$script"
