@@ -686,11 +686,18 @@ detect_quit_and_stop_app() {
 track_job_status_and_wait_for_exit() {
   local pid_to_wait_for msg job_file
   pid_to_wait_for="$1"
-  msg="$2"
-  job_file="$apps_mdm_jobs_dir/$("$date_cmd" +"%s").$pid_to_wait_for"
-  echo "$msg" > "$job_file"
-  wait "$pid_to_wait_for" || exit_code=$?
-  mv "$job_file" "$job_file.$("$date_cmd" +"%s").$exit_code.done"
+
+  if [[ -z "$apps_mdm_jobs_dir" ]]; then 
+    # shouldn't be here unless testing from $REPO_DIR
+    [[ "$REPO_DIR" ]] || error "REPO_DIR and apps_mdm_jobs_dir are undefined"
+    wait "$pid_to_wait_for" # wait but don't track b/c no app's mdm job dir to associate job to
+  else
+    msg="$2"
+    job_file="$apps_mdm_jobs_dir/$("$date_cmd" +"%s").$pid_to_wait_for"
+    echo "$msg" > "$job_file"
+    wait "$pid_to_wait_for" || exit_code=$?
+    mv "$job_file" "$job_file.$("$date_cmd" +"%s").$exit_code.done"
+  fi
 }
 
 extract_tar_to_existing_container_path() {
