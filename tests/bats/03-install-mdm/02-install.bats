@@ -61,21 +61,21 @@ setup() {
   assert_output -p "installed"
 }
 
-# # if docker is not running, a message should ask the user to start docker
-# @test '[docker] launcher needs running docker to continue' {
-#   is_docker_compatible || skip
-#   stop_docker_service
-#   run "$lib_dir/launcher"
-#   assert_success
-#   assert_output -e "start docker"
-#   refute_output -p "advanced"
-# }
+# if docker is not running, a message should ask the user to start docker
+@test '[docker] launcher needs running docker to continue' {
+  is_docker_compatible || skip
+  stop_docker_service
+  run "$lib_dir/launcher"
+  assert_success
+  assert_output -e "start docker"
+  refute_output -p "advanced"
+}
 
-# # start docker and the normal menu should display
-# @test '[docker] launcher start_docker' {
-#   is_docker_compatible || skip
-#   "$lib_dir/launcher" start_docker
-#   run "$lib_dir/launcher"
-#   assert_success
-#   assert_output -e "advanced"
-# }
+# start docker and the normal menu should display
+@test '[docker] launcher start_docker' {
+  is_docker_compatible || skip
+  "$lib_dir/launcher" start_docker
+  run "$lib_dir/launcher"
+  assert_success
+  assert_output -e "advanced"
+}
