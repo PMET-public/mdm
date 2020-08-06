@@ -129,7 +129,10 @@ is_mac() {
   [[ "$(uname)" = "Darwin" ]]
 }
 
-if is_mac; then
+# if the core_utils are installed (should always be true after initial install), use the GNU tools
+# there may be some inconsistencies prior to install.
+# if they are significant, hopefully testing finds them and will be accounted for
+if is_mac && [[ -n "$(which gdate)" ]]; then
   # use homebrew's core utils
   stat_cmd="gstat"
   sort_cmd="gsort"
