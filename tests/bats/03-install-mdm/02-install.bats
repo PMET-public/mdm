@@ -32,7 +32,7 @@ setup() {
   run "$lib_dir/launcher" "$output"
   assert_success
   assert_output -e "installed missing"
-  assert_file_exist "$HOME/.mdm/bin/lib.sh"
+  assert_file_exist "$HOME/.mdm/current/bin/lib.sh"
 }
 
 @test '[CI] launcher install_additional_tools' {
@@ -45,7 +45,18 @@ setup() {
 
 @test '[dev] launcher install_additional_tools' {
   is_CI && skip
+  # remove a inconsequential tool to run this test locally
+  rm "$(brew --prefix)"/etc/bash_completion.d/docker* || :
   run "$lib_dir/launcher" install_additional_tools
   assert_success
   assert_output -p "installed"
+}
+
+@test '[docker] launcher needs running docker to continue' {
+  is_docker_compatible || skip
+  stop_docker_service
+  run "$lib_dir/launcher"
+  assert_success
+  assert_output -e "start docker"
+  refute_output -p "advanced"
 }

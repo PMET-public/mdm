@@ -699,9 +699,26 @@ extract_tar_to_existing_container_path() {
   rm -rf "$tmp_dir"
 }
 
+start_docker_service() {
+  if is_mac; then
+    open --background -a Docker
+  else
+    :
+  fi
+}
+
+
+stop_docker_service() {
+  if is_mac; then
+    osascript -e 'quit app "Docker"'
+  else
+    :
+  fi
+}
+
 restart_docker_and_wait() {
-  osascript -e 'quit app "Docker"'
-  open --background -a Docker
+  stop_docker_service
+  start_docker_service
   while ! is_docker_ready; do
     sleep 2
   done
@@ -728,7 +745,7 @@ download_and_link_latest() {
   cd "$mdm_path"
   curl -sLO "$repo_url/archive/$latest_ver.tar.gz"
   tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver_dir"
-  rm "$latest_ver.tar.gz" current || : # cleanup and remove old link
+  rm "$latest_ver.tar.gz" current 2> /dev/null || : # cleanup and remove old link
   ln -sf "$latest_ver" current
   [[ -d current/certs ]] && rsync -az current/certs/ certs/ || : # cp over any new certs if the exist
 }
