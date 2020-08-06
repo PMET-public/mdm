@@ -299,7 +299,7 @@ is_valid_hostname() {
   # only allow [a-zA-Z0-9] for last char
   # curl exit code 3 = bad/illegal url
   [[ ! "$1" =~ ^\. ]] && [[ "$1" =~ [a-zA-Z0-9]$ ]] && {
-    curl -I "http://$1" || [[ "$?" -ne 3 ]]
+    curl -sI "http://$1" || [[ "$?" -ne 3 ]]
   }
 }
 
@@ -590,8 +590,10 @@ get_wildcard_cert_and_key_for_mdm_demo_domain() {
 }
 
 mkcert_for_domain() {
-  is_valid_hostname "$1" || error "Invalid name $1"
-  mkcert -cert-file "$certs_dir/$1/fullchain1.pem" -key-file "certs/$1/privkey1.pem" $1
+  local cert_dir="$certs_dir/$1" domain="$1"
+  is_valid_hostname "$domain" || error "Invalid name '$domain'"
+  mkdir -p "$cert_dir"
+  mkcert -cert-file "$cert_dir/fullchain1.pem" -key-file "$cert_dir/privkey1.pem" "$domain"
 }
 
 cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain() {
