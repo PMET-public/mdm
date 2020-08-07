@@ -32,3 +32,14 @@ setup() {
   run diff <(echo "$output1") <(echo "$output2")
   assert_failure
 }
+
+@test "toggle_mkcert_CA_install" {
+  is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
+  output1="$("$lib_dir/launcher")"
+  "$lib_dir/launcher" toggle_mkcert_CA_install
+  output2="$("$lib_dir/launcher")"
+  run diff <(echo "$output1") <(echo "$output2")
+  assert_failure
+  assert_output -e "spoofing.*on"
+  assert_output -e "spoofing.*off"
+}

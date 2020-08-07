@@ -470,11 +470,11 @@ is_advanced_mode && {
     menu["$key-handler"]=reload_rev_proxy
 
     if is_mkcert_CA_installed; then
-      key="⚠️ 🔓 ANY domain spoofing -> ON!"
+      key="⚠️ 🔓 Permit spoofing ANY domain is ON!"
       keys+=("$key")
       menu["$key-handler"]=toggle_mkcert_CA_install
     else
-      key="⚠️ 🔒 Permit spoofing ANY domain"
+      key="⚠️ 🔒 Permit spoofing ANY domain is OFF"
       keys+=("$key")
       menu["$key-handler"]=toggle_mkcert_CA_install
     fi
