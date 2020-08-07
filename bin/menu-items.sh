@@ -457,7 +457,7 @@ is_advanced_mode && {
     menu["$key-handler"]=toggle_mdm_debug_mode
   fi
 
-  key="Force check for new MDM versioon"
+  key="Force check for new MDM version"
   keys+=("$key")
   menu["$key-handler"]=force_check_mdm_ver
 
