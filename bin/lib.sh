@@ -328,8 +328,15 @@ is_running_as_sudo() {
 }
 
 is_mkcert_CA_installed() {
-  is_mkcert_installed && 
-    [[ ! "$(mkcert 2>&1)" =~ verification ]] # if "verification" matches output. then mkcert CA is NOT installed
+  local warning_count
+  is_mkcert_installed || return 1
+  warning_count="$(mkcert 2>&1 | grep "Warning:" | wc -l)"
+  if is_CI; then
+    # no chrome or firefox installed on CI so a warning remains
+    [[ "$warning_count" -eq 1 ]]
+  else
+    [[ "$warning_count" -eq 0 ]]
+  fi
 }
 
 ###
