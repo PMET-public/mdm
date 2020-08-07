@@ -442,7 +442,7 @@ get_pwa_prev_hostname() {
   is_adobe_system && echo "pwa-prev.$mdm_demo_domain" || echo "pwa-prev"
 }
 
-find_networks() {
+find_mdm_networks() {
   docker network ls -q --filter 'driver=bridge' --filter 'name=_default'
 }
 
@@ -459,26 +459,26 @@ find_hostname_by_network() {
   [[ "$cid" ]] &&
     apps_resources_dir="$(docker inspect "$cid" | \
       perl -ne 's/.*com.docker.compose.project.working_dir.*?(\/[^"]*).*/$1\/../ and print')"
-  [[ "$apps_resources_dir" ]] &&
-    perl -ne 's/.*VIRTUAL_HOST\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/docker-compose.yml" ||
-    :
+  [[ "$apps_resources_dir" ]] || return 0
+  perl -ne 's/.*VIRTUAL_HOST\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/docker-compose.yml"
 }
 
-find_hostnames() {
-  local hostnames="$pwa_hostname $pwa_prev_hostname"
+find_mdm_hostnames() {
+  local hostnames networks
+  hostnames=("$(get_pwa_hostname)" "$(get_pwa_prev_hostname)")
+  networks="$(find_mdm_networks)"
   for network in $networks; do
-    hostnames+=" $(find_hostname_by_network "$network")"
+    hostnames+=("$(find_hostname_by_network "$network")")
   done
-  echo "$hostnames" | trim
+  echo "${hostnames[*]}"
 }
 
 find_hostnames_not_resolving_to_local() {
-  local hostname hostnames_not_resolving_to_local
+  local hostname hostnames="$*" hostnames_not_resolving_to_local=()
   for hostname in $hostnames; do
-    [[ "$hostname" ]] && ! is_hostname_resolving_to_local "$hostname" && 
-      hostnames_not_resolving_to_local+=" $hostname"
+    ! is_hostname_resolving_to_local "$hostname" && hostnames_not_resolving_to_local+=("$hostname")
   done
-  echo "$hostnames_not_resolving_to_local" | trim
+  echo "${hostnames_not_resolving_to_local[*]}"
 }
 
 backup_hosts() {
@@ -486,7 +486,8 @@ backup_hosts() {
 }
 
 add_hostnames_to_hosts_file() {
-  local hostnames="$1" lines="" error_msg="Could not update hosts files." tmp_hosts
+  [[ "$*" ]] || return 0
+  local hostnames="$*" lines="" error_msg="Could not update hosts files." tmp_hosts
   for host in $hostnames; do
     lines+="127.0.0.1 $host $hosts_file_line_marker"$'\n'
   done
@@ -590,12 +591,11 @@ get_github_file_contents() {
 }
 
 get_wildcard_cert_and_key_for_mdm_demo_domain() {
-  is_new_cert_required_for_domain ".$mdm_demo_domain" && {
-    cert_dir="$certs_dir/.$mdm_demo_domain"
-    mkdir -p "$cert_dir"
-    get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/fullchain1.pem" > "$cert_dir/fullchain1.pem"
-    get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/privkey1.pem" > "$cert_dir/privkey1.pem"
-  }
+  is_new_cert_required_for_domain ".$mdm_demo_domain" || return 0
+  cert_dir="$certs_dir/.$mdm_demo_domain"
+  mkdir -p "$cert_dir"
+  get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/fullchain1.pem" > "$cert_dir/fullchain1.pem"
+  get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/privkey1.pem" > "$cert_dir/privkey1.pem"
 }
 
 mkcert_for_domain() {
