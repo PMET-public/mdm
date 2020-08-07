@@ -23,8 +23,7 @@ setup() {
 
 @test '[CI] launcher install_additional_tools' {
   is_CI || skip
-  output="$($lib_dir/launcher)"
-  run "$lib_dir/launcher" "$output"
+  run "$lib_dir/launcher" install_additional_tools
   assert_success
   assert_output -p "magento-cloud"
   assert_output -p "installed"
