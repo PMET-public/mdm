@@ -259,7 +259,8 @@ lib_sourced_for_specific_bundled_app() {
     return 0
   fi
   # else is the sourcing process a specific app instance?
-  local oldest_parent_path="${BASH_SOURCE[-1]}"
+  # DON'T use ${BASH_SOURCE[-1]} b/c this is unusual reference before bash is upgraded on mac
+  local oldest_parent_path="${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}"
   [[ "$oldest_parent_path" =~ \.app\/Contents\/ ]] &&
     apps_resources_dir="${oldest_parent_path/\/Contents\/*/\/Contents\/Resources}" &&
     export apps_resources_dir
