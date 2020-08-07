@@ -259,10 +259,9 @@ lib_sourced_for_specific_bundled_app() {
     return 0
   fi
   # else is the sourcing process a specific app instance?
-  local parent_pids_path
-  parent_pids_path="$(ps -p $PPID -o command=)"
-  [[ "$parent_pids_path" =~ .app/Contents/MacOS/ ]] &&
-    apps_resources_dir="${parent_pids_path/\/MacOS\/*/\/Resources}" &&
+  local oldest_parent_path="${BASH_SOURCE[-1]}"
+  [[ "$oldest_parent_path" =~ \.app\/Contents\/ ]] &&
+    apps_resources_dir="${oldest_parent_path/\/Contents\/*/\/Contents\/Resources}" &&
     export apps_resources_dir
 }
 
