@@ -76,19 +76,19 @@ is_update_available && {
     fi
   }
 
-  is_magento_app_runnig && is_network_state_ok && {
+  is_magento_app_running && is_network_state_ok && {
     key="🚀 Open Magento app in browser"
     keys+=("$key")
     menu["$key-handler"]=open_app
   }
 
-  is_magento_app_installed && is_magento_app_runnig && {
+  is_magento_app_installed && is_magento_app_running && {
     key="🛑 Stop Magento app"
     keys+=("$key")
     menu["$key-handler"]=stop_app
   }
 
-  is_magento_app_installed && ! is_magento_app_runnig && {
+  is_magento_app_installed && ! is_magento_app_running && {
     if is_network_state_ok; then
       key="▶️ Restart Magento app"
       keys+=("$key")
@@ -101,14 +101,14 @@ is_update_available && {
     fi
   }
 
-  # is_advanced_mode && ! is_magento_app_runnig && {
+  # is_advanced_mode && ! is_magento_app_running && {
   #   key="TODO Sync Magento app to remote env"
   #   keys+=("$key")
   #   menu["$key-handler"]=sync_app_to_remote
   #   menu["$key-disabled"]=true
   # }
 
-  # is_advanced_mode && ! is_magento_app_runnig && {
+  # is_advanced_mode && ! is_magento_app_running && {
   #   key="TODO Clone to new Magento app"
   #   keys+=("$key")
   #   menu["$key-handler"]=clone_app
@@ -131,7 +131,7 @@ is_update_available && {
     key="Magento commands"
     keys+=("$key")
 
-    ! is_magento_app_runnig && {
+    ! is_magento_app_running && {
       key="🛑 App stopped. Many cmds N/A"
       keys+=("$key")
       menu["$key-handler"]=no_op
@@ -141,7 +141,7 @@ is_update_available && {
     keys+=("$key")
     menu["$key-handler"]=start_shell_in_app
 
-    is_magento_app_runnig && {
+    is_magento_app_running && {
 
       key="Reindex"
       keys+=("$key")
@@ -230,7 +230,7 @@ if is_network_state_ok; then
   is_docker_compatible && {
 
     ! is_detached && {
-      if is_magento_app_runnig; then
+      if is_magento_app_running; then
         key="(Re)start latest PWA using this Magento app"
       else
         key="🛑 App stopped. Start PWA offline"
@@ -450,7 +450,7 @@ is_advanced_mode && {
     else
       key="Debugging is OFF for this app"
     fi
-    is_magento_app_runnig && {
+    is_magento_app_running && {
       key+=" (stops running app)"
     }
     keys+=("$key")
