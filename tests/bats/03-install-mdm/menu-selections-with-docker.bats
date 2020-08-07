@@ -11,6 +11,7 @@ load '../../../bin/lib.sh'
 
 setup() {
   shopt -s nocasematch
+  is_docker_compatible || skip
 }
 
 # ensure at least one magento image to remove
