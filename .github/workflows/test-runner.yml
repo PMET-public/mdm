@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os:
-          # - ubuntu-latest
+          - ubuntu-latest
           - macos-latest
         # value: [true, ""]
         value: [true]
@@ -28,10 +28,7 @@ jobs:
           submodules: 'true'
       - name: bats tests
         run: |
-          ./tests/bats/01-checkout/docker-related.bats
-      # - name: bats tests
-      #  run: |
-      #    ./tests/bats/**/*.bats
+          ./tests/bats/**/*.bats
       - name: keepalive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master

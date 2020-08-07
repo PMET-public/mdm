@@ -11,6 +11,7 @@ load '../../../bin/lib.sh'
 
 setup() {
   shopt -s nocasematch
+  is_docker_compatible || return 0
   is_docker_installed && is_docker_ready || error "Docker missing."
 }
 
