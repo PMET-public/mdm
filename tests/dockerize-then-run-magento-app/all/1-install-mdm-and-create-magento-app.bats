@@ -33,3 +33,8 @@ setup() {
   run "$lib_dir/dockerize" -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.4.0-ref -n app-from-repo-test -i $HOME/.mdm/current/icons/ref.icns
   assert_success
 }
+
+@test 'install_app' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" install_app
+  assert_success
+}
