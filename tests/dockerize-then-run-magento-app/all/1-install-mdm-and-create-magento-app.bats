@@ -29,3 +29,7 @@ setup() {
   assert_output -p "installed"
 }
 
+@test 'create ref app' {
+  run "$lib_dir/dockerize" -g git@github.com:PMET-public/magento-cloud.git -b pmet-2.4.0-ref -n app-from-repo-test -i $HOME/.mdm/current/icons/ref.icns
+  assert_success
+}
