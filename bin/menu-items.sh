@@ -465,21 +465,21 @@ is_advanced_mode && {
   keys+=("$key")
   menu["$key-handler"]=revert_to_prev_mdm
 
+  if is_mkcert_CA_installed; then
+    key="⚠️ 🔓 Permit spoofing ANY domain is ON!"
+    keys+=("$key")
+    menu["$key-handler"]=toggle_mkcert_CA_install
+  else
+    key="⚠️ 🔒 Permit spoofing ANY domain is OFF"
+    keys+=("$key")
+    menu["$key-handler"]=toggle_mkcert_CA_install
+  fi
+
   is_docker_compatible && { # meaning currently n/a on CI/CD on mac
 
     key="Reload reverse proxy"
     keys+=("$key")
     menu["$key-handler"]=reload_rev_proxy
-
-    if is_mkcert_CA_installed; then
-      key="⚠️ 🔓 Permit spoofing ANY domain is ON!"
-      keys+=("$key")
-      menu["$key-handler"]=toggle_mkcert_CA_install
-    else
-      key="⚠️ 🔒 Permit spoofing ANY domain is OFF"
-      keys+=("$key")
-      menu["$key-handler"]=toggle_mkcert_CA_install
-    fi
 
     key="⚠️ Remove Magento images (breaks stopped apps)"
     keys+=("$key")
