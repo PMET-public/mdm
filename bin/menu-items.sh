@@ -63,7 +63,7 @@ is_update_available && {
 
 ! is_detached && {
 
-  ! is_app_installed && {
+  ! is_magento_app_installed && {
     if is_network_state_ok; then
       key="🔼 Install & open Magento app in browser"
       keys+=("$key")
@@ -76,19 +76,19 @@ is_update_available && {
     fi
   }
 
-  is_app_running && is_network_state_ok && {
+  is_magento_app_runnig && is_network_state_ok && {
     key="🚀 Open Magento app in browser"
     keys+=("$key")
     menu["$key-handler"]=open_app
   }
 
-  is_app_installed && is_app_running && {
+  is_magento_app_installed && is_magento_app_runnig && {
     key="🛑 Stop Magento app"
     keys+=("$key")
     menu["$key-handler"]=stop_app
   }
 
-  is_app_installed && ! is_app_running && {
+  is_magento_app_installed && ! is_magento_app_runnig && {
     if is_network_state_ok; then
       key="▶️ Restart Magento app"
       keys+=("$key")
@@ -101,21 +101,21 @@ is_update_available && {
     fi
   }
 
-  # is_advanced_mode && ! is_app_running && {
+  # is_advanced_mode && ! is_magento_app_runnig && {
   #   key="TODO Sync Magento app to remote env"
   #   keys+=("$key")
   #   menu["$key-handler"]=sync_app_to_remote
   #   menu["$key-disabled"]=true
   # }
 
-  # is_advanced_mode && ! is_app_running && {
+  # is_advanced_mode && ! is_magento_app_runnig && {
   #   key="TODO Clone to new Magento app"
   #   keys+=("$key")
   #   menu["$key-handler"]=clone_app
   #   menu["$key-disabled"]=true
   # }
 
-  is_app_installed && {
+  is_magento_app_installed && {
     key="🚨 Uninstall this Magento app"
     keys+=("$key")
     menu["$key-handler"]=uninstall_app
@@ -127,11 +127,11 @@ is_update_available && {
   #
   ###
 
-  is_app_installed && {
+  is_magento_app_installed && {
     key="Magento commands"
     keys+=("$key")
 
-    ! is_app_running && {
+    ! is_magento_app_runnig && {
       key="🛑 App stopped. Many cmds N/A"
       keys+=("$key")
       menu["$key-handler"]=no_op
@@ -141,7 +141,7 @@ is_update_available && {
     keys+=("$key")
     menu["$key-handler"]=start_shell_in_app
 
-    is_app_running && {
+    is_magento_app_runnig && {
 
       key="Reindex"
       keys+=("$key")
@@ -230,7 +230,7 @@ if is_network_state_ok; then
   is_docker_compatible && {
 
     ! is_detached && {
-      if is_app_running; then
+      if is_magento_app_runnig; then
         key="(Re)start latest PWA using this Magento app"
       else
         key="🛑 App stopped. Start PWA offline"
@@ -412,7 +412,7 @@ is_advanced_mode && {
   keys+=("$key")
   menu["$key-handler"]=show_mdm_logs
 
-  is_app_installed && {
+  is_magento_app_installed && {
     key="Show Magento app logs"
     keys+=("$key")
     menu["$key-handler"]=show_app_logs

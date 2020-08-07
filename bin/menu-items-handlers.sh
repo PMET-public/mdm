@@ -385,7 +385,7 @@ switch_to_developer_mode() {
 start_mdm_shell() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local services_status
-    if is_app_installed; then
+    if is_magento_app_installed; then
       services_status="$(docker-compose ps)"
     else
       services_status="$(warning_w_newlines "Magento app not installed yet.")"

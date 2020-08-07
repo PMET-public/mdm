@@ -184,7 +184,7 @@ is_detached() {
   [[ ! -d "$apps_resources_dir/app" ]]
 }
 
-is_app_installed() {
+is_magento_app_installed() {
   is_detached && return 1
   # grep once and store result in var
   [[ -n "$app_is_installed" ]] ||
@@ -195,7 +195,7 @@ is_app_installed() {
   return "$app_is_installed"
 }
 
-is_app_running() {
+is_magento_app_runnig() {
   is_detached && return 1
   # grep once and store result in var
   [[ -n "$app_is_running" ]] || {
