@@ -443,17 +443,19 @@ is_advanced_mode && {
   key="Maintenance"
   keys+=("$key")
 
-  if [[ "$debug" ]]; then
-    key="MDM debugging is ON"
-  else
-    key="MDM debugging is OFF"
+  # this option only applies to a specific app so should not appear when testing from a repo dir
+  if lib_sourced_for_specific_bundled_app; then
+    if [[ "$debug" ]]; then
+      key="Debugging is ON for this app"
+    else
+      key="Debugging is OFF for this app"
+    fi
+    is_magento_app_runnig && {
+      key+=" (stops running app)"
+    }
+    keys+=("$key")
+    menu["$key-handler"]=toggle_mdm_debug_mode
   fi
-  is_app_running && {
-    key+=" (stops running app)"
-  }
-
-  keys+=("$key")
-  menu["$key-handler"]=toggle_mdm_debug_mode
 
   key="Force check for new MDM versioon"
   keys+=("$key")
