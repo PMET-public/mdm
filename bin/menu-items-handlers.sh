@@ -158,7 +158,7 @@ install_app() {
       perl -pe 's/ .*/ $(get_hostname_for_this_app)/' >> /etc/hosts;
       /app/bin/magento cache:enable
       cloud-post-deploy"
-    open "https://$(get_hostname_for_this_app)"
+    open_app
   } >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
   # skip showing logs in new terminal for CI
@@ -169,7 +169,13 @@ install_app() {
 }
 
 open_app() {
-  open "https://$(get_hostname_for_this_app)"
+  local url
+  url="https://$(get_hostname_for_this_app)"
+  if is_mac; then
+    open "$url"
+  else
+    curl -L "$url"
+  fi
 }
 
 stop_app() {
@@ -190,7 +196,7 @@ restart_app() {
     reload_rev_proxy
     # TODO another BUG where a cache has to be cleaned with a restart AND after a time delay. RACE CONDITION?!
     docker-compose run --rm deploy magento-command cache:clean config_webservice
-    open "https://$(get_hostname_for_this_app)"
+    open_app
   } >> "$handler_log_file" 2>&1 &
   track_job_status_and_wait_for_exit $! "Starting Magento ..."
 }
