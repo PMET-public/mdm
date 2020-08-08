@@ -112,6 +112,7 @@ update_mdm() {
 }
 
 install_app() {
+  local docker_host_ip
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     cd "$apps_resources_dir/app" || exit 1
@@ -152,12 +153,17 @@ install_app() {
     services="$(get_docker_compose_runtime_services)"
     docker-compose up -d $services
     reload_rev_proxy
-    # map the magento app host to the internal docker ip and add it to the container's host file before running post deploy hook
+    # map the magento app hostname to docker host's ip 
+    # add it to the container's /etc/hosts file before running post deploy hook
+    # so curl https://magento-app-hostname/ (the base url) properly resolves for cache warm-up
     # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
-    docker-compose run --rm deploy bash -c "getent hosts host.docker.internal | \
-      perl -pe 's/ .*/ $(get_hostname_for_this_app)/' >> /etc/hosts;
+    docker_host_ip="$host_docker_internal"
+    is_mac && docker_host_ip="$(docker run alpine getent hosts host.docker.internal | perl -pe 's/\s.*//')"
+    docker-compose run --rm deploy bash -c "
+      echo '$docker_host_ip $(get_hostname_for_this_app)' >> /etc/hosts
       /app/bin/magento cache:enable
-      cloud-post-deploy"
+      cloud-post-deploy
+    "
     open_app
   } >> "$handler_log_file" 2>&1 &
   local background_install_pid=$!
