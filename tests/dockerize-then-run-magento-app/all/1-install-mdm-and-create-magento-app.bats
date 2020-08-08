@@ -34,6 +34,11 @@ setup() {
   assert_success
 }
 
+@test 'install_app' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" install_app
+  assert_success
+}
+
 @test 'reindex' {
   run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" reindex
   assert_success
