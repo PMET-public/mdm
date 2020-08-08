@@ -49,6 +49,7 @@ bytes_in_mb=1048576
 mdm_demo_domain="storystore.dev"
 detached_project_name="detached-mdm"
 hosts_file_line_marker="# added by MDM"
+host_docker_internal="172.17.0.1"
 
 mdm_path="$HOME/.mdm"
 launched_apps_dir="$mdm_path/launched-apps"
@@ -130,6 +131,9 @@ can_optimize_vm_disk() {
 is_mac() {
   [[ "$(uname)" = "Darwin" ]]
 }
+
+# override default linux docker host ip with mac dns alias host.docker.internal
+is_mac && host_docker_internal="host.docker.internal"
 
 # if the core_utils are installed (should always be true after initial install), use the GNU tools
 # there may be some inconsistencies prior to install.

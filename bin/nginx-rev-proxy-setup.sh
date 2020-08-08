@@ -49,7 +49,7 @@ write_nginx_config_for_host_at_port() {
       ssl_certificate /etc/letsencrypt/$hostname/fullchain1.pem;
       ssl_certificate_key /etc/letsencrypt/$hostname/privkey1.pem;
       location / {
-        proxy_pass http://host.docker.internal:$web_port;
+        proxy_pass http://$host_docker_internal:$web_port;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-Proto \$scheme;
       }
