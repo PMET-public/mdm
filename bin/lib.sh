@@ -1058,9 +1058,8 @@ lib_sourced_for_specific_bundled_app && {
   init_app_specific_vars
   [[ "$debug" ]] && init_mdm_logging
   ! is_detached && init_quit_detection
-  # if docker is up and the current launcher innovaction is constructing the current menu, then cache this docker output
-  # to parse for additional options
-  is_docker_ready && invoked_mdm_without_args && formatted_cached_docker_ps_output="$(
+  # if docker is up, then cache this output to parse when adding and filtering additional available menu options
+  is_docker_ready && formatted_cached_docker_ps_output="$(
     docker ps -a -f "label=com.docker.compose.service=db" --format "{{.Names}} {{.Status}}" | \
       perl -pe 's/ (Up|Exited) .*/ \1/'
   )"
