@@ -846,7 +846,7 @@ get_docker_compose_runtime_services() {
 # if come across entry with no handler or link, entering submenu
 # 
 render_platypus_status_menu() {
-  local key key_length menu_output is_submenu
+  local index key key_length menu_output is_submenu
   key_length=${#keys[@]}
   menu_output=""
   is_submenu=false
