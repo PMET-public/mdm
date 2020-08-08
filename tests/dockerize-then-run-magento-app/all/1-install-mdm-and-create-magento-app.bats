@@ -34,7 +34,37 @@ setup() {
   assert_success
 }
 
-@test 'install_app' {
-  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" install_app
+@test 'reindex' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" reindex
+  assert_success
+}
+
+@test 'run_cron' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" run_cron
+  assert_success
+}
+
+@test 'enable_all_except_cms_cache' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" enable_all_except_cms_cache
+  assert_success
+}
+
+@test 'enable_all_caches' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" enable_all_caches
+  assert_success
+}
+
+@test 'disable_most_caches' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" disable_most_caches
+  assert_success
+}
+
+@test 'flush_cache' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" flush_cache
+  assert_success
+}
+
+@test 'warm_cache' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" warm_cache
   assert_success
 }
