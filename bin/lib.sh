@@ -851,12 +851,12 @@ get_docker_compose_runtime_services() {
 # 
 render_platypus_status_menu() {
   local index key key_length menu_output is_submenu
-  key_length=${#keys[@]}
+  key_length=${#mdm_menu_items_keys[@]}
   menu_output=""
   is_submenu=false
   # based on Platypus menu syntax, submenu headers are not seletctable so no handler or link entry unlike actual submenu items
   for (( index=0; index < key_length; index++ )); do
-    key="${keys[$index]}"
+    key="${mdm_menu_items_keys[$index]}"
     if [[ $key = "end submenu" ]]; then
       $is_submenu && {
         is_submenu=false
@@ -865,14 +865,14 @@ render_platypus_status_menu() {
       }
     fi
     # no handler or link? must be a submenu heading
-    [[ -z "${menu["$key-handler"]}" && -z "${menu["$key-link"]}" ]] && {
+    [[ -z "${mdm_menu_items["$key-handler"]}" && -z "${mdm_menu_items["$key-link"]}" ]] && {
       # if menu has some output already & if a submenu heading, was the last char a newline? if not, add one to start new submenu
       [[ -n $menu_output && ! $menu_output =~ $'\n'$ ]] && menu_output+=$'\n'
       menu_output+="SUBMENU|$key"
       is_submenu=true
       continue
     }
-    [[ ${menu["$key-disabled"]} ]] && menu_output+="DISABLED|"
+    [[ ${mdm_menu_items["$key-disabled"]} ]] && menu_output+="DISABLED|"
     # status menu at top of menu case - needs newline
     if [[ "$key" =~ ^DISABLED && "$key" =~ ---$ ]]; then
       menu_output+="$key"$'\n'
@@ -891,15 +891,15 @@ handle_mdm_input() {
 
   # a handler?
   key="$mdm_input-handler"
-  [[ -n "${menu[$key]}" ]] && {
-    "${menu[$key]}"
+  [[ -n "${mdm_menu_items[$key]}" ]] && {
+    "${mdm_menu_items[$key]}"
     exit
   }
 
   # a link?
   key="$mdm_input-link"
-  [[ -n "${menu[$key]}" ]] && {
-    open "${menu[$key]}"
+  [[ -n "${mdm_menu_items[$key]}" ]] && {
+    open "${mdm_menu_items[$key]}"
     exit
   }
 
@@ -910,7 +910,7 @@ handle_mdm_input() {
   #
   # an env var is exported to mark these calls in case changes in the handler behavior are appropiate for these calls
   # (e.g. it's not appropiate to launch a new interactive OSX terminal)
-  for value in "${menu[@]}"; do
+  for value in "${mdm_menu_items[@]}"; do
     [[ "$mdm_input" = "$value" ]] && {
       export MDM_DIRECT_HANDLER_CALL=true
       # msg_w_newlines "$mdm_input found in current menu. Running ..."
