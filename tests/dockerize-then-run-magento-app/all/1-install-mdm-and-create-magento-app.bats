@@ -29,6 +29,14 @@ setup() {
   assert_output -p "installed"
 }
 
+@test "toggle_mkcert_CA_install" {
+  is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
+  is_mkcert_CA_installed || "$lib_dir/launcher" toggle_mkcert_CA_install
+  run "$lib_dir/launcher"
+  assert_success
+  assert_output -e "spoofing.*on"
+}
+
 @test 'create ref app' {
   run "$lib_dir/dockerize" -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.4.0-ref -n app-from-repo-test -i "$HOME/.mdm/current/icons/ref.icns"
   assert_success
