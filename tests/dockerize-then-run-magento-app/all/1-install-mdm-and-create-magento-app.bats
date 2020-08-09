@@ -81,3 +81,9 @@ setup() {
   run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" warm_cache
   assert_success
 }
+
+@test 'open_app' {
+  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" open_app
+  assert_success
+  assert_output ''
+}
