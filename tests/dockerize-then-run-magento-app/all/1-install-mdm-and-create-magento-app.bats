@@ -59,10 +59,10 @@ setup() {
   assert_success
 }
 
-@test 'disable_most_caches' {
-  run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" disable_most_caches
-  assert_success
-}
+# @test 'disable_most_caches' {
+#   run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" disable_most_caches
+#   assert_success
+# }
 
 @test 'flush_cache' {
   run "$HOME/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources/script" flush_cache

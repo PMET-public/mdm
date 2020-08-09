@@ -159,9 +159,9 @@ is_update_available && {
       keys+=("$key")
       menu["$key-handler"]=enable_all_caches
 
-      key="Disable most caches"
-      keys+=("$key")
-      menu["$key-handler"]=disable_most_caches
+      # key="Disable most caches"
+      # keys+=("$key")
+      # menu["$key-handler"]=disable_most_caches
 
       key="Flush Cache"
       keys+=("$key")
