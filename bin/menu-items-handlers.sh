@@ -320,13 +320,21 @@ no_op() {
   :
 }
 
+# by accepting additional args this function allows arbitrary cmds to be run in the magento app with a single call
+# this is useful for testing since no menu items currently accept args as user input
 start_shell_in_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     cd "$apps_resources_dir/app" || exit 1
-    docker-compose run --rm deploy bash
+    if [[ -z "$*" ]]; then
+      docker-compose run --rm deploy bash
+    else
+      docker-compose run --rm deploy bash -c "$*"
+    fi
   }
 }
 
+# TODO - remove this func and make use of start shell in app
+# run_this_menu_item_handler_in_new_terminal_if_applicable will have to be modified to pass args
 run_as_bash_cmds_in_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     cd "$apps_resources_dir/app" || exit 1
