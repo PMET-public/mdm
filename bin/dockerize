@@ -173,7 +173,13 @@ rm -rf "$tmp_app_dir" || :
 if is_existing_cloud_env; then
   magento-cloud get -e "$env" --depth=0 "$pid" "$tmp_app_dir"
 else
-  git clone "$git_url" --branch "$branch$tag" --depth 1 "$tmp_app_dir"
+  git clone "$git_url" --branch "$branch$tag" --depth 1 "$tmp_app_dir" || {
+    # if error, try branch/tag as commit
+    git clone "$git_url" "$tmp_app_dir"
+    cd "$tmp_app_dir"
+    git checkout "$branch$tag"
+    cd ..
+  }
 fi
 rm -rf "$tmp_app_dir/.git"
 

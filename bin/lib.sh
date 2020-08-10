@@ -1018,13 +1018,10 @@ self_install() {
   # create expected directory structure
   mkdir -p "$launched_apps_dir" "$certs_dir" "$hosts_backup_dir"
   
-  # if in CI/CD env, use current branch
-  if [[ $GITHUB_WORKSPACE ]]; then
-    REPO_BRANCH="${GITHUB_REF#refs/heads/}"
-  elif [[ $TRAVIS ]]; then
-    REPO_BRANCH="$TRAVIS_BRANCH"
-  fi
-  download_and_link_latest "$REPO_BRANCH"
+  pushd "$MDM_REPO_DIR"
+  MDM_REPO_BRANCH="$(git branch --show-current)"
+  popd
+  download_and_link_latest "$MDM_REPO_BRANCH"
 
   msg_w_newlines "
 Once all requirements are installed and validated, this script will not need to run again."

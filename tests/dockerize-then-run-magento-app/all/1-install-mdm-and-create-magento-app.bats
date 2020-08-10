@@ -13,6 +13,14 @@ setup() {
   shopt -s nocasematch
   app_name="app-from-repo-test"
   app_dir="$(find "$HOME/Downloads" -maxdepth 1 -type d -name "*$app_name*.app" || :)"
+  if [[ -z "$GITHUB_REPOSITORY" || "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then
+    # default when none specified or mdm is primary repo
+    MAGENTO_CLOUD_REPO="https://github.com/PMET-public/magento-cloud.git"
+    MAGENTO_CLOUD_CHECKOUT="pmet-2.4.0-ref"
+  else
+    MAGENTO_CLOUD_REPO="https://github.com/$GITHUB_REPOSITORY.git"
+    MAGENTO_CLOUD_CHECKOUT="$GITHUB_SHA"
+  fi
 }
 
 @test 'launcher with initial output' {
@@ -40,7 +48,7 @@ setup() {
 }
 
 @test 'create ref app' {
-  run "$lib_dir/dockerize" -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.4.0-ref -n "$app_name" -i "$HOME/.mdm/current/icons/ref.icns"
+  run "$lib_dir/dockerize" -g "$MAGENTO_CLOUD_REPO" -b "$MAGENTO_CLOUD_CHECKOUT" -n "$app_name" -i "$HOME/.mdm/current/icons/ref.icns"
   assert_success
 }
 
