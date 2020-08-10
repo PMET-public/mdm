@@ -23,7 +23,7 @@ setup() {
   fi
 }
 
-@test 'launcher with initial output' {
+@test 'installl mdm by running launcher with initial output' {
   output="$($lib_dir/launcher)"
   run "$lib_dir/launcher" "$output"
   assert_success
@@ -31,7 +31,7 @@ setup() {
   assert_file_exist "$HOME/.mdm/current/bin/lib.sh"
 }
 
-@test '[CI] launcher install_additional_tools' {
+@test '[CI] install_additional_tools' {
   is_CI || skip
   run "$lib_dir/launcher" install_additional_tools
   assert_success
@@ -47,7 +47,7 @@ setup() {
   assert_output -e "spoofing.*on"
 }
 
-@test 'create ref app' {
+@test 'dockerize app' {
   run "$lib_dir/dockerize" -g "$MAGENTO_CLOUD_REPO" -b "$MAGENTO_CLOUD_CHECKOUT" -n "$app_name" -i "$HOME/.mdm/current/icons/ref.icns"
   assert_success
 }
