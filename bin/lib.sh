@@ -236,20 +236,21 @@ are_other_magento_apps_running() {
 }
 
 invoked_mdm_without_args() {
-  # it can be difficult to determine whether mdm was called without args to display the menu or invoke a selected menu item.
-  # bash5 on mac and bash4 on linux report BASH_ARGC differently. the vsc debugger wraps the call in other args.
+  # it can be difficult to determine whether mdm was called w/o args to display the menu or invoke a selected menu item
+  # bash5 on mac and bash4 on linux report BASH_ARGC (he number of parameters in each frame of the current bash 
+  # execution call stack) differently. also the vsc debugger wraps the call in other args (changing BASH_ARGC)
   # so modify this carefully.
-  # for debugging, bash vscode debugger changes normal invocation, so check for a special var 
+  # for debugging, bash vscode debugger changes normal invocation, so check for a special env var $vsc_debugger_arg
   if [[ "$vsc_debugger_arg" == "n/a" ]]; then
-    return 0
+    return 0 # invoked WITHOUT args
   elif [[ -n "$vsc_debugger_arg" ]]; then
-    mdm_input="$vsc_debugger_arg"
-    return 1
+    mdm_first_arg="$vsc_debugger_arg"
+    return 1 # invoked WITH args
   elif [[ "${BASH_ARGV[-1]}" =~ /bin/mdm$ ]]; then
-    return 0
+    return 0 # invoked WITHOUT args
   else
-    mdm_input="${BASH_ARGV[-1]}"
-    return 1
+    mdm_first_arg="${BASH_ARGV[-1]}"
+    return 1 # invoked WITH args
   fi
 }
 
@@ -398,6 +399,14 @@ convert_secs_to_hms() {
 
 seconds_since() {
   echo "$(( $("$date_cmd" +"%s") - $1 ))"
+}
+
+reverse_array() {
+    declare -n input_array="$1" output_array="$2"
+    local index
+    for index in "${input_array[@]}"; do
+        output_array=("$index" "${output_array[@]}")
+    done
 }
 
 confirm_or_exit() {
@@ -885,19 +894,19 @@ render_platypus_status_menu() {
   printf "%s" "$menu_output"
 }
 
-handle_mdm_input() {
+handle_mdm_args() {
   local key value
   # check what type of menu item was selected
 
   # a handler?
-  key="$mdm_input-handler"
+  key="$mdm_first_arg-handler"
   [[ -n "${mdm_menu_items[$key]}" ]] && {
     "${mdm_menu_items[$key]}"
     exit
   }
 
   # a link?
-  key="$mdm_input-link"
+  key="$mdm_first_arg-link"
   [[ -n "${mdm_menu_items[$key]}" ]] && {
     open "${mdm_menu_items[$key]}"
     exit
@@ -911,15 +920,22 @@ handle_mdm_input() {
   # an env var is exported to mark these calls in case changes in the handler behavior are appropiate for these calls
   # (e.g. it's not appropiate to launch a new interactive OSX terminal)
   for value in "${mdm_menu_items[@]}"; do
-    [[ "$mdm_input" = "$value" ]] && {
+    [[ "$mdm_first_arg" = "$value" ]] && {
       export MDM_DIRECT_HANDLER_CALL=true
-      # msg_w_newlines "$mdm_input found in current menu. Running ..."
-      "$mdm_input"
+      # BASH_ARGV has all parameters in the current bash execution call stack
+      # the final parameter of the last subroutine call is first in the queue
+      # the first parameter of the initial call is last
+      # in this case, the sourced bin/mdm is first and the last element is the directly called handler
+      # so remove the first and last and reverse the middle (whew!)
+      local len=$(( ${#BASH_ARGV[*]} - 2 )) remaining_args
+      reverse_array BASH_ARGV remaining_args
+      echo "${remaining_args[@]}" >> /tmp/del-me
+      "$mdm_first_arg" "${remaining_args[@]:1:$len}"
       exit
     }
   done
 
-  error "Handler for $mdm_input was not found or valid in this context."
+  error "Handler for $mdm_first_arg was not found or valid in this context."
 
 }
 

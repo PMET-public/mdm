@@ -28,6 +28,14 @@ setup() {
   assert_equal "${lines[0]}" '1h 0m 1s'
 }
 
+@test 'reverse_array ("a" 2 3 "a string")' {
+  a1=("a" 2 3 "a string")
+  reverse_array a1 a2
+  run echo ${a2[@]}
+  assert_success
+  assert_output 'a string 3 2 a'
+}
+
 @test 'confirm_or_exit "y"' {
   run confirm_or_exit <<< 'y'
   assert_success
