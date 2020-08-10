@@ -11,7 +11,8 @@ load '../../../bin/lib.sh'
 
 setup() {
   shopt -s nocasematch
-  app_dir="$(find "$HOME/Downloads" -maxdepth 1 -type d -name "*.app" || :)"
+  app_name="app-from-repo-test"
+  app_dir="$(find "$HOME/Downloads" -maxdepth 1 -type d -name "*$app_name*.app" || :)"
 }
 
 @test 'launcher with initial output' {
@@ -39,7 +40,7 @@ setup() {
 }
 
 @test 'create ref app' {
-  run "$lib_dir/dockerize" -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.4.0-ref -n app-from-repo-test -i "$HOME/.mdm/current/icons/ref.icns"
+  run "$lib_dir/dockerize" -g https://github.com/PMET-public/magento-cloud.git -b pmet-2.4.0-ref -n "$app_name" -i "$HOME/.mdm/current/icons/ref.icns"
   assert_success
 }
 
@@ -89,14 +90,31 @@ setup() {
   assert_output -e 'copyright.*magento'
 }
 
+# can use get_* funcs directly b/c lib.sh is loaded independently
+# have to use an indirect method to get the app's url
+
+@test 'web/unsecure/base_url should be secure' {
+  run "$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/unsecure/base_url"'
+  assert_success
+  assert_output -p 'https://'
+}
+
+@test 'web/secure/base_url should be secure' {
+  run "$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"'
+  assert_success
+  assert_output -p 'https://'
+}
+
 @test 'check search result page for images' {
-  run curl "https://$(get_hostname_for_this_app)/catalogsearch/result/?q=accessory"
+  base_url="$("$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
+  run curl "$base_url/catalogsearch/result/?q=accessory"
   assert_success
   assert_output -e 'img.*src.*catalog\/product\/cache'
 }
 
 @test 'find and check the first category page in the nav for images' {
-  category_url="$(curl "https://$(get_hostname_for_this_app)" |
+  base_url="$("$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
+  category_url="$(curl "$base_url" |
     perl -ne 's/.*?class.*?nav-[12]-1.*?href=.([^ ]+.html).*/$1/ and print')"
   run curl "$category_url"
   assert_success
@@ -104,8 +122,10 @@ setup() {
 }
 
 # @test 'check admin login' {
+#   "$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento admin:user:create --admin-user "" --admin-password "" --admin-email admin@example.com --admin-firstname admin --admin-lastname admin'
+#   base_url="$("$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
 #   rm /tmp/myc 2> /dev/null || :
-#   admin_output="$(curl -sL -c /tmp/myc -b /tmp/myc "https://app-from-repo-test/admin/")"
+#   admin_output="$(curl -sL -c /tmp/myc -b /tmp/myc "$base_url/admin/")"
 #   form_url="$(echo "$admin_output" | perl -ne '/.*BASE_URL[\s='\''"]+([^'\''"]+).*/ and print $1')"
 #   form_key="$(echo "$admin_output" | perl -ne '/.*FORM_KEY[\s='\''"]+([^'\''"]+).*/ and print $1')"
 #   curl -sLv --max-redirs 1 -c /tmp/myc -b /tmp/myc -X POST -d "login[username]=&login[password]=&form_key=$form_key" "$form_url" 2>&1 |
