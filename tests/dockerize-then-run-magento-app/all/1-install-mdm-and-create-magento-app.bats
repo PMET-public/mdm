@@ -14,7 +14,8 @@ setup() {
   app_name="app-from-repo-test"
   app_dir="$(find "$HOME/Downloads" -maxdepth 1 -type d -name "*$app_name*.app" || :)"
   if [[ -z "$GITHUB_REPOSITORY" || "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then
-    # default when none specified or mdm is primary repo
+    # default when none specified or mdm is the primary repo
+    # so mdm is testing itself rather than being included to test another repo
     MAGENTO_CLOUD_REPO="https://github.com/PMET-public/magento-cloud.git"
     MAGENTO_CLOUD_CHECKOUT="pmet-2.4.0-ref"
   else
@@ -98,7 +99,7 @@ setup() {
   assert_output -e 'copyright.*magento'
 }
 
-# can use get_* funcs directly b/c lib.sh is loaded independently
+# can't use get_* funcs directly b/c lib.sh is loaded independently of any specific app
 # have to use an indirect method to get the app's url
 
 @test 'web/unsecure/base_url should be secure' {
@@ -129,13 +130,20 @@ setup() {
   assert_output -e 'img.*src.*catalog\/product\/cache'
 }
 
-# @test 'check admin login' {
-#   "$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento admin:user:create --admin-user "" --admin-password "" --admin-email admin@example.com --admin-firstname admin --admin-lastname admin'
-#   base_url="$("$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
-#   rm /tmp/myc 2> /dev/null || :
-#   admin_output="$(curl -sL -c /tmp/myc -b /tmp/myc "$base_url/admin/")"
-#   form_url="$(echo "$admin_output" | perl -ne '/.*BASE_URL[\s='\''"]+([^'\''"]+).*/ and print $1')"
-#   form_key="$(echo "$admin_output" | perl -ne '/.*FORM_KEY[\s='\''"]+([^'\''"]+).*/ and print $1')"
-#   curl -sLv --max-redirs 1 -c /tmp/myc -b /tmp/myc -X POST -d "login[username]=&login[password]=&form_key=$form_key" "$form_url" 2>&1 |
-#       grep -i -m 1 "Location.*admin/dashboard" | wc -l)
-# }
+@test 'create admin user' {
+  run "$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento admin:user:create --admin-user "admin" \
+    --admin-password "pass4mdmCI" --admin-email admin@example.com --admin-firstname admin --admin-lastname admin'
+  assert_success
+  assert_output -e 'created.*admin'
+}
+
+@test 'check admin login user:pass == admin:pass4mdmCI' {
+  base_url="$("$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"' | perl -ne 's/\/\s*$// and print')"
+  rm /tmp/myc 2> /dev/null || :
+  admin_output="$(curl -L -c /tmp/myc -b /tmp/myc "$base_url/admin/")"
+  form_url="$(echo "$admin_output" | perl -ne '/.*BASE_URL[\s='\''"]+([^'\''"]+).*/ and print $1')"
+  form_key="$(echo "$admin_output" | perl -ne '/.*FORM_KEY[\s='\''"]+([^'\''"]+).*/ and print $1')"
+  run curl -Lv --max-redirs 3 -c /tmp/myc -b /tmp/myc -d "login[username]=admin&login[password]=pass4mdmCI&form_key=$form_key" "$form_url"
+  assert_success
+  assert_output -e "Location.*admin/dashboard"
+}
