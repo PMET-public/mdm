@@ -4,10 +4,11 @@ set -e
 # don't trap errors while using VSC debugger
 [[ $VSCODE_PID ]] || {
   set -E # If set, the ERR trap is inherited by shell functions.
-  trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE.
-Env when error occurred:
-$(env | "$sort_cmd")
-"' ERR
+#   trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE.
+# Env when error occurred:
+# $(env | "$sort_cmd")
+# "' ERR
+    trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE.' ERR
 }
 
 # this lib is used by dockerize, mdm, tests, etc. but logging to STDOUT is problematic for platypus apps
