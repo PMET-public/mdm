@@ -660,8 +660,14 @@ sudo_run_bash_cmds() {
 run_this_menu_item_handler_in_new_terminal_if_applicable() {
   [[ $MDM_DIRECT_HANDLER_CALL ]] && return 1
   ! is_mac && return 1
-  local caller script
-  caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_this_menu_item_handler_in_new_terminal_if_applicable //; s/ .*//')"
+  local caller script funcs="${FUNCNAME[*]}"
+  # extract the calling function from the list of function names ordinarily it's immediately after
+  # run_this_menu_item_handler_in_new_terminal_if_applicable unless called by the helper run_as_bash_cmds_in_app
+  if [[ "$funcs" =~ "run_as_bash_cmds_in_app" ]]; then
+    caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_as_bash_cmds_in_app //; s/ .*//')"
+  else
+    caller="$(echo "${FUNCNAME[*]}" | sed 's/.*run_this_menu_item_handler_in_new_terminal_if_applicable //; s/ .*//')"
+  fi
   script="$(mktemp -t "$COMPOSE_PROJECT_NAME-$caller")" || exit
   # remember to escape in this string if you want it to be evaluated at RUN time vs when the script is written
   # also env vars are appear to be overriden by disconnected instances of Mac's Terminal app
@@ -929,7 +935,6 @@ handle_mdm_args() {
       # so remove the first and last and reverse the middle (whew!)
       local len=$(( ${#BASH_ARGV[*]} - 2 )) remaining_args
       reverse_array BASH_ARGV remaining_args
-      echo "${remaining_args[@]}" >> /tmp/del-me
       "$mdm_first_arg" "${remaining_args[@]:1:$len}"
       exit
     }
