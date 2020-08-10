@@ -38,10 +38,12 @@ is_docker_compatible() {
 }
 
 # allow mdm_script_path to be set by env var for debugging or testing
-if [[ $GITHUB_WORKSPACE ]]; then
-  REPO_DIR="$GITHUB_WORKSPACE"
-elif [[ $TRAVIS ]]; then
-  REPO_DIR="$TRAVIS_BUILD_DIR"
+if [[ -z "$MDM_REPO_DIR" ]]; then
+  if [[ $GITHUB_WORKSPACE ]]; then
+    MDM_REPO_DIR="$GITHUB_WORKSPACE"
+  elif [[ $TRAVIS ]]; then
+    MDM_REPO_DIR="$TRAVIS_BUILD_DIR"
+  fi
 fi
 
 if [[
@@ -55,7 +57,7 @@ if [[
 
 ]]; then
 
-  mdm_script_path="${REPO_DIR:-$HOME/.mdm/current}/bin/mdm"
+  mdm_script_path="${MDM_REPO_DIR:-$HOME/.mdm/current}/bin/mdm"
   # shellcheck source=mdm
   source "$mdm_script_path"
 
@@ -70,14 +72,14 @@ else
   else
 
     installer=$(mktemp)
-    if [[ "$REPO_DIR" ]]; then
-      cp "$REPO_DIR/bin/lib.sh" "$installer"
+    if [[ "$MDM_REPO_DIR" ]]; then
+      cp "$MDM_REPO_DIR/bin/lib.sh" "$installer"
     else
       curl -sL "https://raw.githubusercontent.com/PMET-public/mdm/master/bin/lib.sh" > "$installer"
     fi
     echo "self_install" >> "$installer" # call the self_install function
     chmod +x "$installer"
-    if ! is_mac || [[ "$REPO_DIR" ]]; then
+    if ! is_mac || [[ "$MDM_REPO_DIR" ]]; then
       "$installer"
     else
       open -a Terminal "$installer"

@@ -675,7 +675,7 @@ run_this_menu_item_handler_in_new_terminal_if_applicable() {
   # particularly watch out for COMPOSE_PROJECT_NAME. may have to evaluate each time. 
   # see export_compose_project_name below
   echo "#!/usr/bin/env bash -l
-export REPO_DIR=\"${REPO_DIR}\"
+export MDM_REPO_DIR=\"${MDM_REPO_DIR}\"
 export apps_resources_dir=\"$apps_resources_dir\"
 [[ \"$debug\" ]] && echo \"\$(env | $sort_cmd)\" && set -x
 printf '\e[8;45;180t' # terminal size
@@ -720,8 +720,8 @@ track_job_status_and_wait_for_exit() {
   pid_to_wait_for="$1"
 
   if [[ -z "$apps_mdm_jobs_dir" ]]; then 
-    # shouldn't be here unless testing from $REPO_DIR
-    [[ "$REPO_DIR" ]] || error "REPO_DIR and apps_mdm_jobs_dir are undefined"
+    # shouldn't be here unless testing from $MDM_REPO_DIR
+    [[ "$MDM_REPO_DIR" ]] || error "MDM_REPO_DIR and apps_mdm_jobs_dir are undefined"
     wait "$pid_to_wait_for" # wait but don't track b/c no app's mdm job dir to associate job to
   else
     msg="$2"

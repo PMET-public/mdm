@@ -31,7 +31,7 @@ $ cd mdm
 3. set up your env
 
 ```
-$ export debug=1 REPO_DIR=. COMPOSER_AUTH='{"github-oauth":{"github.com":"..."}}'
+$ export debug=1 MDM_REPO_DIR=. COMPOSER_AUTH='{"github-oauth":{"github.com":"..."}}'
 ```
 
 ## Additional troubleshooting notes

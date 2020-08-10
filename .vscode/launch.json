@@ -20,7 +20,7 @@
       "env": {
         "debug": true,
         "vsc_debugger_arg": "n/a",
-        "REPO_DIR": "${workspaceFolder}",
+        "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir":
           "${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"
       },
@@ -44,7 +44,7 @@
         // "vsc_debugger_arg": "Reload reverse proxy",
         //"vsc_debugger_arg": "Install additional tools for additional features",
         //"vsc_debugger_arg": "⚠️ Remove Magento images (breaks stopped apps)",
-        "REPO_DIR": "${workspaceFolder}",
+        "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir": 
           "${env:HOME}/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources"
       },
@@ -65,7 +65,7 @@
         //"vsc_debugger_arg": "start_pwa_with_remote",
         //"vsc_debugger_arg": "rm_magento_docker_images",
         "vsc_debugger_arg": "start_mdm_shell",
-        "REPO_DIR": "${workspaceFolder}",
+        "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir": 
           //"${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"
           "${env:HOME}/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources"
