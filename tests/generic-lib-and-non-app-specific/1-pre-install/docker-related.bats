@@ -29,7 +29,8 @@ setup() {
   msg="hello, world!"
   echo "$msg" > a/1/file1
   tar -zcf some.tar.gz a
-  cid="$(docker create alpine)"
+  # simple container that will remove itself after brief period (enough for test)
+  cid="$(docker run --rm -d alpine sleep 20)"
   extract_tar_to_existing_container_path some.tar.gz "$cid:/tmp"
   docker cp "$cid:/tmp/a/1/file1" file1
   run cat file1 && rm -rf a some.tar.gz file1
