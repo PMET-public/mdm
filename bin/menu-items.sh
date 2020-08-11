@@ -128,6 +128,13 @@ is_update_available && {
     mdm_menu_items["$key-handler"]=uninstall_app
   }
 
+  is_docker_compatible && are_other_magento_apps_running && {
+    key="🛑 Stop all other Magento apps"
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-handler"]=stop_other_apps
+  }
+
+
   ###
   #
   # start Magento commands submenu
@@ -217,13 +224,6 @@ is_update_available && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=show_mdm_logs
   }
-
-  is_docker_compatible && are_other_magento_apps_running && {
-    key="🛑 Stop all other Magento apps"
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=stop_other_apps
-  }
-
 }
 
 
