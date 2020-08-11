@@ -98,6 +98,10 @@ is_mkcert_installed() {
   [[ -n "$(which mkcert)" ]]
 }
 
+is_tmate_installed() {
+  [[ -n "$(which tmate)" ]]
+}
+
 are_additional_tools_installed() {
   is_magento_cloud_cli_installed || return
   is_mac && {
@@ -105,6 +109,7 @@ are_additional_tools_installed() {
     is_platypus_installed || return
   }
   is_mkcert_installed || return
+  is_tmate_installed || return
 }
 
 can_optimize_vm_cpus() {

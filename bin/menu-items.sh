@@ -287,6 +287,12 @@ is_adobe_system && {
   key="#m2-demo-support (Magento Org Slack)"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-link"]="slack://channel?team=T025FJ55H&id=C0MQZ62DV"
+
+  is_tmate_installed && {
+    key="💻 SI Team remote access"
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-handler"]=start_tmate_session
+  }
 }
 
 key="#cloud-docker (Magento Community Slack)"

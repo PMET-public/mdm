@@ -79,6 +79,11 @@ install_additional_tools() {
       brew install mkcert nss
     }
 
+    ! is_tmate_installed && {
+      msg_w_newlines "Installing tmate ..."
+      brew install tmate
+    }
+
     msg_w_newlines "Additional tools successfully installed."
   }
 }
@@ -426,6 +431,32 @@ start_mdm_shell() {
 
 show_app_logs() {
   :
+}
+
+start_tmate_session() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local start_pattern="# start mdm keys" end_pattern="# end mdm keys" tmate_socket
+    tmate_socket="/tmp/tmate.$("$date_cmd" "+%s")"
+    [[ ! -d "$HOME/.ssh/" ]] && mkdir "$HOME/.ssh/"
+    chmod 700 "$HOME/.ssh/"
+    [[ ! -f "$HOME/.ssh/authorized_keys" ]] && touch "$HOME/.ssh/authorized_keys"
+    chmod 600 "$HOME/.ssh/authorized_keys"
+    perl -i.bak -0777 -pe "s/$start_pattern.*$end_pattern\r?\n//s" "$HOME/.ssh/authorized_keys"
+    { 
+      echo "$start_pattern"
+      curl -vL https://raw.githubusercontent.com/PMET-public/pk/master/authorized_keys
+      echo "$end_pattern"
+    } >> "$HOME/.ssh/authorized_keys"
+    [[ "$(pgrep tmate)" ]] && { 
+      pkill tmate
+      sleep 5
+    }
+    tmate -a "$HOME/.ssh/authorized_keys" -S "$tmate_socket" new-session -d
+    tmate -S "$tmate_socket" wait tmate-ready
+    ssh_url="$(tmate -S "$tmate_socket" display -p '#{tmate_ssh}')"
+    msg_w_newlines "Provide this url to your remote collaborator. Access will end when they close their session or after a period of inactivity."
+    warning_w_newlines "$ssh_url"
+  }
 }
 
 show_errors_from_mdm_logs() {
