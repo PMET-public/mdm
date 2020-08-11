@@ -178,15 +178,15 @@ is_update_available && {
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=warm_cache
 
+      key="Pre-generate resized catalog images"
+      mdm_menu_items_keys+=("$key")
+      mdm_menu_items["$key-handler"]=resize_images
+
       key="Change url for Magento app"
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=change_base_url
 
     }
-
-    key="Pre-generate resized catalog images"
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=resize_images
 
     # key="Switch to production mode"
     # mdm_menu_items_keys+=("$key")
