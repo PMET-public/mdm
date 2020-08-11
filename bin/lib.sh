@@ -345,6 +345,18 @@ is_mkcert_CA_installed() {
   fi
 }
 
+has_valid_composer_auth() {
+  [[ "$COMPOSER_AUTH" =~ \{.*github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com.*\} ]] && return
+  if [[ -f "$HOME/.composer/auth.json" ]]; then
+    # print auth.json as 1 line and assign to var
+    COMPOSER_AUTH="$(perl -0777 -pe 's/\r?\n//g;s/\s*("|{|})\s*/\1/g' "$HOME/.composer/auth.json")"
+    if [[ "$COMPOSER_AUTH" =~ github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com ]]; then
+      export COMPOSER_AUTH && return
+    fi
+  fi
+  return 1
+}
+
 ###
 #
 # end test functions

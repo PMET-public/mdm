@@ -54,6 +54,12 @@ is_docker_compatible && {
 
   ! is_docker_ready && return 0
 
+  has_valid_composer_auth || {
+    key="⚠️ Missing credentials - some features limited"
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-link"]="https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
+  }
+
 }
 
 is_update_available && {

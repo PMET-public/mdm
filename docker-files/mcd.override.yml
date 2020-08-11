@@ -21,6 +21,8 @@ services:
       - 'magento:/app:rw'
       - 'magento-vendor:/app/vendor:rw'
       - 'magento-generated:/app/generated:rw'
+    environment:
+      - COMPOSER_AUTH
   varnish:
     ports:
       - 80
