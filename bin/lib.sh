@@ -318,7 +318,7 @@ is_valid_hostname() {
   [[ ! "$1" =~ ^\. ]] && [[ "$1" =~ [a-zA-Z0-9]$ ]] && {
     # just want to know if name is valid so ignore output and timeout quickly
     # exit code 3 would be almost instant
-    curl -sI ---max-time 2 "http://$1" > /dev/null || [[ "$?" -ne 3 ]]
+    curl -sI --max-time 2 "http://$1" > /dev/null || [[ "$?" -ne 3 ]]
   }
 }
 
@@ -467,7 +467,8 @@ get_github_token_from_composer_auth() {
 get_docker_host_ip() {
   [[ "$docker_host_ip" ]] && return # already defined
   docker_host_ip="$host_docker_internal"
-  is_mac && docker_host_ip="$(docker run alpine getent hosts host.docker.internal | perl -pe 's/\s.*//')"
+  is_mac && docker_host_ip="$(docker run --rm alpine getent hosts host.docker.internal | perl -pe 's/\s.*//')"
+  printf '%s' "$docker_host_ip"
 }
 
 get_hostname_for_this_app() {
