@@ -1,4 +1,4 @@
-## How MDM finds & stores certs
+## How MDM creates/retrieves & stores certs
 
 Certs for a hostname are stored in a directory of the same name. For example, certs for `test.example.com` are stored in `~/.mdm/certs/test.example.com/`
 
