@@ -385,8 +385,9 @@ warm_cache() {
     msg Warming cache ...
 
     # recursively get admin and store front
-    wget -nv -O "$tmp_file" -H --domains="$domain" "$url/admin"
-    wget -nv -r -X static,media -l 1 -O "$tmp_file" -H --domains="$domain" "$url"
+    # TODO --no-check-certificate is only needed on mac (even with mkcert CA installed)
+    wget --no-check-certificate -nv -O "$tmp_file" -H --domains="$domain" "$url/admin"
+    wget --no-check-certificate -nv -r -X static,media -l 1 -O "$tmp_file" -H --domains="$domain" "$url"
     rm "$tmp_file"
   }
 }
@@ -403,12 +404,8 @@ change_base_url() {
       /app/bin/magento config:set web/unsecure/base_url https://$hostname/
       /app/bin/magento config:set web/secure/base_url https://$hostname/
       /app/bin/magento cache:flush
-      echo '$(print_containers_hosts_file_entry)' >> /etc/hosts
     "
-    is_hostname_resolving_to_local "$hostname" && {
-      msg_w_newlines "$hostname must be added to your /etc/hosts file. You must enter your password."
-      add_hostnames_to_hosts_file "$hostname"
-    }
+    reload_rev_proxy
     warm_cache
   }
 }
