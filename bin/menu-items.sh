@@ -170,13 +170,17 @@ is_update_available && {
       # mdm_menu_items_keys+=("$key")
       # mdm_menu_items["$key-handler"]=disable_most_caches
 
-      key="Flush Cache"
+      key="Flush cache"
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=flush_cache
 
-      key="Warm Cache"
+      key="Warm cache"
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=warm_cache
+
+      key="Change url for Magento app"
+      mdm_menu_items_keys+=("$key")
+      mdm_menu_items["$key-handler"]=change_base_url
 
     }
 
@@ -192,6 +196,12 @@ is_update_available && {
     # mdm_menu_items_keys+=("$key")
     # mdm_menu_items["$key-handler"]=switch_to_developer_mode
 
+    is_advanced_mode && {
+      key="💻 Start MDM shell"
+      mdm_menu_items_keys+=("$key")
+      mdm_menu_items["$key-handler"]=start_mdm_shell
+    }
+
     mdm_menu_items_keys+=("end submenu")
 
   }
@@ -201,12 +211,6 @@ is_update_available && {
   # end Magento commands submenu
   #
   ###
-
-  is_advanced_mode && {
-    key="💻 Start MDM shell"
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=start_mdm_shell
-  }
 
   ! is_advanced_mode && {
     key="📝 Show MDM logs"
@@ -490,9 +494,13 @@ is_advanced_mode && {
 
   is_docker_compatible && { # meaning currently n/a on CI/CD on mac
 
-    key="Reload reverse proxy"
+    key="🔄Reload reverse proxy"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=reload_rev_proxy
+
+    key="🧹 Remove hostnames added to /etc/hosts file"
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-handler"]=rm_added_hostnames_from_hosts_file
 
     key="⚠️ Remove Magento images (breaks stopped apps)"
     mdm_menu_items_keys+=("$key")

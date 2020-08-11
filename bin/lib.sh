@@ -312,7 +312,9 @@ is_valid_hostname() {
   # only allow [a-zA-Z0-9] for last char
   # curl exit code 3 = bad/illegal url
   [[ ! "$1" =~ ^\. ]] && [[ "$1" =~ [a-zA-Z0-9]$ ]] && {
-    curl -sI "http://$1" || [[ "$?" -ne 3 ]]
+    # just want to know if name is valid so ignore output and timeout quickly
+    # exit code 3 would be almost instant
+    curl -sI ---max-time 2 "http://$1" > /dev/null || [[ "$?" -ne 3 ]]
   }
 }
 
@@ -458,12 +460,34 @@ get_github_token_from_composer_auth() {
 #
 ###
 
+get_docker_host_ip() {
+  [[ "$docker_host_ip" ]] && return # already defined
+  docker_host_ip="$host_docker_internal"
+  is_mac && docker_host_ip="$(docker run alpine getent hosts host.docker.internal | perl -pe 's/\s.*//')"
+}
+
 get_hostname_for_this_app() {
   [[ -f "$apps_resources_dir/app/docker-compose.yml" ]] &&
     perl -ne 's/.*VIRTUAL_HOST=\s*(.*)\s*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml" ||
     error "Host not found"
 }
 
+print_containers_hosts_file_entry() {
+  printf '%s' "$(get_docker_host_ip) $(get_hostname_for_this_app) $hosts_file_line_marker"
+}
+
+print_local_hosts_file_entry() {
+  local hostname="$1"
+  printf '%s' "127.0.0.1 $hostname $hosts_file_line_marker"
+}
+
+set_hostname_for_this_app() {
+  local hostname="$1"
+  is_valid_hostname "$hostname" || error "Invalid hostname"
+  [[ -f "$apps_resources_dir/app/docker-compose.yml" ]] &&
+    perl -i -pe "s/(.*VIRTUAL_HOST=\s*)(.*)(\s*)/\1$hostname\3/" "$apps_resources_dir/app/docker-compose.yml" ||
+    error "Host not found"
+}
 
 get_pwa_hostname() {
   is_adobe_system && echo "pwa.$mdm_demo_domain" || echo "pwa"
@@ -518,9 +542,9 @@ backup_hosts() {
 
 add_hostnames_to_hosts_file() {
   [[ "$*" ]] || return 0
-  local hostnames="$*" lines="" error_msg="Could not update hosts files." tmp_hosts
-  for host in $hostnames; do
-    lines+="127.0.0.1 $host $hosts_file_line_marker"$'\n'
+  local hostnames="$*" hostname lines="" error_msg="Could not update hosts files." tmp_hosts
+  for hostname in $hostnames; do
+    lines+="$(print_local_hosts_file_entry "$hostname")"$'\n'
   done
   echo "Password may be required to modify /etc/hosts."
   tmp_hosts=$(mktemp)

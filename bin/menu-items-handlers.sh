@@ -117,7 +117,6 @@ update_mdm() {
 }
 
 install_app() {
-  local docker_host_ip
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     cd "$apps_resources_dir/app" || exit 1
@@ -162,10 +161,8 @@ install_app() {
     # add it to the container's /etc/hosts file before running post deploy hook
     # so curl https://magento-app-hostname/ (the base url) properly resolves for cache warm-up
     # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
-    docker_host_ip="$host_docker_internal"
-    is_mac && docker_host_ip="$(docker run alpine getent hosts host.docker.internal | perl -pe 's/\s.*//')"
     docker-compose run --rm deploy bash -c "
-      echo '$docker_host_ip $(get_hostname_for_this_app)' >> /etc/hosts
+      echo '$(print_containers_hosts_file_entry)' >> /etc/hosts
       /app/bin/magento cache:enable
       cloud-post-deploy
     "
@@ -391,6 +388,28 @@ warm_cache() {
     wget -nv -O "$tmp_file" -H --domains="$domain" "$url/admin"
     wget -nv -r -X static,media -l 1 -O "$tmp_file" -H --domains="$domain" "$url"
     rm "$tmp_file"
+  }
+}
+
+change_base_url() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local hostname
+    msg_w_newlines "Enter new domain or hostname for this magento app:  (Ex. www.example.com, sales-opp.demo, etc.)"
+    read -r -p ''
+    hostname="$REPLY"
+    is_valid_hostname "$hostname" || error "Invalid domain. Exiting unchanged."
+    set_hostname_for_this_app "$hostname"
+    run_as_bash_cmds_in_app "
+      /app/bin/magento config:set web/unsecure/base_url https://$hostname/
+      /app/bin/magento config:set web/secure/base_url https://$hostname/
+      /app/bin/magento cache:flush
+      echo '$(print_containers_hosts_file_entry)' >> /etc/hosts
+    "
+    is_hostname_resolving_to_local "$hostname" && {
+      msg_w_newlines "$hostname must be added to your /etc/hosts file. You must enter your password."
+      add_hostnames_to_hosts_file "$hostname"
+    }
+    warm_cache
   }
 }
 
