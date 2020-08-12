@@ -80,7 +80,7 @@
         //"vsc_debugger_arg": "rm_magento_docker_images",
         //"vsc_debugger_arg": "start_pwa_with_remote",
         //"vsc_debugger_arg": "rm_magento_docker_images",
-        "vsc_debugger_arg": "change_base_url",
+        "vsc_debugger_arg": "start_pwa_with_app",
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir": 
           //"${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"

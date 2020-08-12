@@ -578,8 +578,8 @@ start_pwa() {
     docker-compose up -d storystore-pwa storystore-pwa-prev
     ! is_nginx_rev_proxy_running && reload_rev_proxy
     local index=1
-    until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://pwa/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
-    open "https://pwa/$pwa_path"
+    until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://$(get_pwa_hostname)/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
+    open "https://$(get_pwa_hostname)/$pwa_path"
   } >> "$handler_log_file" 2>&1 &
   track_job_status_and_wait_for_exit $! "(Re)starting PWA"
 }

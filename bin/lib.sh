@@ -528,6 +528,11 @@ get_pwa_prev_hostname() {
   is_adobe_system && echo "pwa-prev.$mdm_demo_domain" || echo "pwa-prev"
 }
 
+export_pwa_hostnames() {
+  PWA_HOSTNAME="$(get_pwa_hostname)"
+  PWA_PREV_HOSTNAME="$(get_pwa_prev_hostname)"
+  export PWA_HOSTNAME PWA_PREV_HOSTNAME
+}
 
 find_bridged_docker_networks() {
   docker network ls -q --filter 'driver=bridge' --filter 'name=_default'
@@ -1046,6 +1051,7 @@ run_bundled_app_as_script() {
 
 init_app_specific_vars() {
   # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
+  export_pwa_hostnames
   export_compose_project_name
   export_compose_file
   if ! is_detached; then
