@@ -750,7 +750,9 @@ run_this_menu_item_handler_in_new_terminal_if_applicable() {
   echo "#!/usr/bin/env bash -l
 export MDM_REPO_DIR=\"${MDM_REPO_DIR}\"
 export apps_resources_dir=\"$apps_resources_dir\"
-[[ \"$debug\" ]] && echo \"\$(env | $sort_cmd)\" && set -x
+# enable debugging and print env EXCEPT for interactive shell
+# TODO - why is shell prompt not showing while in debug mode
+[[ \"$debug\" && \"$caller\" != \"start_mdm_shell\" ]] && echo \"\$(env | $sort_cmd)\" && set -x
 printf '\e[8;45;180t' # terminal size
 $lib_dir/launcher $caller
 " > "$script"
