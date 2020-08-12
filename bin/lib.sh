@@ -528,7 +528,8 @@ get_pwa_prev_hostname() {
   is_adobe_system && echo "pwa-prev.$mdm_demo_domain" || echo "pwa-prev"
 }
 
-find_mdm_networks() {
+
+find_bridged_docker_networks() {
   docker network ls -q --filter 'driver=bridge' --filter 'name=_default'
 }
 
@@ -538,12 +539,11 @@ find_proxy_by_network() {
     sed 's/.*://;s/-.*//'
 }
 
-find_hostname_by_network() {
+find_web_service_hostname_by_network() {
   local cid apps_resources_dir
-  cid="$(docker ps -a --filter "network=$1" \
-      --filter "label=com.docker.compose.service=web" --format "{{.ID}}")"
-  [[ "$cid" ]] &&
-    apps_resources_dir="$(docker inspect "$cid" | \
+  cid="$(docker ps -a --filter "network=$1" --filter "label=com.docker.compose.service=web" --format "{{.ID}}")"
+  [[ "$cid" ]] || return 0
+  apps_resources_dir="$(docker inspect "$cid" | \
       perl -ne 's/.*com.docker.compose.project.working_dir.*?(\/[^"]*).*/$1\/../ and print')"
   [[ "$apps_resources_dir" ]] || return 0
   perl -ne 's/.*VIRTUAL_HOST\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/docker-compose.yml"
@@ -552,9 +552,9 @@ find_hostname_by_network() {
 find_mdm_hostnames() {
   local hostnames hostname networks network
   hostnames=("$(get_pwa_hostname)" "$(get_pwa_prev_hostname)")
-  networks="$(find_mdm_networks)"
+  networks="$(find_bridged_docker_networks)"
   for network in $networks; do
-    hostname="$(find_hostname_by_network "$network")"
+    hostname="$(find_web_service_hostname_by_network "$network")"
     [[ -n "$hostname" ]] && hostnames+=("$hostname")
   done
   echo "${hostnames[*]}"
