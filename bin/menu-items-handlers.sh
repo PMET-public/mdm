@@ -192,9 +192,7 @@ stop_app() {
     msg_w_timestamp "${FUNCNAME[0]}"
     docker-compose stop
   } >> "$handler_log_file" 2>&1 &
-  # if stopped indirectly (by quitting the app), don't bother to set the status and wait
-  invoked_mdm_without_args ||
-    track_job_status_and_wait_for_exit $! "Stopping Magento ..."
+  track_job_status_and_wait_for_exit $! "Stopping Magento ..."
 }
 
 restart_app() {

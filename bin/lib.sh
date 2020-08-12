@@ -777,8 +777,8 @@ detect_quit_and_stop_app() {
     done
   )
   # parent pid gone, so remove file and stop dockerized magento
-  rm "$quit_detection_file"
-  stop_app
+  rm "$quit_detection_file" || :
+  docker-compose stop
 }
 
 # background jobs invoked by a menu selection are tracked to relay info about their progress to the user.
