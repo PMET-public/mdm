@@ -1170,7 +1170,7 @@ lib_sourced_for_specific_bundled_app && {
   ensure_mdm_log_files_exist
   init_app_specific_vars
   [[ "$debug" ]] && init_mdm_logging
-  ! is_detached && init_quit_detection
+  ! is_detached && ! is_CI && init_quit_detection
   # if docker is up, then cache this output to parse when adding and filtering additional available menu options
   is_docker_ready && formatted_cached_docker_ps_output="$(
     docker ps -a -f "label=com.docker.compose.service" --format "{{.Names}} {{.Status}}" | \
