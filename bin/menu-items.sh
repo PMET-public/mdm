@@ -127,14 +127,21 @@ is_update_available && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=uninstall_app
   }
+}
 
-  is_docker_compatible && are_other_magento_apps_running && {
-    key="🛑 Stop all other Magento apps"
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=stop_other_apps
-  }
+is_docker_compatible && are_other_magento_apps_running && {
+  key="🛑 Stop all other Magento apps"
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=stop_other_apps
+}
 
+is_docker_compatible && has_valid_composer_auth && {
+  key="📦 Create a new Magento app"
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=dockerize_app
+}
 
+! is_detached && {
   ###
   #
   # start Magento commands submenu

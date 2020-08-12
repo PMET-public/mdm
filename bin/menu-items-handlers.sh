@@ -524,6 +524,34 @@ stop_other_apps() {
   track_job_status_and_wait_for_exit $! "Stopping other apps ..."
 }
 
+dockerize_app() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local url projects project branch
+    printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env or a $(warning "cloud compatible") git repo."
+    read -r -p ''
+    url="$REPLY"
+    if is_valid_mc_url "$url"; then
+      projects="$("$magento_cloud_cmd" projects --pipe --no 2> /dev/null)"
+      [[ "$projects" ]] || {
+        msg_w_newlines "You do not appear to be logged into your magento cloud account."
+        "$magento_cloud_cmd" login
+      }
+      project="$(get_project_from_mc_url "$url")"
+      branch="$(get_branch_from_mc_url "$url")"
+      [[ "$project" ]] || error "Project could not be determined from: $url"
+      [[ "$branch" ]] || {
+        msg_w_newlines "Branch could not be determined from: $url. Using 'master' ..."
+        branch="master"
+      }
+      "$lib_dir/dockerize" -p "$project" -e "$branch" -m -i "$HOME/.mdm/current/icons/magento.icns"
+    elif is_valid_github_web_url "$url"; then
+      branch="$(get_branch_from_github_web_url "$url")"
+      "$lib_dir/dockerize" -g "$url" -b "$branch" -i "$HOME/.mdm/current/icons/magenot.icns"
+    else
+      error "Url does not appear to be a valid GitHub url (ex. https://github.com...) or a valid Magento Cloud url from your MC projects page."
+    fi
+  }
+}
 
 # TODO change away positional pararms & is demo mode still used?
 start_pwa_with_app() {

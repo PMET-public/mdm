@@ -331,6 +331,31 @@ is_existing_cloud_env() {
   [[ "$env_is_existing_cloud" ]]
 }
 
+is_valid_github_web_url() {
+  local url="$1"
+  [[ "$url" =~ https?://.*github\.com/.+/.+ ]]
+}
+
+get_branch_from_github_web_url() {
+  local url="$1"
+  echo "$url" | perl -ne '/.*\/(tree|blob|commit)\/([^\/]+)/ and print $2'
+}
+
+is_valid_mc_url() {
+  local url="$1"
+  [[ "$url" =~ https?://.*magento\.cloud/ ]]
+}
+
+get_project_from_mc_url() {
+  local url="$1"
+  echo "$url" | perl -ne '/.*?\/projects\/([^\/]+)/ and print $1'
+}
+
+get_branch_from_mc_url() {
+  local url="$1"
+  echo "$url" | perl -ne '/.*?\/environments\/([^\/]+)/ and print $1'
+}
+
 is_hostname_resolving_to_local() {
   local curl_output
   curl_output="$(curl -vI "$1" 2>&1 >/dev/null | grep Trying)"

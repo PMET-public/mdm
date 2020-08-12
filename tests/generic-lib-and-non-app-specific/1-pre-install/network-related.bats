@@ -13,6 +13,96 @@ setup() {
   shopt -s nocasematch
 }
 
+@test 'is_valid_mc_url https://demo.magento.cloud/projects/xy4itwbmg2khb' {
+  run is_valid_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
+  assert_success
+}
+
+@test 'get_project_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
+  run get_project_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
+  assert_success
+  assert_output "xy4itwbmg2khb"
+}
+
+@test 'get_branch_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
+  run get_branch_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
+  assert_success
+  assert_output ""
+}
+
+@test 'is_valid_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
+  run is_valid_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
+  assert_success
+}
+
+@test 'get_project_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
+  run get_project_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
+  assert_success
+  assert_output "xy4itwbmg2khb"
+}
+
+@test 'get_branch_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
+  run get_branch_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
+  assert_success
+  assert_output "master"
+}
+
+@test 'is_valid_mc_url "https://master-7rqtwti-xy4itwbmg2khb.demo.magentosite.cloud/"' {
+  run is_valid_mc_url "https://master-7rqtwti-xy4itwbmg2khb.demo.magentosite.cloud/"
+  assert_failure
+}
+
+@test 'is_valid_mc_url "https://google.com/"' {
+  run is_valid_mc_url "https://google.com/"
+  assert_failure
+}
+
+@test 'is_valid_github_web_url "https://github.com/PMET-public/magento-cloud/tree/deployable"' {
+  run is_valid_github_web_url "https://github.com/PMET-public/magento-cloud/tree/deployable"
+  assert_success
+}
+
+@test 'is_valid_github_web_url "https://github.com/PMET-public/magento-cloud"' {
+  run is_valid_github_web_url "https://github.com/PMET-public/magento-cloud"
+  assert_success
+}
+
+@test 'is_valid_github_web_url "https://github.com/PMET-public"' {
+  run is_valid_github_web_url "https://github.com/PMET-public"
+  assert_failure
+}
+
+@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm"' {
+  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm"
+  assert_success
+  assert_output ''
+}
+
+@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/commit/f3f84327f7308a983b8464a333ac0ec323a66553"' {
+  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/commit/f3f84327f7308a983b8464a333ac0ec323a66553"
+  assert_success
+  assert_output "f3f84327f7308a983b8464a333ac0ec323a66553"
+}
+
+@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/develop"' {
+  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/develop"
+  assert_success
+  assert_output "develop"
+}
+
+@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/travis/docker-files"' {
+  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/travis/docker-files"
+  assert_success
+  assert_output "travis"
+}
+
+@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/blob/travis/some/file.yml"' {
+  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/blob/travis/some/file.yml"
+  assert_success
+  assert_output "travis"
+}
+
+
 @test 'is_valid_hostname "?a"' {
   run is_valid_hostname "?a"
   assert_failure
