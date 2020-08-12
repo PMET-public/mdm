@@ -550,11 +550,12 @@ find_hostname_by_network() {
 }
 
 find_mdm_hostnames() {
-  local hostnames networks
+  local hostnames hostname networks network
   hostnames=("$(get_pwa_hostname)" "$(get_pwa_prev_hostname)")
   networks="$(find_mdm_networks)"
   for network in $networks; do
-    hostnames+=("$(find_hostname_by_network "$network")")
+    hostname="$(find_hostname_by_network "$network")"
+    [[ -n "$hostname" ]] && hostnames+=("$hostname")
   done
   echo "${hostnames[*]}"
 }

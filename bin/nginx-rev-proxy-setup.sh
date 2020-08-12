@@ -66,7 +66,7 @@ write_nginx_configs() {
   for network in $(find_mdm_networks); do
     web_port="$(find_proxy_by_network "$network")"
     hostname="$(find_hostname_by_network "$network")"
-    write_nginx_config_for_host_at_port "$hostname" "$web_port" > "$tmp_nginx_conf_dir/$hostname.conf"
+    [[ -n "$hostname" ]] && write_nginx_config_for_host_at_port "$hostname" "$web_port" > "$tmp_nginx_conf_dir/$hostname.conf"
   done
 
   # plus 2 pwa demo hostnames
