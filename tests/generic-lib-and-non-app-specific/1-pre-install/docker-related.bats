@@ -39,13 +39,13 @@ setup() {
 }
 
 @test "[docker] are_required_ports_free with no running containers" {
-  docker stop $(docker ps -qa)
+  docker stop $(docker ps -qa) || :
   run are_required_ports_free
   assert_success
 }
 
 @test "[docker] are_required_ports_free 80" {
-  docker stop $(docker ps -qa)
+  docker stop $(docker ps -qa) || :
   docker run -p 80:80 -d nginx
   sleep 5 # docker background process may take a moment
   run are_required_ports_free
@@ -53,7 +53,7 @@ setup() {
 }
 
 @test "[docker] are_required_ports_free 443" {
-  docker stop $(docker ps -qa)
+  docker stop $(docker ps -qa) || :
   docker run -p 443:443 -d nginx
   sleep 5 # docker background process may take a moment
   run are_required_ports_free
