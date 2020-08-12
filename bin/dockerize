@@ -155,7 +155,7 @@ You must provide either:
 # if an app_hostname is provided, use it. otherwise, determine one based on other input.
 [[ $app_hostname ]] || {
   if is_existing_cloud_env; then
-    magento-cloud -q || error "The magento-cloud CLI was not found. To install, run
+    "$magento_cloud_cmd" -q || error "The "$magento_cloud_cmd" CLI was not found. To install, run
     curl -svLS https://accounts.magento.cloud/cli/installer | php"
     app_hostname="$pid-$env"
   else
@@ -171,7 +171,7 @@ You must provide either:
 tmp_app_dir="$HOME/Downloads/$app_hostname"
 rm -rf "$tmp_app_dir" || :
 if is_existing_cloud_env; then
-  magento-cloud get -e "$env" --depth=0 "$pid" "$tmp_app_dir"
+  "$magento_cloud_cmd" get -e "$env" --depth=0 "$pid" "$tmp_app_dir"
 else
   git clone "$git_url" --branch "$branch$tag" --depth 1 "$tmp_app_dir" || {
     # if error, try branch/tag as commit
@@ -201,11 +201,11 @@ is_existing_cloud_env && {
 
   # extract current env DB into the expected dir
   mkdir -p "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
-  magento-cloud db:dump -p "$pid" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
+  "$magento_cloud_cmd" db:dump -p "$pid" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
 
   # extract only the encryption key from the env's app/etc/env.php
   mkdir -p "$app_dir/app/etc"
-  magento-cloud ssh -p "$pid" -e "$env" "
+  "$magento_cloud_cmd" ssh -p "$pid" -e "$env" "
     php -r '\$a = require_once(\"app/etc/env.php\");
     echo \"<?php return array ( \\\"crypt\\\"  => \";
     var_export(\$a[\"crypt\"]); echo \");\";'
@@ -214,11 +214,11 @@ is_existing_cloud_env && {
   # get the env's media
   mkdir -p "$tmp_app_dir/pub/media"
   if [[ $media_cache ]]; then
-    magento-cloud ssh -y -p "$pid" -e "$env" "/app/bin/magento catalog:images:resize"
+    "$magento_cloud_cmd" ssh -y -p "$pid" -e "$env" "/app/bin/magento catalog:images:resize"
   else
     media_cache_option="--exclude=cache"
   fi
-  magento-cloud mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" $media_cache_option
+  "$magento_cloud_cmd" mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" $media_cache_option
   tar -C "$tmp_app_dir" -zcf "$app_dir/media.tar.gz" "pub/media"
 
 }

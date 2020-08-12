@@ -62,6 +62,7 @@ handler_log_file="$mdm_path/current/handler.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 advanced_mode_flag_file="$mdm_path/advanced_mode_on"
 mdm_ver_file="$mdm_path/latest-sem-ver"
+magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
 repo_url="https://github.com/PMET-public/mdm"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
@@ -83,7 +84,7 @@ has_uncleared_jobs_statuses() {
 }
 
 is_magento_cloud_cli_installed() {
-  [[ -f "$HOME/.magento-cloud/bin/magento-cloud" ]]
+  [[ -f "$magento_cloud_cmd" ]]
 }
 
 is_docker_bash_completion_installed() {
