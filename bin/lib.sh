@@ -789,7 +789,7 @@ detect_quit_and_stop_app() {
 # the UI_STATE can be updated to "seen" for errors and then "cleared" when clicked in the UI
 # successes aren't worth tracking so after displaying once "new" -> "cleared"
 track_job_status_and_wait_for_exit() {
-  local pid_to_wait_for msg job_file
+  local pid_to_wait_for msg job_file exit_code=0
   pid_to_wait_for="$1"
 
   if [[ -z "$apps_mdm_jobs_dir" ]]; then 
