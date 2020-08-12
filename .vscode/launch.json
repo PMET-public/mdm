@@ -14,7 +14,7 @@
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "Run specific app's launcher with no menu selection",
+      "name": "Run the detached app's launcher with no menu selection",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/launcher",
       "env": {
@@ -23,6 +23,22 @@
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir":
           "${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"
+      },
+      "args": []
+    },
+    // emulates the simplest case - a user clicking on the status menu icon
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Run a specific magento app's launcher with no menu selection",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/launcher",
+      "env": {
+        "debug": true,
+        "vsc_debugger_arg": "n/a",
+        "MDM_REPO_DIR": "${workspaceFolder}",
+        "apps_resources_dir":
+          "${env:HOME}/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources"
       },
       "args": []
     },
@@ -64,7 +80,7 @@
         //"vsc_debugger_arg": "rm_magento_docker_images",
         //"vsc_debugger_arg": "start_pwa_with_remote",
         //"vsc_debugger_arg": "rm_magento_docker_images",
-        "vsc_debugger_arg": "start_mdm_shell",
+        "vsc_debugger_arg": "change_base_url",
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir": 
           //"${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"
