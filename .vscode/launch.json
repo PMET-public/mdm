@@ -146,7 +146,7 @@
       },
       "args": [
         "-g", "git@github.com:pmet-public/magento-cloud.git",
-        "-b", "pmet-2.3.5-ref",
+        "-b", "pmet-2.4.0-ref",
         "-n", "ref",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
@@ -163,7 +163,7 @@
       },
       "args": [
         "-g", "git@github.com:pmet-public/magento-cloud.git",
-        "-b", "pmet-2.3.5-demo",
+        "-b", "pmet-2.4.0-demo",
         "-n", "demo",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
@@ -180,7 +180,7 @@
       },
       "args": [
         "-g", "git@github.com:pmet-public/magento-cloud.git",
-        "-b", "pmet-2.3.5-b2b",
+        "-b", "pmet-2.4.0-b2b",
         "-n", "b2b",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
