@@ -771,20 +771,6 @@ $lib_dir/launcher $caller
   # open -F -n -a Terminal "$script"
 }
 
-detect_quit_and_stop_app() {
-  # run the loop in a subshell so it doesn't fill the log with loop output
-  ( 
-    set +x
-    # while the Platyplus app exists ($PPID), do nothing
-    while ps -p $PPID > /dev/null 2>&1; do
-      sleep 10
-    done
-  )
-  # parent pid gone, so remove file and stop dockerized magento
-  rm "$quit_detection_file" || :
-  docker-compose stop
-}
-
 # background jobs invoked by a menu selection are tracked to relay info about their progress to the user.
 # the tracked info includes:
 # - the PID
@@ -1085,13 +1071,26 @@ init_mdm_logging() {
   set -x
 }
 
-init_quit_detection() {
-  quit_detection_file="$apps_mdm_dir/.$PPID-still_running"
+init_mac_quit_detection() {
+  # only relevant to the mac gui app (not mac testing or cmd line usage), so return otherwise
+  [[ "$(ps -p $PPID -o comm=)" =~ Contents/MacOS/ ]] || return 0
+
+  local quit_detection_file="$apps_mdm_dir/.$PPID-still_running"
   # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
   [[ ! -f "$quit_detection_file" ]] && {
     touch "$quit_detection_file"
-    detect_quit_and_stop_app >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
+    {
+      # while the Platyplus app exists ($PPID), do nothing
+      while ps -p $PPID > /dev/null 2>&1; do
+        sleep 10
+      done
+
+      # parent pid now gone, so remove file and stop dockerized magento
+      rm "$quit_detection_file" || :
+      docker-compose stop
+    } >> "$handler_log_file" 2>&1 & # must background & disconnect STDIN & STDOUT for Platypus to exit
   } || :
+
 }
 
 ###
@@ -1174,7 +1173,7 @@ lib_sourced_for_specific_bundled_app && {
   ensure_mdm_log_files_exist
   init_app_specific_vars
   [[ "$debug" ]] && init_mdm_logging
-  ! is_detached && ! is_CI && init_quit_detection
+  ! is_detached && is_mac && ! is_CI && init_mac_quit_detection
   # if docker is up, then cache this output to parse when adding and filtering additional available menu options
   is_docker_ready && formatted_cached_docker_ps_output="$(
     docker ps -a -f "label=com.docker.compose.service" --format "{{.Names}} {{.Status}}" | \
