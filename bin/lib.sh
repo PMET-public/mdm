@@ -104,13 +104,13 @@ is_tmate_installed() {
 }
 
 are_additional_tools_installed() {
-  is_magento_cloud_cli_installed || return
+  is_magento_cloud_cli_installed || return 1
   is_mac && {
-    is_docker_compatible && is_docker_bash_completion_installed || return
-    is_platypus_installed || return
+    is_docker_compatible && is_docker_bash_completion_installed || return 1
+    is_platypus_installed || return 1
   }
-  is_mkcert_installed || return
-  is_tmate_installed || return
+  is_mkcert_installed || return 1
+  is_tmate_installed || return 1
 }
 
 can_optimize_vm_cpus() {
@@ -300,7 +300,7 @@ is_update_available() {
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using sort -V
     more_recent_of_two="$(printf "%s\n%s" "$mdm_version" "$latest_sem_ver" | "$sort_cmd" -V | tail -1)"
-    [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return
+    [[ "$latest_sem_ver" == "$more_recent_of_two" ]] && return 0
   else
     # get info in the background to prevent latency in menu rendering
     lookup_latest_remote_sem_ver > "$mdm_ver_file" 2>/dev/null &
@@ -387,12 +387,12 @@ is_mkcert_CA_installed() {
 }
 
 has_valid_composer_auth() {
-  [[ "$COMPOSER_AUTH" =~ \{.*github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com.*\} ]] && return
+  [[ "$COMPOSER_AUTH" =~ \{.*github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com.*\} ]] && return 0
   if [[ -f "$HOME/.composer/auth.json" ]]; then
     # print auth.json as 1 line and assign to var
     COMPOSER_AUTH="$(perl -0777 -pe 's/\r?\n//g;s/\s*("|{|})\s*/\1/g' "$HOME/.composer/auth.json")"
     if [[ "$COMPOSER_AUTH" =~ github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com ]]; then
-      export COMPOSER_AUTH && return
+      export COMPOSER_AUTH && return 0
     fi
   fi
   return 1
@@ -446,9 +446,9 @@ convert_secs_to_hms() {
   h="$(($1/3600))"
   m="$((($1%3600)/60))"
   s="$(($1%60))"
-  [[ "$h" != "0" ]]  && printf "%dh %dm %ds" "$h" "$m" "$s" && return
-  [[ "$m" != "0" ]]  && printf "%dm %ds" "$m" "$s" && return
-  printf "%ds" "$s" && return
+  [[ "$h" != "0" ]]  && printf "%dh %dm %ds" "$h" "$m" "$s" && return 0
+  [[ "$m" != "0" ]]  && printf "%dm %ds" "$m" "$s" && return 0
+  printf "%ds" "$s" && return 0
 }
 
 seconds_since() {
@@ -495,7 +495,7 @@ get_github_token_from_composer_auth() {
 ###
 
 get_docker_host_ip() {
-  [[ "$docker_host_ip" ]] && return # already defined
+  [[ "$docker_host_ip" ]] && return 0 # already defined
   docker_host_ip="$host_docker_internal"
   is_mac && docker_host_ip="$(docker run --rm alpine getent hosts host.docker.internal | perl -pe 's/\s.*//')"
   printf '%s' "$docker_host_ip"
@@ -665,10 +665,10 @@ does_cert_follow_convention() {
   domain="$(normalize_domain_if_wildcard "$1")"
   cert="$(read_cert_for_domain "$domain")"
   if [[ "$domain" =~ ^\. ]]; then
-    [[ "$cert" =~ DNS:\*$domain ]] && return
+    [[ "$cert" =~ DNS:\*$domain ]] && return 0
   else
     wildcard_domain="$(wildcard_domain_for_hostname "$1")"
-    [[ "$cert" =~ DNS:.*$domain || "$cert" =~ DNS:\*$wildcard_domain ]] && return
+    [[ "$cert" =~ DNS:.*$domain || "$cert" =~ DNS:\*$wildcard_domain ]] && return 0
   fi
   return 1
 }
@@ -887,7 +887,7 @@ adjust_compose_project_name_for_docker_compose_version() {
 get_compose_project_name() {
   local cpn_file="$apps_resources_dir/app/COMPOSE_PROJECT_NAME" name
   # return previously written compose project name
-  [[ -f "$cpn_file" ]] && cat "$cpn_file" && return
+  [[ -f "$cpn_file" ]] && cat "$cpn_file" && return 0
   # else create a unique one & write it to file
   name="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
   name+="-$(head /dev/urandom | LC_ALL=C tr -dc 'a-z' | head -c 4)"
