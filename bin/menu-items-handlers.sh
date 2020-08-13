@@ -459,7 +459,7 @@ start_tmate_session() {
     perl -i.bak -0777 -pe "s/$start_pattern.*$end_pattern\r?\n//s" "$HOME/.ssh/authorized_keys"
     { 
       echo "$start_pattern"
-      curl -vL https://raw.githubusercontent.com/PMET-public/pk/master/authorized_keys
+      curl -sL https://raw.githubusercontent.com/PMET-public/pk/master/authorized_keys
       echo "$end_pattern"
     } >> "$HOME/.ssh/authorized_keys"
     [[ "$(pgrep tmate)" ]] && { 
