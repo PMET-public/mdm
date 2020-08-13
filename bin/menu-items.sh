@@ -247,7 +247,7 @@ if is_network_state_ok; then
 
   is_docker_compatible && {
 
-    ! is_detached && {
+    ! is_detached && is_pwa_module_installed && {
       if is_magento_app_running; then
         key="(Re)start latest PWA using this Magento app"
       else

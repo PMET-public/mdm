@@ -219,6 +219,10 @@ is_magento_app_running() {
   return "$magento_app_is_running"
 }
 
+is_pwa_module_installed() {
+  [[ -f "$apps_resources_dir/app/composer.json" ]] && grep -q "PMET-public/module-storystore" "$apps_resources_dir/app/composer.json"
+}
+
 are_required_ports_free() {
   { ! nc -z 127.0.0.1 80 && ! nc -z 127.0.0.1 443; } > /dev/null 2>&1
   return
