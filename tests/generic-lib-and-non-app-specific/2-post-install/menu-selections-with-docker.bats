@@ -16,9 +16,11 @@ setup() {
 
 # ensure at least one magento image to remove
 @test "[docker] find_magento_docker_image_ids - normal function (not a menu item)" {
-  docker network create mymdmtestnetwork || : # create a network
-  docker run --network=mymdmtestnetwork pmetpublic/nginx-with-pagespeed bash  # create a container with a magento imate
-  docker run --network=mymdmtestnetwork --name=mytestalpinecontainer alpine # create a container with a non-magento image
+  {
+    docker network create mymdmtestnetwork || : # create a network
+    docker run --network=mymdmtestnetwork pmetpublic/nginx-with-pagespeed bash # create a container with a magento imate
+    docker run --network=mymdmtestnetwork --name=mytestalpinecontainer alpine # create a container with a non-magento image
+  }  > /dev/null
   run find_magento_docker_image_ids
   assert_success
   assert_output -e '^[0-9a-f ]+$'
