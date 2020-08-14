@@ -24,7 +24,7 @@ jobs:
           submodules: 'true'
       - name: bats tests
         run: |
-          ./tests/dockerize-then-run-detached-app/**/*.bats
+          ./tests/libs/bats/bin/bats -T -r ./tests/dockerize-then-run-detached-app
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
@@ -42,7 +42,7 @@ jobs:
           submodules: 'true'
       - name: bats tests
         run: |
-          ./tests/dockerize-then-run-magento-app/**/*.bats
+          ./tests/libs/bats/bin/bats -T -r ./tests/dockerize-then-run-magento-app/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
@@ -60,7 +60,7 @@ jobs:
           submodules: 'true'
       - name: bats tests
         run: |
-          ./tests/generic-lib-and-non-app-specific/**/*.bats
+          ./tests/libs/bats/bin/bats -T -r ./tests/generic-lib-and-non-app-specific/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
