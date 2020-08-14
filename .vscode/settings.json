@@ -1,3 +1,6 @@
 {
-  "bashIde.highlightParsingErrors": false
+  "bashIde.highlightParsingErrors": false,
+  "search.exclude": {
+    "**/libs": true
+  }
 }
