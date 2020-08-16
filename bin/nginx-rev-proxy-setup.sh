@@ -63,7 +63,7 @@ EOF
 
 # find each magento app by interating over docker's networks
 write_nginx_configs() {
-  local hostname web_port
+  local network hostname web_port
   for network in $(find_bridged_docker_networks); do
     web_port="$(find_varnish_port_by_network "$network")"
     hostname="$(find_web_service_hostname_by_network "$network")"
