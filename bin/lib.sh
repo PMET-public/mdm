@@ -542,7 +542,7 @@ find_bridged_docker_networks() {
   docker network ls -q --filter 'driver=bridge' --filter 'name=_default'
 }
 
-find_proxy_by_network() {
+find_varnish_port_by_network() {
   docker ps -a --filter "network=$1" \
     --filter "label=com.docker.compose.service=varnish" --format "{{.Ports}}" | \
     sed 's/.*://;s/-.*//'
