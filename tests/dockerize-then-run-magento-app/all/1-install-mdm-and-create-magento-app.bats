@@ -18,6 +18,7 @@ setup() {
     # so mdm is testing itself rather than being included to test another repo
     MAGENTO_CLOUD_REPO="https://github.com/PMET-public/magento-cloud.git"
     MAGENTO_CLOUD_CHECKOUT="pmet-2.4.0-ref"
+    [[ "$GITHUB_REF" =~ /testing ]] && MAGENTO_CLOUD_CHECKOUT="master" # checkout the simplest magento app on the testing branch
   else
     MAGENTO_CLOUD_REPO="https://github.com/$GITHUB_REPOSITORY.git"
     MAGENTO_CLOUD_CHECKOUT="$GITHUB_SHA"
