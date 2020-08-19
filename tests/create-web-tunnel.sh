@@ -4,6 +4,7 @@ set -e
 # set -x
 
 echo "$TUNNEL_SSH_PK" > "$HOME/pk"
+chmod 600 $HOME/pk
 
 remote_port="$(( $RANDOM + 20000 ))"
 if [[ "$TUNNEL_LOCAL_PORT" =~ ^[0-9]+$ ]]; then
@@ -14,6 +15,6 @@ fi
 
 [[ ! "$local_port" =~ ^[0-9]+$ ]] && echo "Could not find valid local port" && exit 1
 
-ssh -i "$HOME/pk" -NR "$remote_port":127.0.0.1:"$local_port" "$TUNNEL_SSH_URL"
+ssh -o StrictHostKeyChecking=no -i "$HOME/pk" -NR "$remote_port":127.0.0.1:"$local_port" "$TUNNEL_SSH_URL"
 
 sleep 7200
