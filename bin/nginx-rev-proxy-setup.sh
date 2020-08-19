@@ -52,10 +52,10 @@ write_nginx_config_for_host_at_port() {
         proxy_pass http://$host_docker_internal:$web_port;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-Proto \$scheme;
-        # should not be necessary if using right pmetpublic/magento-cloud-docker-nginx
-        # proxy_buffer_size          128k;
-        # proxy_buffers              4 256k;
-        # proxy_busy_buffers_size    256k;
+        # TODO should this be in pmetpublic/magento-cloud-docker-nginx instead?
+        proxy_buffer_size          128k;
+        proxy_buffers              4 256k;
+        proxy_busy_buffers_size    256k;
       }
     }
 EOF
