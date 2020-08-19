@@ -12,5 +12,5 @@ remote_port="$(( $RANDOM + 20000 ))"
 network="$(find_bridged_docker_networks)"
 local_port="$(find_varnish_port_by_network "$network")"
 
-ssh -i "$HOME/pk" -NR $remote_port:127.0.0.1:$local_port "$TUNNEL_SSH_URL"
+ssh -i "$HOME/pk" -NR "$remote_port":127.0.0.1:"$local_port" "$TUNNEL_SSH_URL"
 
