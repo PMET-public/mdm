@@ -11,21 +11,21 @@ load '../../../bin/lib.sh'
 
 setup() {
   shopt -s nocasematch
-  app_name="app-from-repo-test"
   if [[ -z "$GITHUB_REPOSITORY" || "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then
-    # default when none specified or mdm is the primary repo
+    # default when none specified (developer's machine) or mdm is the primary repo
     # so mdm is testing itself rather than being included to test another repo
     MAGENTO_CLOUD_REPO="https://github.com/PMET-public/magento-cloud.git"
-    # checkout the simplest magento app on the testing branch
-    [[ "$GITHUB_REF" =~ /testing ]] && MAGENTO_CLOUD_CHECKOUT="master" || MAGENTO_CLOUD_CHECKOUT="pmet-2.4.0-ref"
+    MAGENTO_CLOUD_REF_TO_TEST="${MAGENTO_CLOUD_REF_TO_TEST:-master}"
   else
     MAGENTO_CLOUD_REPO="https://github.com/$GITHUB_REPOSITORY.git"
-    MAGENTO_CLOUD_CHECKOUT="$GITHUB_SHA"
+    MAGENTO_CLOUD_REF_TO_TEST="$GITHUB_SHA"
   fi
+  app_name="$MAGENTO_CLOUD_REF_TO_TEST"
 }
 
-@test 'installl mdm by running launcher with initial output' {
+@test 'install mdm by running launcher with initial output' {
   output="$($lib_dir/launcher)"
+  [[ "$output" =~ "advanced mode" ]] && is_mac && skip # dev machine
   run "$lib_dir/launcher" "$output"
   assert_success
   assert_output -e "installed missing"
@@ -49,7 +49,7 @@ setup() {
 }
 
 @test 'dockerize app' {
-  run "$lib_dir/dockerize" -g "$MAGENTO_CLOUD_REPO" -b "$MAGENTO_CLOUD_CHECKOUT" -n "$app_name" -i "$HOME/.mdm/current/icons/ref.icns"
+  run "$lib_dir/dockerize" -g "$MAGENTO_CLOUD_REPO" -b "$MAGENTO_CLOUD_REF_TO_TEST" -n "$app_name" -i "$HOME/.mdm/current/icons/ref.icns"
   assert_success
 }
 
