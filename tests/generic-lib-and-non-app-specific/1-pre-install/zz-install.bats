@@ -37,7 +37,7 @@ setup() {
 
 # additional tools part 1
 @test 'launcher after initial install' {
-  # remove a inconsequential tool to run this test locally
+  # remove an inconsequential tool to run this test locally
   is_mac && rm "$(brew --prefix)"/etc/bash_completion.d/docker* || :
   run "$lib_dir/launcher"
   assert_success
