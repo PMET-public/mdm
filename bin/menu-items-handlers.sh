@@ -118,7 +118,7 @@ update_mdm() {
 }
 
 install_app() {
-  local cid background_install_pid logging_pid
+  local cid background_install_pid logging_pid finished_msg="install_app finished"
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     cd "$apps_resources_dir/app" || exit 1
@@ -172,15 +172,17 @@ install_app() {
     ")"
     docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid":/usr/local/share/ca-certificates/rootCA.crt
     open_app
+    printf "%s\n" "$finished_msg"
   } >> "$handler_log_file" 2>&1 &
   background_install_pid=$!
-  # skip showing logs in new terminal for CI
-  show_mdm_logs &
-  logging_pid=$!
+  if launched_from_mac_menu; then
+    show_mdm_logs
+  else
+    tail -f "$handler_log_file" |  grep --line-buffered -q "$finished_msg"
+  fi
   # last b/c of blocking wait
   # can't run in background b/c child process can't "wait" for sibling proces only descendant processes
   track_job_status_and_wait_for_exit $background_install_pid "Installing Magento ..."
-  kill "$logging_pid"
 }
 
 open_app() {
