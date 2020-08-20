@@ -172,13 +172,14 @@ install_app() {
     ")"
     docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid":/usr/local/share/ca-certificates/rootCA.crt
     open_app
-    printf "%s\n" "$finished_msg"
+    echo "$finished_msg"
   } >> "$handler_log_file" 2>&1 &
-  background_install_pid=$!
+  background_install_pid="$!"
   if launched_from_mac_menu; then
     show_mdm_logs
   else
-    tail -f "$handler_log_file" |  grep --line-buffered -q "$finished_msg"
+    # still have to kill pipe after pattern found https://unix.stackexchange.com/questions/416150/make-tail-f-exit-on-a-broken-pipe?noredirect=1&lq=1
+    { perl -pe "/$finished_msg/ and exit"; kill -s PIPE "$!"; } < <(tail -f "$handler_log_file")
   fi
   # last b/c of blocking wait
   # can't run in background b/c child process can't "wait" for sibling proces only descendant processes
