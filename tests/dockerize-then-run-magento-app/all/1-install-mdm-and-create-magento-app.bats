@@ -12,7 +12,6 @@ load '../../../bin/lib.sh'
 setup() {
   shopt -s nocasematch
   app_name="app-from-repo-test"
-  app_dir="$(find "$HOME/Downloads" -maxdepth 1 -type d -name "*$app_name*.app" || :)"
   if [[ -z "$GITHUB_REPOSITORY" || "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then
     # default when none specified or mdm is the primary repo
     # so mdm is testing itself rather than being included to test another repo
@@ -55,47 +54,49 @@ setup() {
 }
 
 @test 'install_app' {
-  run "$app_dir/Contents/Resources/script" install_app
+  app_dir="$(find "$HOME/Downloads" -maxdepth 1 -type d -name "*$app_name*.app" || :)"
+  ln -sf "$app_dir/Contents/Resources/script" "$app_name"
+  run "./$app_name" install_app
   assert_success
 }
 
 @test 'reindex' {
-  run "$app_dir/Contents/Resources/script" reindex
+  run "./$app_name" reindex
   assert_success
 }
 
 @test 'run_cron' {
-  run "$app_dir/Contents/Resources/script" run_cron
+  run "./$app_name" run_cron
   assert_success
 }
 
 @test 'enable_all_except_cms_cache' {
-  run "$app_dir/Contents/Resources/script" enable_all_except_cms_cache
+  run "./$app_name" enable_all_except_cms_cache
   assert_success
 }
 
 @test 'enable_all_caches' {
-  run "$app_dir/Contents/Resources/script" enable_all_caches
+  run "./$app_name" enable_all_caches
   assert_success
 }
 
 # @test 'disable_most_caches' {
-#   run "$app_dir/Contents/Resources/script" disable_most_caches
+#   run "./$app_name" disable_most_caches
 #   assert_success
 # }
 
 @test 'flush_cache' {
-  run "$app_dir/Contents/Resources/script" flush_cache
+  run "./$app_name" flush_cache
   assert_success
 }
 
 @test 'warm_cache' {
-  run "$app_dir/Contents/Resources/script" warm_cache
+  run "./$app_name" warm_cache
   assert_success
 }
 
 @test 'open_app' {
-  run "$app_dir/Contents/Resources/script" open_app
+  run "./$app_name" open_app
   assert_success
   assert_output -e 'copyright.*magento'
 }
@@ -104,26 +105,26 @@ setup() {
 # have to use an indirect method to get the app's url
 
 @test 'web/unsecure/base_url should be secure' {
-  run "$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/unsecure/base_url"'
+  run "./$app_name" start_shell_in_app 'php bin/magento config:show "web/unsecure/base_url"'
   assert_success
   assert_output -p 'https://'
 }
 
 @test 'web/secure/base_url should be secure' {
-  run "$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"'
+  run "./$app_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"'
   assert_success
   assert_output -p 'https://'
 }
 
 @test 'check search result page for images' {
-  base_url="$("$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
+  base_url="$("./$app_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
   run curl "$base_url/catalogsearch/result/?q=accessory"
   assert_success
   assert_output -e 'img.*src.*catalog\/product\/cache'
 }
 
 @test 'find and check the first category page in the nav for images' {
-  base_url="$("$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
+  base_url="$("./$app_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
   category_url="$(curl "$base_url" |
     perl -ne 's/.*?class.*?nav-[12]-1.*?href=.([^ ]+.html).*/$1/ and print')"
   run curl "$category_url"
@@ -132,14 +133,14 @@ setup() {
 }
 
 @test 'create admin user' {
-  run "$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento admin:user:create --admin-user "admin" \
+  run "./$app_name" start_shell_in_app 'php bin/magento admin:user:create --admin-user "admin" \
     --admin-password "pass4mdmCI" --admin-email admin@example.com --admin-firstname admin --admin-lastname admin'
   assert_success
   assert_output -e 'created.*admin'
 }
 
 @test 'check admin login user:pass == admin:pass4mdmCI' {
-  base_url="$("$app_dir/Contents/Resources/script" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"' | perl -ne 's/\/\s*$// and print')"
+  base_url="$("./$app_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"' | perl -ne 's/\/\s*$// and print')"
   rm /tmp/myc 2> /dev/null || :
   admin_output="$(curl -L -c /tmp/myc -b /tmp/myc "$base_url/admin/")"
   form_url="$(echo "$admin_output" | perl -ne '/.*BASE_URL[\s='\''"]+([^'\''"]+).*/ and print $1')"
