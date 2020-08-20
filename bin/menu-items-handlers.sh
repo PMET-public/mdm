@@ -118,7 +118,7 @@ update_mdm() {
 }
 
 install_app() {
-  local cid background_install_pid logging_pid finished_msg="install_app finished"
+  local cid background_install_pid line finished_msg="install_app finished"
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     cd "$apps_resources_dir/app" || exit 1
@@ -178,8 +178,10 @@ install_app() {
   if launched_from_mac_menu; then
     show_mdm_logs
   else
-    # still have to kill pipe after pattern found https://unix.stackexchange.com/questions/416150/make-tail-f-exit-on-a-broken-pipe?noredirect=1&lq=1
-    { perl -pe "/$finished_msg/ and exit"; kill -s PIPE "$!"; } < <(tail -f "$handler_log_file")
+    # https://superuser.com/a/449307/10719
+    tail -f "$handler_log_file" | tee /dev/tty | while read line; do
+      [[ "$line" =~ $finished_msg ]] && pkill -P $$ tail
+    done
   fi
   # last b/c of blocking wait
   # can't run in background b/c child process can't "wait" for sibling proces only descendant processes
