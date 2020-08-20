@@ -582,6 +582,10 @@ find_hostnames_not_resolving_to_local() {
 }
 
 backup_hosts() {
+  [[ -d "$hosts_backup_dir" ]] || {
+    warning "Creating hosts back up dir - should only need to do this if MDM install was skipped (e.g. testing/development)"
+    mkdir -p "$hosts_backup_dir"
+  }
   cp /etc/hosts "$hosts_backup_dir/hosts.$("$date_cmd" "+%s")"
 }
 
