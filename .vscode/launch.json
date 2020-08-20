@@ -42,6 +42,19 @@
       },
       "args": []
     },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "invoke a symlink with no args to render a terminal menu",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/master",
+      "env": {
+        "debug": true,
+        "vsc_debugger_arg": "n/a",
+        "MDM_REPO_DIR": "${workspaceFolder}",
+      },
+      "args": []
+    },
     // emulates a user selecting a valid option from the status menu
     {
       "type": "bashdb",
