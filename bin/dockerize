@@ -237,9 +237,10 @@ cd "$tmp_app_dir" || exit 1
   cp "$auth_json_path" "$tmp_app_dir"
 [[ ! -f "auth.json" && ! $COMPOSER_AUTH ]] && 
   warning_w_newlines "No auth.json OR COMPOSER_AUTH env var file detected! 
-Composer may be rate-limited and/or be unable to download required packages.
+Composer may be rate-limited and/or be unable to download required packages. 
+Waiting 30 secs before continuing or cancel (ctrl - c) and resolve this issue.
   " &&
-  sleep 5
+  sleep 30
 # backup for later restore
 cp composer.json composer.json.bak
 cp composer.lock composer.lock.bak
