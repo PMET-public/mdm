@@ -88,8 +88,8 @@ setup() {
   assert_output -e "Error:.*some-error"
 }
 
-@test 'is_terminal_interactive' {
-  run is_terminal_interactive
+@test 'is_interactive_terminal' {
+  run is_interactive_terminal
   assert_failure
   assert_output ""
 }

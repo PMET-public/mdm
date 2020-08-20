@@ -366,7 +366,7 @@ is_hostname_resolving_to_local() {
   [[ "$curl_output" =~ ::1 || "$curl_output" =~ 127\.0\.0\.1 ]]
 }
 
-is_terminal_interactive() {
+is_interactive_terminal() {
   [[ $- == *i* ]]
 }
 
@@ -727,7 +727,7 @@ sudo_run_bash_cmds() {
   # echo "Running $script ..."
   if is_running_as_sudo; then
     "$script"
-  elif is_terminal_interactive || is_CI; then
+  elif is_interactive_terminal || is_CI; then
     sudo "$script"
   elif is_mac; then
     # osascript -e "do shell script \"sudo mv $tmp_hosts /etc/hosts \" with administrator privileges" ||
@@ -1101,7 +1101,7 @@ init_mac_quit_detection() {
 
 self_install() {
 
-  is_terminal_interactive && printf '\e[8;50;140t' # resize terminal
+  is_interactive_terminal && printf '\e[8;50;140t' # resize terminal
 
   # on linux, some services require a min virtual memory map count and may need to be raised
   # https://devdocs.magento.com/cloud/docker/docker-containers-service.html#troubleshooting
