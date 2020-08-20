@@ -4,7 +4,7 @@ set -e
 # set -x
 
 echo "$TUNNEL_SSH_PK" > "$HOME/pk"
-chmod 600 $HOME/pk
+chmod 600 "$HOME/pk"
 
 remote_port="$(( $RANDOM + 20000 ))"
 if [[ "$TUNNEL_LOCAL_PORT" =~ ^[0-9]+$ ]]; then
