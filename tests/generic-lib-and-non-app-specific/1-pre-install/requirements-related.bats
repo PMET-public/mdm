@@ -30,7 +30,7 @@ setup() {
 @test "[CI][osx] Reinstall missing requirements" {
   is_mac && is_CI || skip
   output="$("$lib_dir/launcher")"
-  run "$lib_dir/launcher" "$output"
+  run "$lib_dir/launcher" "install_additional_tools"
   assert_success
   assert_output -p "installed"
 }
