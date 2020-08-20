@@ -491,7 +491,7 @@ show_errors_from_mdm_logs() {
 show_mdm_logs() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     cd "$apps_resources_dir" || exit 1
-    screen -c "$lib_dir/../.screenrc"
+    tail -f "$handler_log_file"
   }
 }
 
