@@ -59,6 +59,7 @@ hosts_backup_dir="$mdm_path/hosts.bak"
 
 menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
+dockerize_log_file="$mdm_path/current/dockerize.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 advanced_mode_flag_file="$mdm_path/advanced_mode_on"
 mdm_ver_file="$mdm_path/latest-sem-ver"

@@ -5,6 +5,11 @@ set -e
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
+exec > >(tee -ia "$dockerize_log_file")
+# exec 2> >(tee -ia "$cur_log_file")
+exec 2>> "$dockerize_log_file"
+
+
 # this script assembles the parts needed for a magento cloud docker deployment and
 # if supported tools/icons are detected, bundles into a OSX style app
 # order of stpes matter because some operations depend on the results of others
@@ -248,27 +253,12 @@ cp composer.lock composer.lock.bak
 # so exact versions needed for build in cache
 python -c "import sys, json; data = json.load(sys.stdin); data.pop('scripts', 0); print(json.dumps(data))" \
   < composer.json.bak > composer.json
-# run composer operations inside a version specific php container
-script_for_tmp_php_container=$(mktemp)
-cat << EOF > "$script_for_tmp_php_container"
-#!/bin/bash
-composer global require hirak/prestissimo --no-interaction # parallelize downloads (much faster)
-composer install --no-suggest --no-ansi --no-interaction --no-progress --prefer-dist
-# require (or replace if already required) the official magento cloud docker module with ours
-# also note that a few envs may have a composer repo entry that needs to be updated
-perl -i -pe 's/magento\/magento-cloud-docker.git/pmet-public\/magento-cloud-docker.git/' composer.json
-grep -q 'pmet-public/magento-cloud-docker' composer.json ||
-  composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
-composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
-./vendor/bin/ece-docker build:compose --host="$app_hostname"
-EOF
-chmod +x "$script_for_tmp_php_container"
 
-# get php version of app
+# get php version of app to run composer operations inside a version specific container
 app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml)
 
 # if using ssh, set ssh options
-[[ $SSH_AUTH_SOCK ]] && {
+[[ "$USE_SSH_AUTH_SOCK_FOR_DOCKER" && "$SSH_AUTH_SOCK" ]] && {
   is_mac && SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
   # home dir of container will /app
   ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
@@ -277,13 +267,25 @@ app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml
 
 composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
 docker pull "$composer_image"
-cid="$(docker create $ssh_auth_opts -v "$PWD:/app:delegated" \
-  -e COMPOSER_AUTH -e COMPOSER_HOME=.composer -e DEBUG=true \
-  "$composer_image" /tmp/script_for_php_container)"
-docker cp "$script_for_tmp_php_container" "$cid:/tmp/script_for_php_container"
+cid="$(docker create $ssh_auth_opts \
+  -e COMPOSER_AUTH -e COMPOSER_HOME=/app/.composer -e app_hostname \
+  "$composer_image" /tmp/script)"
+docker cp . "$cid:/app/"
+docker cp "$lib_dir/install-composer-deps-and-build-docker-compose.sh" "$cid:/tmp/script"
 docker start -a "$cid"
-rm "$script_for_tmp_php_container"
-cp -r docker-compose*.yml .docker "$app_dir"
+
+# get generated files from container
+docker cp "$cid:/app/docker-compose.yml" "$app_dir"
+docker cp "$cid:/app/.docker" "$app_dir"
+
+# get generated composer cache from container
+docker cp "$cid:/app/.composer" .composer
+# special case: assuming some existing installed packages already have catalog imagery from modules in pub/media, we can delete that media
+# this can significantly reduce composer archive size
+is_existing_cloud_env && {
+  find .composer -path "*/catalog/product/*.jpg" -delete || :
+}
+tar -zcf "$app_dir/.composer.tar.gz" .composer
 
 # restore the original composer files for use in the build container later
 mv composer.json.bak composer.json
@@ -303,15 +305,7 @@ grep -q DATABASE_CONFIGURATION "$app_dir/.magento.env.yaml" || perl -i -pe "s/^ 
           password: ''
 /" "$app_dir/.magento.env.yaml"
 
-
-# special case: assuming some existing installed packages already have catalog imagery from modules in pub/media, we can delete that media
-# this can significantly reduce composer archive size
-is_existing_cloud_env && {
-  find .composer -path "*/catalog/product/*.jpg" -delete || :
-}
-tar -zcf "$app_dir/.composer.tar.gz" .composer
-
-# del tmp dir
+# cd to diff diff before del tmp dir
 cd "$app_dir" || exit 1
 
 # current magento php image run as root, so root owns the files if not using docker desktop for mac
