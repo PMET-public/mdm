@@ -60,6 +60,11 @@ setup() {
   assert_success
 }
 
+@test 'disable 2FA' {
+  run "./$app_name" start_shell_in_app 'perl -i -pe "/Magento_TwoFactorAuth/ and s/1/0/" app/etc/config.php'
+  assert_success
+}
+
 @test 'reindex' {
   run "./$app_name" reindex
   assert_success
@@ -96,6 +101,7 @@ setup() {
 }
 
 @test 'open_app' {
+  is_CI || skip # install_app already opens browser tab in gui and in non-CI text won't be available as output
   run "./$app_name" open_app
   assert_success
   assert_output -e 'copyright.*magento'
