@@ -25,7 +25,7 @@ setup() {
 
 @test 'install mdm by running launcher with initial output' {
   output="$($lib_dir/launcher)"
-  [[ "$output" =~ "advanced mode" ]] && is_mac && skip # dev machine
+  [[ "$output" =~ advanced_mode ]] && skip # already installed (dev machine or 2nd app install)
   run "$lib_dir/launcher" "$output"
   assert_success
   assert_output -e "installed missing"
@@ -33,7 +33,8 @@ setup() {
 }
 
 @test '[CI] install_additional_tools' {
-  is_CI || skip
+  output="$($lib_dir/launcher)"
+  [[ "$output" =~ install_additional_tools ]] || skip # already installed (dev machine or 2nd app install)
   run "$lib_dir/launcher" install_additional_tools
   assert_success
   assert_output -p "magento-cloud"
