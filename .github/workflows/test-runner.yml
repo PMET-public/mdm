@@ -33,7 +33,7 @@ jobs:
         uses: PMET-public/action-tmate@master
 
 
-  dockerize-then-run-magento-app:
+  dockerize-then-run-magento-apps:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -45,7 +45,9 @@ jobs:
           submodules: 'true'
       - name: bats tests
         run: |
+          # install the master and a 2nd to test simultaneous compatibility
           ./tests/libs/bats/bin/bats -T -r ./tests/dockerize-then-run-magento-app/**/*.bats
+          MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.0-ref ./tests/libs/bats/bin/bats -T -r ./tests/dockerize-then-run-magento-app/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
