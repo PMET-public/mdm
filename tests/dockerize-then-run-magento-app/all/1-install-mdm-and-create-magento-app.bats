@@ -117,6 +117,7 @@ setup() {
 }
 
 @test 'check search result page for images' {
+  "./$app_name" start_shell_in_app 'grep -q catalog-sample-data composer.json' || skip
   base_url="$("./$app_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
   run curl "$base_url/catalogsearch/result/?q=accessory"
   assert_success
@@ -124,6 +125,7 @@ setup() {
 }
 
 @test 'find and check the first category page in the nav for images' {
+  "./$app_name" start_shell_in_app 'grep -q catalog-sample-data composer.json' || skip
   base_url="$("./$app_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
   category_url="$(curl "$base_url" |
     perl -ne 's/.*?class.*?nav-[12]-1.*?href=.([^ ]+.html).*/$1/ and print')"
