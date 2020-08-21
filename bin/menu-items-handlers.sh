@@ -179,8 +179,8 @@ install_app() {
     show_mdm_logs
   else
     # https://superuser.com/a/449307/10719
-    tail -f "$handler_log_file" | tee /dev/tty | while read line; do
-      [[ "$line" =~ $finished_msg ]] && pkill -P $$ tail
+    tail -f "$handler_log_file" | tee /dev/tty | while read -r line; do
+      [[ "$line" = "$finished_msg" ]] && pkill -P $$ tail
     done
   fi
   # last b/c of blocking wait
