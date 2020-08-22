@@ -179,9 +179,10 @@ install_app() {
     show_mdm_logs
   else
     # https://superuser.com/a/449307/10719
-    tail -f "$handler_log_file" | tee /dev/tty | while read -r line; do
-      [[ "$line" = "$finished_msg" ]] && pkill -P $$ tail
-    done
+    #tail -f "$handler_log_file" | tee /dev/tty | while read -r line; do
+    #  [[ "$line" = "$finished_msg" ]] && pkill -P $$ tail
+    #done
+    echo "To watch the install progress: tail -f \"$handler_log_file\""
   fi
   # last b/c of blocking wait
   # can't run in background b/c child process can't "wait" for sibling proces only descendant processes
