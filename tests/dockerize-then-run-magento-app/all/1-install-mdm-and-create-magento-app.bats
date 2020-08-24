@@ -20,7 +20,8 @@ setup() {
     MAGENTO_CLOUD_REPO="https://github.com/$GITHUB_REPOSITORY.git"
     MAGENTO_CLOUD_REF_TO_TEST="$GITHUB_SHA"
   fi
-  app_name="$MAGENTO_CLOUD_REF_TO_TEST"
+  # app name will be truncated by dockerize but prevent very long symlink too
+  app_name="${MAGENTO_CLOUD_REF_TO_TEST:0:12}"
 }
 
 @test 'install mdm by running launcher with initial output' {
@@ -55,7 +56,8 @@ setup() {
 }
 
 @test 'install_app' {
-  app_dir="$(find "$HOME/Downloads" -maxdepth 1 -type d -name "*$app_name*.app" || :)"
+  # get the most recently created app dir
+  app_dir="$(ls -dtr "$HOME"/Downloads/*.app | tail -1 || :)"
   ln -sf "$app_dir/Contents/Resources/script" "$app_name"
   run "./$app_name" install_app
   assert_success
