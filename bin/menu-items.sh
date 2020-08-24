@@ -158,7 +158,7 @@ is_docker_compatible && has_valid_composer_auth && {
       mdm_menu_items["$key-handler"]=no_op
     }
 
-    key="💻 Start shell in Magento app"
+    key="💻 Start shell in app"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=start_shell_in_app
 
@@ -196,7 +196,7 @@ is_docker_compatible && has_valid_composer_auth && {
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=resize_images
 
-      key="Change url for Magento app"
+      key="Change url for app"
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=change_base_url
 
@@ -470,9 +470,9 @@ is_advanced_mode && {
   # this option only applies to a specific app so should not appear when testing from a repo dir
   if lib_sourced_for_specific_bundled_app; then
     if [[ "$debug" ]]; then
-      key="Debugging is ON for this app"
+      key="🐞MDM debugging is ON for this app"
     else
-      key="Debugging is OFF for this app"
+      key="🐞MDM debugging is OFF for this app"
     fi
     is_magento_app_running && {
       key+=" (stops running app)"
