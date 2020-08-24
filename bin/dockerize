@@ -122,17 +122,22 @@ while getopts "b:e:g:hdp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
   esac
 done
 
-[[ $detached && $app_hostname ]] && 
+[[ "$detached" && "$app_hostname" ]] && 
   error "Name provided for magento app, but detached app also selected. Incompatible selection."
 
-[[ $detached ]] && {
+[[ "$detached" ]] && {
   create_bundled_app "$detached_project_name" "$HOME/Downloads/$detached_project_name"
   exit 0
 }
 
-[[ $app_hostname ]] && {
+[[ "$app_hostname" ]] && {
   is_valid_hostname "$app_hostname" ||
     error "Provided name must be a valid hostname accepted by web browsers."
+}
+
+[[ "${#app_hostname}" -gt 12 ]] && {
+  warning_w_newlines "App name will be truncated to 12 characters."
+  app_hostname="${app_hostname:0:12}"
 }
 
 # additional error checking
