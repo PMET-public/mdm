@@ -27,7 +27,7 @@ jobs:
           submodules: 'true'
       - name: bats tests
         run: |
-          ./tests/libs/bats/bin/bats -T -r ./tests/dockerize-then-run-detached-app
+          ./tests/libs/bats/bin/bats -T -r ./tests/2-dockerize-then-run-detached-app
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
@@ -46,9 +46,9 @@ jobs:
       - name: bats tests
         run: |
           # install the master and a 2nd to test simultaneous compatibility
-          ./tests/libs/bats/bin/bats -T -r ./tests/dockerize-then-run-magento-app/**/*.bats
+          ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
           export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.0-ref
-          ./tests/libs/bats/bin/bats -T -r ./tests/dockerize-then-run-magento-app/**/*.bats
+          ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
@@ -66,7 +66,7 @@ jobs:
           submodules: 'true'
       - name: bats tests
         run: |
-          ./tests/libs/bats/bin/bats -T -r ./tests/generic-lib-and-non-app-specific/**/*.bats
+          ./tests/libs/bats/bin/bats -T -r ./tests/1-generic-lib-and-non-app-specific/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
