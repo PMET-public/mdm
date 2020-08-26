@@ -12,6 +12,10 @@ load '../../../bin/lib.sh'
 setup() {
   shopt -s nocasematch
   is_docker_compatible || skip
+  is_docker_ready || {
+    printf "Docker not ready. Starting docker ..." | tee /dev/tty
+    start_docker_service
+  }
 }
 
 @test "[docker] extract_tar_to_existing_container_path some.tar" {
