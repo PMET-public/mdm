@@ -39,25 +39,25 @@ setup() {
 }
 
 @test 'get_github_file_contents from this public repo' {
-  run get_github_file_contents "PMET-public/mdm" "bin/lib.sh" "master"
+  run get_github_file_contents "https://github.com/PMET-public/mdm/blob/master/bin/lib.sh"
   assert_success
   assert_output -e "#!.*bash"
 }
 
 @test 'get_github_file_contents from this public repo at specific commit' {
-  run get_github_file_contents "PMET-public/mdm" "lib.sh" "bb90b5e9a2bf82228841ef61c3e650e9ce669d84"
+  run get_github_file_contents "https://github.com/PMET-public/mdm/blob/2cd34a3f7cc5472544ba48ac63ebd6df358d893c/bin/lib.sh"
   assert_success
   assert_output -e "#!.*bash"
 }
 
 @test 'get_github_file_contents from this public repo that does not exist' {
-  run get_github_file_contents "PMET-public/mdm" "file-that-does-not-exist" "master"
+  run get_github_file_contents "https://github.com/PMET-public/mdm/blob/master/DOES_NOT_EXIST"
   assert_failure
   assert_output -e "404"
 }
 
 @test 'get_github_file_contents from private repo' {
-  run get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/fullchain1.pem" "master"
+  run get_github_file_contents "$mdm_demo_domain_fullchain_gh_url"
   assert_success
   assert_output -e "BEGIN CERTIFICATE"
 }

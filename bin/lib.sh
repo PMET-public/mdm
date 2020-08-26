@@ -688,10 +688,24 @@ is_new_cert_required_for_domain() {
     does_cert_follow_convention "$1" && ! is_cert_for_domain_expiring_soon "$1"; }
 }
 
+# accept any public or private github.com or raw.githubusercontent.com url
+# but for consistency retrieve from github api 
+# where token (if needed) will be passed as header and not url get param
 get_github_file_contents() {
-  local project="$1" path="$2" ref="$3" token url
+  local url="$1" org repo ref path token
+  read -r org repo ref path <<<"$(
+    echo "$url" | perl -pe 's/
+    ^https?:\/\/[^\/]+\/
+    (?<org>[^\/]+)\/
+    (?<repo>[^\/]+)\/
+    (blob\/)?
+    (?<ref>[^\/]+)\/
+    (?<path>[^\?\$]+)
+    .*
+    /$+{org} $+{repo} $+{ref} $+{path}/x'
+  )"
   token="$(get_github_token_from_composer_auth)"
-  url="https://api.github.com/repos/$project/contents/$path?ref=${ref:-master}"
+  url="https://api.github.com/repos/$org/$repo/contents/$path?ref=${ref:-master}"
   [[ "$token" ]] && token=("-H" "Authorization: token $token")
   curl --fail -vL -H 'Accept: application/vnd.github.v3.raw' "${token[@]}" "$url"
 }
@@ -700,8 +714,8 @@ get_wildcard_cert_and_key_for_mdm_demo_domain() {
   is_new_cert_required_for_domain ".$mdm_demo_domain" || return 0
   cert_dir="$certs_dir/.$mdm_demo_domain"
   mkdir -p "$cert_dir"
-  get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/fullchain1.pem" > "$cert_dir/fullchain1.pem"
-  get_github_file_contents "PMET-public/mdm-config" "$mdm_demo_domain/privkey1.pem" > "$cert_dir/privkey1.pem"
+  get_github_file_contents "$mdm_demo_domain_fullchain_gh_url" > "$cert_dir/fullchain1.pem"
+  get_github_file_contents "$mdm_demo_domain_privkey_gh_url" > "$cert_dir/privkey1.pem"
 }
 
 mkcert_for_domain() {
