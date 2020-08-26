@@ -129,14 +129,14 @@ setup() {
   assert_output ""
 }
 
-@test 'is_hostname_resolving_to_local "pwa.$mdm_demo_domain"' {
-  run is_hostname_resolving_to_local "pwa.$mdm_demo_domain"
+@test 'is_hostname_resolving_to_local "pwa.$mdm_domain"' {
+  run is_hostname_resolving_to_local "pwa.$mdm_domain"
   assert_success
   assert_output ""
 }
 
-@test 'is_hostname_resolving_to_local "pwa-prev.$mdm_demo_domain"' {
-  run is_hostname_resolving_to_local "pwa-prev.$mdm_demo_domain"
+@test 'is_hostname_resolving_to_local "pwa-prev.$mdm_domain"' {
+  run is_hostname_resolving_to_local "pwa-prev.$mdm_domain"
   assert_success
   assert_output ""
 }

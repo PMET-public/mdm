@@ -3,9 +3,9 @@
 # This file contains configuration for various features of MDM
 
 # Certs - Integrating letsencrypt certs for your app
-mdm_demo_domain="your-domain.com"
-mdm_demo_domain_fullchain_gh_url="https://github.com/your-org/your-config-project/blob/master/your-domain.com/fullchain1.pem"
-mdm_demo_domain_privkey_gh_url="https://github.com/your-org/your-config-project/blob/master/your-domain.com/fullchain1.pem"
+mdm_domain="your-domain.com"
+mdm_domain_fullchain_gh_url="https://github.com/your-org/your-config-project/blob/master/your-domain.com/fullchain1.pem"
+mdm_domain_privkey_gh_url="https://github.com/your-org/your-config-project/blob/master/your-domain.com/fullchain1.pem"
 
 
 # Remote Support - url to the public authorized keys that should be allowed to connect to a tmate remote support session

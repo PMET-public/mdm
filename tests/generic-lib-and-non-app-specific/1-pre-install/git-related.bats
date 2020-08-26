@@ -57,7 +57,7 @@ setup() {
 }
 
 @test 'get_github_file_contents from private repo' {
-  run get_github_file_contents "$mdm_demo_domain_fullchain_gh_url"
+  run get_github_file_contents "$mdm_domain_fullchain_gh_url"
   assert_success
   assert_output -e "BEGIN CERTIFICATE"
 }

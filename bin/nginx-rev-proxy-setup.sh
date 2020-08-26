@@ -18,9 +18,9 @@ prepare_cert_and_key_for_hostname() {
   mkdir -p "$cert_dir"
 
   # if applicable, try to fetch a valid cert and return
-  if [[ "$hostname" =~ \.$mdm_demo_domain$ ]]; then
-    get_wildcard_cert_and_key_for_mdm_demo_domain &&
-      cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain $hostname &&
+  if [[ "$hostname" =~ \.$mdm_domain$ ]]; then
+    get_wildcard_cert_and_key_for_mdm_domain &&
+      cp_wildcard_mdm_domain_cert_and_key_for_subdomain $hostname &&
       return
   fi
 

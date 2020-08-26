@@ -531,11 +531,11 @@ set_hostname_for_this_app() {
 }
 
 get_pwa_hostname() {
-  is_adobe_system && echo "pwa.$mdm_demo_domain" || echo "pwa"
+  is_adobe_system && echo "pwa.$mdm_domain" || echo "pwa"
 }
 
 get_pwa_prev_hostname() {
-  is_adobe_system && echo "pwa-prev.$mdm_demo_domain" || echo "pwa-prev"
+  is_adobe_system && echo "pwa-prev.$mdm_domain" || echo "pwa-prev"
 }
 
 export_pwa_hostnames() {
@@ -710,12 +710,12 @@ get_github_file_contents() {
   curl --fail -vL -H 'Accept: application/vnd.github.v3.raw' "${token[@]}" "$url"
 }
 
-get_wildcard_cert_and_key_for_mdm_demo_domain() {
-  is_new_cert_required_for_domain ".$mdm_demo_domain" || return 0
-  cert_dir="$certs_dir/.$mdm_demo_domain"
+get_wildcard_cert_and_key_for_mdm_domain() {
+  is_new_cert_required_for_domain ".$mdm_domain" || return 0
+  cert_dir="$certs_dir/.$mdm_domain"
   mkdir -p "$cert_dir"
-  get_github_file_contents "$mdm_demo_domain_fullchain_gh_url" > "$cert_dir/fullchain1.pem"
-  get_github_file_contents "$mdm_demo_domain_privkey_gh_url" > "$cert_dir/privkey1.pem"
+  get_github_file_contents "$mdm_domain_fullchain_gh_url" > "$cert_dir/fullchain1.pem"
+  get_github_file_contents "$mdm_domain_privkey_gh_url" > "$cert_dir/privkey1.pem"
 }
 
 mkcert_for_domain() {
@@ -725,12 +725,12 @@ mkcert_for_domain() {
   mkcert -cert-file "$cert_dir/fullchain1.pem" -key-file "$cert_dir/privkey1.pem" "$domain"
 }
 
-cp_wildcard_mdm_demo_domain_cert_and_key_for_subdomain() {
+cp_wildcard_mdm_domain_cert_and_key_for_subdomain() {
   local subdomain="$1"
-  [[ "$subdomain" =~ $mdm_demo_domain$ ]] || error "$domain is not a subdomain of $mdm_demo_domain"
+  [[ "$subdomain" =~ $mdm_domain$ ]] || error "$domain is not a subdomain of $mdm_domain"
   is_new_cert_required_for_domain "$subdomain" || return 0 # still valid
-  is_new_cert_required_for_domain ".$mdm_demo_domain" && get_wildcard_cert_and_key_for_mdm_demo_domain
-  rsync -az "$certs_dir/.$mdm_demo_domain/" "$certs_dir/$subdomain/"
+  is_new_cert_required_for_domain ".$mdm_domain" && get_wildcard_cert_and_key_for_mdm_domain
+  rsync -az "$certs_dir/.$mdm_domain/" "$certs_dir/$subdomain/"
 }
 
 ###
