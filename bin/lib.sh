@@ -485,9 +485,16 @@ ARE YOU SURE?! (y/n)
 
 # look in env and fallback to expected home path
 get_github_token_from_composer_auth() {
-  ( echo "$COMPOSER_AUTH" && cat "$HOME/.composer/auth.json" ) |
-    perl -ne '/github.com".*?"([^"]*)"/ and print "$1\n"' |
-    head -1
+  local token
+  [[ "$COMPOSER_AUTH" ]] && {
+    token="$(echo "$COMPOSER_AUTH" | perl -ne '/github.com".*?"([^"]*)"/ and print "$1"')"
+    [[ "$token" =~ [a-zA-Z0-9]{20,} ]] && echo "$token" && return
+  }
+  [[ -f "$HOME/.composer/auth.json" ]] && {
+    token="$(perl -ne '/github.com".*?"([^"]*)"/ and print "$1"' "$HOME/.composer/auth.json")"
+    [[ "$token" =~ [a-zA-Z0-9]{20,} ]] && echo "$token" && return
+  }
+  return 1
 }
 
 ###
