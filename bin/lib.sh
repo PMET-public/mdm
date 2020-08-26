@@ -37,7 +37,8 @@ done
 #
 ###
 
-# in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when that specific dir is intended
+# in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when the central install dir is intended
+source "$lib_dir/../.mdm_config.sh"
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[1;33m'
@@ -47,7 +48,6 @@ recommended_vm_mem_mb=4096
 recommended_vm_swap_mb=2048
 recommended_vm_disk_mb=64000
 bytes_in_mb=1048576
-mdm_demo_domain="storystore.dev"
 detached_project_name="detached-mdm"
 hosts_file_line_marker="# added by MDM"
 host_docker_internal="172.17.0.1"
@@ -61,7 +61,7 @@ menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
 dockerize_log_file="$mdm_path/current/dockerize.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
-advanced_mode_flag_file="$mdm_path/advanced_mode_on"
+advanced_mode_flag_file="$mdm_path/advanced-mode-on"
 mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
