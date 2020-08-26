@@ -488,6 +488,21 @@ start_tmate_session() {
   }
 }
 
+toggle_remote_web_access() {
+  local remote_port local_port
+  remote_port="$(( $RANDOM + 20000 ))" # RANDOM is between 0-32767 (2^16 / 2 - 1)
+  local_port="$(docker ps -a --filter "name=varnish" --format "{{.Ports}}" | tr ',' '\n' | perl -ne "s/.*:(?=\d{5})// and s/-.*// and print")"
+  [[ ! "$local_port" =~ ^[0-9]+$ ]] && echo "Could not find valid local port" && exit 1
+  ssh -f \
+    -F /dev/null \
+    -o IdentitiesOnly=yes \
+    -o ExitOnForwardFailure=yes \
+    -o StrictHostKeyChecking=no \
+    -i "$HOME/pk" \
+    -NR "$remote_port":127.0.0.1:"$local_port" \
+    "$TUNNEL_SSH_URL"
+}
+
 show_errors_from_mdm_logs() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local errors
