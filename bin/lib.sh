@@ -1142,7 +1142,7 @@ init_mac_quit_detection() {
 ##
 
 self_install() {
-
+  local pkg=("bash" "coreutils")
   is_interactive_terminal && printf '\e[8;50;140t' # resize terminal
 
   # on linux, some services require a min virtual memory map count and may need to be raised
@@ -1180,8 +1180,10 @@ Once all requirements are installed and validated, this script will not need to 
 
     # do not install docker (which is docker toolbox) via homebrew; use docker for mac instead
     # upgrade mac's bash, use coreutils for consistency across *NIX
-    brew install bash coreutils
-    brew upgrade bash coreutils
+    ! brew list "${pkg[@]}" > /dev/null && {
+      brew install "${pkg[@]}"
+    }
+    brew upgrade "${pkg[@]}"
 
     [[ -d /Applications/Docker.app ]] || {
       msg_w_newlines "
