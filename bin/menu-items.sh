@@ -304,6 +304,10 @@ is_adobe_system && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=start_tmate_session
   }
+
+  key="🔓 Web remote access"
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=toggle_remote_web_access
 }
 
 key="#cloud-docker (Magento Community Slack)"
@@ -469,6 +473,15 @@ is_advanced_mode && {
 
   # this option only applies to a specific app so should not appear when testing from a repo dir
   if lib_sourced_for_specific_bundled_app; then
+
+    if [[ "$notsetyet" ]]; then
+      key="🐞PHP Xdebug is ON for this app"
+    else
+      key="🐞PHP Xdebug is OFF for this app"
+    fi
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-handler"]=toggle_xdebug
+
     if [[ "$debug" ]]; then
       key="🐞MDM debugging is ON for this app"
     else
