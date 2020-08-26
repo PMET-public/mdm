@@ -886,7 +886,7 @@ reload_rev_proxy() {
 
 download_and_link_latest() {
   local latest_ver latest_ver_dir
-  latest_ver="${1:-$(lookup_latest_remote_sem_ver)}"
+  latest_ver="${1:-$(lookup_latest_remote_sem_ver)}" # if unset or empty string, lookup latest sem ver
   latest_ver_dir="$mdm_path/$latest_ver"
   mkdir -p "$latest_ver_dir"
   cd "$mdm_path"
@@ -1154,9 +1154,9 @@ self_install() {
   # create expected directory structure
   mkdir -p "$launched_apps_dir" "$certs_dir" "$hosts_backup_dir"
   
-  pushd "$MDM_REPO_DIR"
-  MDM_REPO_BRANCH="$(git branch --show-current)"
-  popd
+  [[ "$MDM_REPO_DIR" ]] && pushd "$MDM_REPO_DIR" # for dev/testing: if dir is specified, cd & use it for install
+  MDM_REPO_BRANCH="$(git branch --show-current)" # otherwise, just use current git dir or empty string
+  [[ "$MDM_REPO_DIR" ]] && popd
   download_and_link_latest "$MDM_REPO_BRANCH"
 
   msg_w_newlines "
@@ -1208,6 +1208,7 @@ Once all requirements are installed and validated, this script will not need to 
 }
 
 self_uninstall() {
+  # 2nd file test to ensure mdm_path is set correctly before rm -rf to avoid deleting unintended dir
   [[ -d "$mdm_path" && -f "$mdm_path/current/bin/lib.sh" ]] && rm -rf "$mdm_path" || :
 }
 
