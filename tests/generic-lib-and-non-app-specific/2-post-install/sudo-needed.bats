@@ -13,12 +13,6 @@ setup() {
   shopt -s nocasematch
 }
 
-@test 'sudo_run_bash_cmds echo string' {
-  run sudo_run_bash_cmds "echo 'Hello, world!'"
-  assert_success
-  assert_output -p 'Hello, world!' # partial match b/c "bash -l" may trigger extra output
-}
-
 @test 'sudo_run_bash_cmds check env' {
   run sudo_run_bash_cmds "env | grep -q SUDO"
   assert_success
