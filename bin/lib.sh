@@ -12,7 +12,7 @@ set -e
 }
 
 # this lib is used by dockerize, mdm, tests, etc. but logging to STDOUT is problematic for platypus apps
-# so need a way to check and if appropiate, defer until lib can bootstrap the appropiate logging
+# so need a way to check and if appropiate, defer output until lib can bootstrap the appropiate logging
 included_by_mdm() {
   # shellcheck disable=SC2199 # error in shellcheck? implicit array concatenation - which is desired plus = vs =~
   [[ "${BASH_SOURCE[@]}" =~ /bin/mdm ]]
