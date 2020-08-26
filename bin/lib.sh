@@ -38,7 +38,9 @@ done
 ###
 
 # in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when the central install dir is intended
-source "$lib_dir/../.mdm_config.sh"
+[[ -f "$lib_dir/../.mdm_config.sh" ]] && {
+  source "$lib_dir/../.mdm_config.sh"
+}
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[1;33m'
