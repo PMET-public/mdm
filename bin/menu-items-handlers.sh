@@ -397,8 +397,10 @@ warm_cache() {
 
     # recursively get admin and store front
     # TODO --no-check-certificate is only needed on mac (even with mkcert CA installed)
-    wget --no-check-certificate -nv -O "$tmp_file" -H --domains="$domain" "$url/admin"
-    wget --no-check-certificate -nv -r -X static,media -l 1 -O "$tmp_file" -H --domains="$domain" "$url"
+    # TODO should work without --no-cookies option but varnish is caching 404 (the default behavior) 
+    # but why are urls like whats-new.html returning 404 - is it a demo store issue - and admin is visited 1st?
+    wget --no-cookies --no-check-certificate -nv -O "$tmp_file" -H --domains="$domain" "$url/admin"
+    wget --no-cookies --no-check-certificate -nv -r -X static,media -l 1 -O "$tmp_file" -H --domains="$domain" "$url"
     rm "$tmp_file"
   }
 }
