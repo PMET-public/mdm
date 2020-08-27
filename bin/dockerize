@@ -169,7 +169,7 @@ You must provide either:
 # if an app_hostname is provided, use it. otherwise, determine one based on other input.
 [[ $app_hostname ]] || {
   if is_existing_cloud_env; then
-    "$magento_cloud_cmd" -q || error "The "$magento_cloud_cmd" CLI was not found. To install, run
+    "$magento_cloud_cmd" -q || error "The magento-cloud CLI was not found. To install, run
     curl -svLS https://accounts.magento.cloud/cli/installer | php"
     app_hostname="$pid-$env"
   else
