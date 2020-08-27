@@ -130,14 +130,14 @@ setup() {
 }
 
 @test 'is_hostname_resolving_to_local "pwa.$mdm_domain"' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   run is_hostname_resolving_to_local "pwa.$mdm_domain"
   assert_success
   assert_output ""
 }
 
 @test 'is_hostname_resolving_to_local "pwa-prev.$mdm_domain"' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   run is_hostname_resolving_to_local "pwa-prev.$mdm_domain"
   assert_success
   assert_output ""

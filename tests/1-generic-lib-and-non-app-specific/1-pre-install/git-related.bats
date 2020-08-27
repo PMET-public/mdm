@@ -57,7 +57,7 @@ setup() {
 }
 
 @test 'get_github_file_contents from private file defined in .mdm_config.sh' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   run get_github_file_contents "$mdm_domain_fullchain_gh_url"
   assert_success
   assert_output -e "BEGIN CERTIFICATE"

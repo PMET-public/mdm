@@ -14,7 +14,7 @@ setup() {
 }
 
 @test 'remove certs & test does_cert_and_key_exist_for_domain' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   rm -rf "$certs_dir/localhost" "$certs_dir/.$mdm_domain"
   run does_cert_and_key_exist_for_domain "localhost" || does_cert_and_key_exist_for_domain ".$mdm_domain"
   assert_failure
@@ -30,7 +30,7 @@ setup() {
 }
 
 @test 'get_wildcard_cert_and_key_for_mdm_domain' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   get_wildcard_cert_and_key_for_mdm_domain
   does_cert_and_key_exist_for_domain ".$mdm_domain" 
   run read_cert_for_domain ".$mdm_domain"
@@ -45,7 +45,7 @@ setup() {
 }
 
 @test 'get_cert_utc_end_date_for_domain ".$mdm_domain"' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   run get_cert_utc_end_date_for_domain ".$mdm_domain"
   assert_success
   assert_output -e "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$"
@@ -64,7 +64,7 @@ setup() {
 }
 
 @test 'is_cert_current_for_domain ".$mdm_domain"' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   run is_cert_current_for_domain ".$mdm_domain"
   assert_success
   assert_output ""
@@ -83,7 +83,7 @@ setup() {
 }
 
 @test 'is_cert_for_domain_expiring_soon ".$mdm_domain"' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   run is_cert_for_domain_expiring_soon ".$mdm_domain"
   assert_failure
   assert_output ""
@@ -102,14 +102,14 @@ setup() {
 }
 
 @test 'does_cert_follow_convention ".$mdm_domain"' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   run does_cert_follow_convention ".$mdm_domain"
   assert_success
   assert_output ""
 }
 
 @test 'does_cert_follow_convention "pwa.$mdm_domain"' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   cp_wildcard_mdm_domain_cert_and_key_for_subdomain "pwa.$mdm_domain"
   run does_cert_follow_convention "pwa.$mdm_domain"
   assert_success
@@ -129,7 +129,7 @@ setup() {
 }
 
 @test 'is_new_cert_required_for_domain ".$mdm_domain"' {
-  [[ "$MDM_CONFIG_URL" ]] || skip
+  [[ "$mdm_domain" ]] || skip
   run is_new_cert_required_for_domain ".$mdm_domain"
   assert_failure
   assert_output ""
