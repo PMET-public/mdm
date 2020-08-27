@@ -9,9 +9,11 @@ env:
   COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
   SLACK_WEBHOOK_URL_FOR_TMATE_FROM_GITHUB_WORKFLOW: ${{ secrets.SLACK_WEBHOOK_URL_FOR_TMATE_FROM_GITHUB_WORKFLOW }}
   TMATE_AUTHORIZED_KEYS_URL: ${{ secrets.TMATE_AUTHORIZED_KEYS_URL }}
+  MDM_CONFIG_URL: ${{ secrets.MDM_CONFIG_URL }}
   TUNNEL_SSH_URL: ${{ secrets.TUNNEL_SSH_URL }}
   TUNNEL_SSH_PK: ${{ secrets.TUNNEL_SSH_PK }}
   TUNNEL_DOCKER_NAME_FILTER: varnish
+  
 
 jobs:
 
@@ -21,7 +23,10 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+        mdm_override_config: [true, ""]
     steps:
+      - run: |
+          if [[ "$mdm_override_config" ]]; then echo "::set-env name=MDM_CONFIG_URL::''"; fi
       - uses: actions/checkout@v2
         with:
           submodules: 'true'

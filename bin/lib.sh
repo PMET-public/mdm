@@ -39,6 +39,7 @@ done
 
 # in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when the central install dir is intended
 [[ -f "$lib_dir/../.mdm_config.sh" ]] && {
+  # shellcheck source=../.mdm_config.sh
   source "$lib_dir/../.mdm_config.sh"
 }
 red='\033[0;31m'
@@ -1147,6 +1148,19 @@ init_mac_quit_detection() {
 # initialization logic
 #
 ##
+
+# the mdm config enables additional features
+# dockerization of an app should include an mdm config, but if clone for dev or testing, it will no exist yet
+download_mdm_config_if_appropiate() {
+  [[ -f "$lib_dir/../.mdm_config.sh" ]] && return # don't overwrite
+  [[ "$MDM_CONFIG_URL" ]] && {
+    # for now, assume it's a github url as will be recommended but try a normal curl if it fails
+    get_github_file_contents "$MDM_CONFIG_URL" > "$lib_dir/../.mdm_config.sh" ||
+      curl --fail -sL "$MDM_CONFIG_URL" > "$lib_dir/../.mdm_config.sh"
+  }
+  return 0
+}
+download_mdm_config_if_appropiate
 
 self_install() {
   local pkg=("bash" "coreutils")
