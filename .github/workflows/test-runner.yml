@@ -23,10 +23,12 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-        mdm_override_config: [true, ""]
+        MDM_OVERRIDE_CONFIG: [true, ""]
+    env:
+      - MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
       - run: |
-          if [[ "$mdm_override_config" ]]; then echo "::set-env name=MDM_CONFIG_URL::''"; fi
+          if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "::set-env name=MDM_CONFIG_URL::''"; fi
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
@@ -38,40 +40,40 @@ jobs:
         uses: PMET-public/action-tmate@master
 
 
-  dockerize-then-run-magento-apps:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - name: bats tests
-        run: |
-          # install the master and a 2nd to test simultaneous compatibility
-          ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
-          export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.0-ref
-          ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
-      - name: keep alive to debug
-        if: ${{ failure() }}
-        uses: PMET-public/action-tmate@master
+  # dockerize-then-run-magento-apps:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         submodules: 'true'
+  #     - name: bats tests
+  #       run: |
+  #         # install the master and a 2nd to test simultaneous compatibility
+  #         ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
+  #         export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.0-ref
+  #         ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
+  #     - name: keep alive to debug
+  #       if: ${{ failure() }}
+  #       uses: PMET-public/action-tmate@master
 
-  generic-lib-and-non-app-specific:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - name: bats tests
-        run: |
-          ./tests/libs/bats/bin/bats -T -r ./tests/1-generic-lib-and-non-app-specific/**/*.bats
-      - name: keep alive to debug
-        if: ${{ failure() }}
-        uses: PMET-public/action-tmate@master
+  # generic-lib-and-non-app-specific:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - ubuntu-latest
+  #         - macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         submodules: 'true'
+  #     - name: bats tests
+  #       run: |
+  #         ./tests/libs/bats/bin/bats -T -r ./tests/1-generic-lib-and-non-app-specific/**/*.bats
+  #     - name: keep alive to debug
+  #       if: ${{ failure() }}
+  #       uses: PMET-public/action-tmate@master

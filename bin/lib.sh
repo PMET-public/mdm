@@ -717,7 +717,7 @@ get_github_file_contents() {
   token="$(get_github_token_from_composer_auth)"
   url="https://api.github.com/repos/$org/$repo/contents/$path?ref=${ref:-master}"
   [[ "$token" ]] && token=("-H" "Authorization: token $token")
-  curl --fail -vL -H 'Accept: application/vnd.github.v3.raw' "${token[@]}" "$url"
+  curl --fail -sL -H 'Accept: application/vnd.github.v3.raw' "${token[@]}" "$url"
 }
 
 get_wildcard_cert_and_key_for_mdm_domain() {
