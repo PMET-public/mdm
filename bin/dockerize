@@ -50,6 +50,8 @@ create_platypus_app() {
     # mv app into app bundle
     mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
   }
+  # copy config if it exists
+  [[ -f "$lib_dir/../.mdm_config.sh" ]] && cp "$lib_dir/../.mdm_config.sh" "$contents_dir.app/Contents/Resources/"
   msg_w_newlines "Successfully created $contents_dir.app"
 }
 
@@ -58,6 +60,8 @@ create_fake_platypus_app() {
   local name="$1" contents_dir="$2"
   mkdir -p "$contents_dir.app/Contents/Resources"
   cp "$lib_dir/launcher" "$contents_dir.app/Contents/Resources/script"
+  # copy config if it exists
+  [[ -f "$lib_dir/../.mdm_config.sh" ]] && cp "$lib_dir/../.mdm_config.sh" "$contents_dir.app/Contents/Resources/"
   [[ -d $contents_dir ]] && {
     # mv app into app bundle
     mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
