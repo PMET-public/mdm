@@ -923,7 +923,7 @@ get_compose_project_name() {
   [[ -f "$cpn_file" ]] && cat "$cpn_file" && return 0
   # else create a unique one & write it to file
   name="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
-  name+="-$(head /dev/urandom | LC_ALL=C tr -dc 'a-z' | head -c 4)"
+  name+="-$(head /dev/urandom | LC_ALL=C tr -dc '[:lower:]' | head -c 4)"
   name="$(adjust_compose_project_name_for_docker_compose_version "$name")"
   printf "%s" "$name" | tee "$cpn_file"
 }
