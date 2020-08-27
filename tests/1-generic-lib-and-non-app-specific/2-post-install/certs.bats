@@ -14,6 +14,7 @@ setup() {
 }
 
 @test 'remove certs & test does_cert_and_key_exist_for_domain' {
+  [[ "$MDM_CONFIG_URL" ]] || skip
   rm -rf "$certs_dir/localhost" "$certs_dir/.$mdm_domain"
   run does_cert_and_key_exist_for_domain "localhost" || does_cert_and_key_exist_for_domain ".$mdm_domain"
   assert_failure
