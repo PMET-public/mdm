@@ -3,3 +3,4 @@
 *-console.log
 certs
 tests/libs
+.mdm_config.sh
