@@ -38,10 +38,6 @@ done
 ###
 
 # in general, use $lib_dir/.. to reference the running version's path; use $mdm_path only when the central install dir is intended
-[[ -f "$lib_dir/../.mdm_config.sh" ]] && {
-  # shellcheck source=../.mdm_config.sh
-  source "$lib_dir/../.mdm_config.sh"
-}
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[1;33m'
@@ -60,6 +56,7 @@ launched_apps_dir="$mdm_path/launched-apps"
 certs_dir="$mdm_path/certs"
 hosts_backup_dir="$mdm_path/hosts.bak"
 
+mdm_config_file="$mdm_path/.mdm_config.sh"
 menu_log_file="$mdm_path/current/menu.log"
 handler_log_file="$mdm_path/current/handler.log"
 dockerize_log_file="$mdm_path/current/dockerize.log"
@@ -70,6 +67,11 @@ magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
 repo_url="https://github.com/PMET-public/mdm"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
+
+[[ -f "$mdm_config_file" ]] && {
+  # shellcheck source=../.mdm_config.sh
+  source "$mdm_config_file"
+}
 
 ###
 #
