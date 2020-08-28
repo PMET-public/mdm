@@ -28,7 +28,7 @@ jobs:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
       - run: |
-          if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "::set-env name=MDM_CONFIG_URL::''"; fi
+          if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "::set-env name=MDM_CONFIG_URL::"; fi
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
