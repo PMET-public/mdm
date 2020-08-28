@@ -894,7 +894,7 @@ reload_rev_proxy() {
   source "$lib_dir/nginx-rev-proxy-setup.sh"
 }
 
-dowload_and_link_repo_ref() {
+download_and_link_repo_ref() {
   local ref ref_dir
   ref="${1:-$(lookup_latest_remote_sem_ver)}" # if unset or empty string, lookup latest sem ver
   ref_dir="$mdm_path/$ref"
@@ -1174,13 +1174,13 @@ self_install() {
   
   # get config accounting for env: CI, dev, end user
   if is_CI; then
-    dowload_and_link_repo_ref "$GITHUB_SHA"
+    download_and_link_repo_ref "$GITHUB_SHA"
     [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
   elif [[ "$MDM_REPO_DIR" ]]; then
     rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
     ln -sf "$mdm_path/repo/" "$mdm_path/current"
   else
-    dowload_and_link_repo_ref # no param = latest sem ver
+    download_and_link_repo_ref # no param = latest sem ver
   fi
 
   msg_w_newlines "
