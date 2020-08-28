@@ -46,6 +46,8 @@ if [[ -z "$MDM_REPO_DIR" ]]; then
   fi
 fi
 
+mdm_path="$HOME/.mdm" # must be set in lib.sh and launcher b/c each can be used independently
+
 if [[
 
   -f "$HOME/.mdm/current/bin/mdm" && \

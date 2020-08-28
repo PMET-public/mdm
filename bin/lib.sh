@@ -51,7 +51,7 @@ detached_project_name="detached-mdm"
 hosts_file_line_marker="# added by MDM"
 host_docker_internal="172.17.0.1"
 
-mdm_path="$HOME/.mdm"
+mdm_path="$HOME/.mdm" # must be set in lib.sh and launcher b/c each can be used independently
 launched_apps_dir="$mdm_path/launched-apps"
 certs_dir="$mdm_path/certs"
 hosts_backup_dir="$mdm_path/hosts.bak"
