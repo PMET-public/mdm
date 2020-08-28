@@ -1152,17 +1152,13 @@ init_mac_quit_detection() {
 ##
 
 # the mdm config enables additional features
-# dockerization of an app should include an mdm config, but if clone for dev or testing, it will no exist yet
-download_mdm_config_if_appropiate() {
-  [[ -f "$lib_dir/../.mdm_config.sh" ]] && return # don't overwrite
-  [[ "$MDM_CONFIG_URL" ]] && {
-    # for now, assume it's a github url as will be recommended but try a normal curl if it fails
-    get_github_file_contents "$MDM_CONFIG_URL" > "$lib_dir/../.mdm_config.sh" ||
-      curl --fail -sL "$MDM_CONFIG_URL" > "$lib_dir/../.mdm_config.sh"
-  }
-  return 0
+# a dockerized app will include an mdm config file but in CI testing, it will not exist 
+# but an env var may exists to download it
+download_mdm_config() {
+    # assume a github url as will be recommended but try a normal curl if it fails
+    get_github_file_contents "$MDM_CONFIG_URL" > "$mdm_config_file" ||
+      curl --fail -sL "$MDM_CONFIG_URL" > "$mdm_config_file"
 }
-download_mdm_config_if_appropiate
 
 self_install() {
   local pkg=("bash" "coreutils")
@@ -1177,10 +1173,16 @@ self_install() {
   # create expected directory structure
   mkdir -p "$launched_apps_dir" "$certs_dir" "$hosts_backup_dir"
   
-  [[ "$MDM_REPO_DIR" ]] && pushd "$MDM_REPO_DIR" # for dev/testing: if dir is specified, cd & use it for install
-  MDM_REPO_BRANCH="$(git branch --show-current)" # otherwise, just use current git dir or empty string
-  [[ "$MDM_REPO_DIR" ]] && popd
-  download_and_link_latest "$MDM_REPO_BRANCH"
+  # get config accounting for env: CI, dev, end user
+  if is_CI; then
+    dowload_and_link_repo_ref "$GITHUB_SHA"
+    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
+  elif [[ "$MDM_REPO_DIR" ]]; then
+    rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
+    ln -sf "$latest_ver" current
+  else
+    dowload_and_link_repo_ref # no param = latest sem ver
+  fi
 
   msg_w_newlines "
 Once all requirements are installed and validated, this script will not need to run again."
