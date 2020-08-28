@@ -63,13 +63,13 @@ if [[
 
 else
 
-  # some dependency is missing and this script was called without args, so prompt user to install
+  # some dependency is missing 
 
-  if [[ ${#BASH_ARGV[@]} -eq 0 ]]; then
+  if [[ ${#BASH_ARGV[@]} -eq 0 ]]; then #this script was called without args, so prompt user to install
 
     echo "Install missing requirements on this computer" && exit
 
-  else
+  else # just run installer from repo for dev/test OR master for normal installation
 
     installer=$(mktemp)
     if [[ "$MDM_REPO_DIR" ]]; then
@@ -77,7 +77,7 @@ else
     else
       curl -sL "https://raw.githubusercontent.com/PMET-public/mdm/master/bin/lib.sh" > "$installer"
     fi
-    echo "self_install" >> "$installer" # call the self_install function
+    echo "self_install" >> "$installer" # add the self_install function at the end to auto-run
     chmod +x "$installer"
     if ! is_mac || [[ "$MDM_REPO_DIR" ]]; then
       "$installer"
