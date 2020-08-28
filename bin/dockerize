@@ -77,7 +77,7 @@ create_bundled_app() {
     create_platypus_app "$name" "$contents_dir"
   elif is_mac; then
     error "Platypus is not installed."
-  else 
+  else
     create_fake_platypus_app "$name" "$contents_dir"
   fi
 }
