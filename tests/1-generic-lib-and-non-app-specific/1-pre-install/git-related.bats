@@ -53,7 +53,6 @@ setup() {
 @test 'get_github_file_contents from this public repo that does not exist' {
   run get_github_file_contents "https://github.com/PMET-public/mdm/blob/master/DOES_NOT_EXIST"
   assert_failure
-  assert_output -e "404"
 }
 
 @test 'get_github_file_contents from private file defined in .mdm_config.sh' {
