@@ -58,7 +58,7 @@ setup() {
 @test 'install_app' {
   # get the most recently created app dir
   app_dir="$(ls -dtr "$HOME"/Downloads/*.app | tail -1 || :)"
-  ln -sf "$app_dir/Contents/Resources/script" "$app_name"
+  ln -sfn "$app_dir/Contents/Resources/script" "$app_name"
   run "./$app_name" install_app
   assert_success
 }

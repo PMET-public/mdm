@@ -246,8 +246,7 @@ revert_to_prev_mdm() {
   )"
   prev=$(echo "${vers/* $current / }" | perl -pe 's/.*?\b([0-9.]+).*/$1/')
   [[ -d "$prev" ]] && {
-    rm current
-    ln -sf "$prev" current
+    ln -sfn "$prev" current
   }
 }
 

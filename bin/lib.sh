@@ -902,7 +902,7 @@ download_and_link_repo_ref() {
   curl -sLO "$repo_url/archive/$ref.tar.gz"
   tar -zxf "$ref.tar.gz" --strip-components 1 -C "$ref_dir"
   rm "$ref.tar.gz" # cleanup
-  ln -sf "$ref_dir" "$mdm_path/current"
+  ln -sfn "$ref_dir" "$mdm_path/current"
   [[ -d "$mdm_path/current" ]] && rsync -az "$mdm_path/current/certs/" "$mdm_path/certs/" || : # cp over any new certs if the exist
 }
 
@@ -1178,7 +1178,7 @@ self_install() {
     [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
   elif [[ "$MDM_REPO_DIR" ]]; then
     rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
-    ln -sf "$mdm_path/repo/" "$mdm_path/current"
+    ln -sfn "$mdm_path/repo/" "$mdm_path/current"
   else
     download_and_link_repo_ref # no param = latest sem ver
   fi
