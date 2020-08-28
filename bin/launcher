@@ -50,7 +50,7 @@ mdm_path="$HOME/.mdm" # must be set in lib.sh and launcher b/c each can be used 
 
 if [[
 
-  -f "$HOME/.mdm/current/bin/mdm" && \
+  -f "$mdm_path/current/bin/mdm" && \
   ( -n "$(which brew)" || ! "$(is_mac)" ) && \
   ${BASH_VERSINFO[0]} -ge 4 && \
   -n "$(which realpath)" && \
@@ -59,7 +59,7 @@ if [[
 
 ]]; then
 
-  mdm_script_path="${MDM_REPO_DIR:-$HOME/.mdm/current}/bin/mdm"
+  mdm_script_path="${MDM_REPO_DIR:-$mdm_path/current}/bin/mdm"
   # shellcheck source=mdm
   source "$mdm_script_path"
 
