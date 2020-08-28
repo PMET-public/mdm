@@ -8,7 +8,7 @@ set -e
 # Env when error occurred:
 # $(env | "$sort_cmd")
 # "' ERR
-    trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE.' ERR
+    trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE."' ERR
 }
 
 # this lib is used by dockerize, mdm, tests, etc. but logging to STDOUT is problematic for platypus apps
