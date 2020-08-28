@@ -124,7 +124,7 @@
         "debug": true,
       },
       "args": [
-        "-g", "git@github.com:magento/magento-cloud.git",
+        "-g", "git@github.com:PMET-public/magento-cloud.git",
         "-b", "master",
         "-n", "mc",
         "-a", "${env:HOME}/.composer/auth.json",
