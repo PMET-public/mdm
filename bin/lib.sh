@@ -901,9 +901,9 @@ dowload_and_link_repo_ref() {
   mkdir -p "$ref_dir"
   curl -sLO "$repo_url/archive/$ref.tar.gz"
   tar -zxf "$ref.tar.gz" --strip-components 1 -C "$ref_dir"
-  rm "$ref.tar.gz" current 2> /dev/null || : # cleanup and remove old link
-  ln -sf "$ref_dir" current
-  [[ -d current/certs ]] && rsync -az current/certs/ certs/ || : # cp over any new certs if the exist
+  rm "$ref.tar.gz" # cleanup
+  ln -sf "$ref_dir" "$mdm_path/current"
+  [[ -d "$mdm_path/current" ]] && rsync -az "$mdm_path/current/certs/" "$mdm_path/certs/" || : # cp over any new certs if the exist
 }
 
 # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
