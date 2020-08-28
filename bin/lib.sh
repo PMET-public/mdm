@@ -899,11 +899,10 @@ dowload_and_link_repo_ref() {
   ref="${1:-$(lookup_latest_remote_sem_ver)}" # if unset or empty string, lookup latest sem ver
   ref_dir="$mdm_path/$ref"
   mkdir -p "$ref_dir"
-  cd "$mdm_path"
   curl -sLO "$repo_url/archive/$ref.tar.gz"
   tar -zxf "$ref.tar.gz" --strip-components 1 -C "$ref_dir"
   rm "$ref.tar.gz" current 2> /dev/null || : # cleanup and remove old link
-  ln -sf "$ref" current
+  ln -sf "$ref_dir" current
   [[ -d current/certs ]] && rsync -az current/certs/ certs/ || : # cp over any new certs if the exist
 }
 
@@ -1179,7 +1178,7 @@ self_install() {
     [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
   elif [[ "$MDM_REPO_DIR" ]]; then
     rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
-    ln -sf "$latest_ver" current
+    ln -sf "$mdm_path/repo/" "$mdm_path/current"
   else
     dowload_and_link_repo_ref # no param = latest sem ver
   fi
