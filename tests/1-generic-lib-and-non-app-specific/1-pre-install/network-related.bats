@@ -185,15 +185,15 @@ setup() {
   assert_output -e ".+\..+\..+"
 }
 
-@test "download_and_link_latest" {
+@test "dowload_and_link_repo_ref" {
   ver="$(lookup_latest_remote_sem_ver)"
-  run download_and_link_latest
+  run dowload_and_link_repo_ref
   assert_success
   assert_symlink_to "$HOME/.mdm/$ver" "$HOME/.mdm/current"
 }
 
-@test "download_and_link_latest develop" {
-  run download_and_link_latest develop
+@test "dowload_and_link_repo_ref develop" {
+  run dowload_and_link_repo_ref develop
   assert_success
   assert_symlink_to "$HOME/.mdm/develop" "$HOME/.mdm/current"
 }

@@ -114,7 +114,7 @@ start_docker() {
 }
 
 update_mdm() {
-  download_and_link_latest
+  dowload_and_link_repo_ref
 }
 
 install_app() {

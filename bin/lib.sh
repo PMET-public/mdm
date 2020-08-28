@@ -894,16 +894,16 @@ reload_rev_proxy() {
   source "$lib_dir/nginx-rev-proxy-setup.sh"
 }
 
-download_and_link_latest() {
-  local latest_ver latest_ver_dir
-  latest_ver="${1:-$(lookup_latest_remote_sem_ver)}" # if unset or empty string, lookup latest sem ver
-  latest_ver_dir="$mdm_path/$latest_ver"
-  mkdir -p "$latest_ver_dir"
+dowload_and_link_repo_ref() {
+  local ref ref_dir
+  ref="${1:-$(lookup_latest_remote_sem_ver)}" # if unset or empty string, lookup latest sem ver
+  ref_dir="$mdm_path/$ref"
+  mkdir -p "$ref_dir"
   cd "$mdm_path"
-  curl -sLO "$repo_url/archive/$latest_ver.tar.gz"
-  tar -zxf "$latest_ver.tar.gz" --strip-components 1 -C "$latest_ver_dir"
-  rm "$latest_ver.tar.gz" current 2> /dev/null || : # cleanup and remove old link
-  ln -sf "$latest_ver" current
+  curl -sLO "$repo_url/archive/$ref.tar.gz"
+  tar -zxf "$ref.tar.gz" --strip-components 1 -C "$ref_dir"
+  rm "$ref.tar.gz" current 2> /dev/null || : # cleanup and remove old link
+  ln -sf "$ref" current
   [[ -d current/certs ]] && rsync -az current/certs/ certs/ || : # cp over any new certs if the exist
 }
 
