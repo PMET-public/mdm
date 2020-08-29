@@ -81,7 +81,7 @@ else
       # when MDM_REPO_DIR exists (dev|CI), config can be acconted for (see self_install)
       # otherwise, in an end user's app, copy current app's config to $mdm_path
       mkdir -p "$mdm_path"
-      cp "$(dirname "${BASH_SOURCE[0]}")/../.mdm_config.sh" "$mdm_path/"
+      cp "$(dirname "${BASH_SOURCE[0]}")/../.mdm_config.sh" "$mdm_path/" || :
     fi
     echo "self_install" >> "$installer" # add the self_install function at the end to auto-run
     chmod +x "$installer"
