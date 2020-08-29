@@ -29,9 +29,6 @@ services:
   varnish:
     ports:
       - 80
-    depends_on:
-      web:
-        condition: service_started
   elasticsearch:
     networks:
       default:
