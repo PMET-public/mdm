@@ -503,11 +503,11 @@ is_advanced_mode && {
   mdm_menu_items["$key-handler"]=revert_to_prev_mdm
 
   if is_mkcert_CA_installed; then
-    key="⚠️ 🔓 Permit spoofing ANY domain is ON!"
+    key="⚠️  🔓 Permit spoofing ANY domain is ON!"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=toggle_mkcert_CA_install
   else
-    key="⚠️ 🔒 Permit spoofing ANY domain is OFF"
+    key="⚠️  🔒 Permit spoofing ANY domain is OFF"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=toggle_mkcert_CA_install
   fi
