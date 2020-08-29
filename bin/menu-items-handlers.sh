@@ -118,7 +118,7 @@ update_mdm() {
 }
 
 install_app() {
-  local cid background_install_pid finished_msg="install_app finished" # line 
+  local tmp_file cid background_install_pid finished_msg="install_app finished" # line 
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     cd "$apps_resources_dir/app" || exit 1
@@ -134,8 +134,10 @@ install_app() {
     # extract tars created for distribution via sync service e.g. dropbox, onedrive
     extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     # grab varnish conf from our mcd project and add to generic varnish image (overrode custom)
-    get_github_file_contents "https://github.com/PMET-public/magento-cloud-docker/blob/develop/images/varnish/6.2/etc/default.vcl" |
-      docker cp - "${COMPOSE_PROJECT_NAME}_varnish_1:/etc/varnish/default.vcl"
+    tmp_file="$(mktemp)"
+    get_github_file_contents "https://github.com/PMET-public/magento-cloud-docker/blob/develop/images/varnish/6.2/etc/default.vcl" > "$tmp_file"
+    docker cp "$tmp_file" "${COMPOSE_PROJECT_NAME}_varnish_1:/etc/varnish/default.vcl"
+    rm "$tmp_file"
     [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
     # 2 options to start build & deploy
@@ -296,7 +298,7 @@ reset_docker() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local container_ids volume_ids
     warning_w_newlines "This will delete all docker containers, volumes, and networks.
-  Docker images will be preserved to avoid downloading all images from scratch."
+  Docker images will be preserved to avoid re-downloading ALL images."
     confirm_or_exit
     # remove containers
     container_ids="$(docker ps -qa)"
@@ -393,7 +395,7 @@ warm_cache() {
     set -x
     domain=$domain
     url="https://$domain"
-    tmp_file=$(mktemp)
+    tmp_file="$(mktemp)"
 
     msg Warming cache ...
 
