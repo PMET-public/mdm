@@ -543,11 +543,11 @@ set_hostname_for_this_app() {
 }
 
 get_pwa_hostname() {
-  is_adobe_system && echo "pwa.$mdm_domain" || echo "pwa"
+  [[ "$mdm_domain" ]] && echo "pwa.$mdm_domain" || echo "pwa"
 }
 
 get_pwa_prev_hostname() {
-  is_adobe_system && echo "pwa-prev.$mdm_domain" || echo "pwa-prev"
+  [[ "$mdm_domain" ]] && echo "pwa-prev.$mdm_domain" || echo "pwa-prev"
 }
 
 export_pwa_hostnames() {
