@@ -475,17 +475,17 @@ is_advanced_mode && {
   if lib_sourced_for_specific_bundled_app; then
 
     if [[ "$notsetyet" ]]; then
-      key="🐞PHP Xdebug is ON for this app"
+      key="🐞 PHP Xdebug is ON for this app"
     else
-      key="🐞PHP Xdebug is OFF for this app"
+      key="🐞 PHP Xdebug is OFF for this app"
     fi
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=toggle_xdebug
 
     if [[ "$debug" ]]; then
-      key="🐞MDM debugging is ON for this app"
+      key="🐞 MDM debugging is ON for this app"
     else
-      key="🐞MDM debugging is OFF for this app"
+      key="🐞 MDM debugging is OFF for this app"
     fi
     is_magento_app_running && {
       key+=" (stops running app)"
@@ -514,7 +514,7 @@ is_advanced_mode && {
 
   is_docker_compatible && { # meaning currently n/a on CI/CD on mac
 
-    key="🔄Reload reverse proxy"
+    key="🔄 Reload reverse proxy"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=reload_rev_proxy
 
@@ -522,11 +522,11 @@ is_advanced_mode && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=rm_added_hostnames_from_hosts_file
 
-    key="⚠️ Remove Magento images (breaks stopped apps)"
+    key="⚠️  Remove Magento images (breaks stopped apps)"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=rm_magento_docker_images
 
-    key="⚠️ Reset Docker (keeps only images)"
+    key="⚠️  Reset Docker (keeps only images)"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=reset_docker
 
