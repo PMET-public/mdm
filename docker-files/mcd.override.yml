@@ -12,6 +12,8 @@ services:
           - database.internal
   varnish:
     image: varnish:6.2
+    ports:
+      - 80
   build:
     image: $php_cli_docker_image
     environment:
@@ -26,9 +28,6 @@ services:
       - 'magento-generated:/app/generated:rw'
     environment:
       - COMPOSER_AUTH
-  varnish:
-    ports:
-      - 80
   elasticsearch:
     networks:
       default:
@@ -36,3 +35,5 @@ services:
           - elasticsearch.internal
   web:
     image: 'pmetpublic/magento-cloud-docker-nginx'
+    ports:
+      - 80
