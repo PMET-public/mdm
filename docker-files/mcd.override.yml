@@ -1,6 +1,5 @@
 version: '2.1'
 services:
-  # start db
   # this should only exist if .magento.env.yaml exists and then values should be translated
   db:
     environment:
@@ -11,7 +10,8 @@ services:
       default:
         aliases:
           - database.internal
-  ## end db
+  varnish:
+    image: varnish:6.2
   build:
     image: $php_cli_docker_image
     environment:

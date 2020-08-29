@@ -133,6 +133,8 @@ install_app() {
       docker cp - "${COMPOSE_PROJECT_NAME}_build_1":/app
     # extract tars created for distribution via sync service e.g. dropbox, onedrive
     extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
+    # grab varnish conf from our mcd project and add to generic varnish image (overrode custom)
+    docker cp "${COMPOSE_PROJECT_NAME}_build_1:/app/vendor/magento/magento-cloud-docker/images/varnish/6.2/etc/default.vcl" "${COMPOSE_PROJECT_NAME}_varnish_1:/etc/varnish/"
     [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
     # 2 options to start build & deploy
