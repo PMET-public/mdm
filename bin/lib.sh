@@ -572,7 +572,7 @@ find_web_service_hostname_by_network() {
   [[ "$cid" ]] || return 0
   apps_resources_dir="$(docker inspect "$cid" | \
       perl -ne 's/.*com.docker.compose.project.working_dir.*?(\/[^"]*).*/$1\/../ and print')"
-  [[ "$apps_resources_dir" ]] || return 0
+  [[ "$apps_resources_dir" && -f "$apps_resources_dir/app/docker-compose.yml" ]] || return 0
   perl -ne 's/.*VIRTUAL_HOST\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/docker-compose.yml"
 }
 
