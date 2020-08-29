@@ -118,7 +118,7 @@ update_mdm() {
 }
 
 install_app() {
-  local cid background_install_pid line finished_msg="install_app finished"
+  local cid background_install_pid finished_msg="install_app finished" # line 
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     cd "$apps_resources_dir/app" || exit 1
