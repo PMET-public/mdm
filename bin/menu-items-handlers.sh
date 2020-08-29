@@ -520,6 +520,7 @@ show_errors_from_mdm_logs() {
 show_mdm_logs() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     cd "$apps_resources_dir" || exit 1
+    [[ ! -s "$handler_log_file" ]] && warning_w_newlines "No logs yet. Keep terminal open to view logs as they happen."
     tail -f "$handler_log_file"
   }
 }
