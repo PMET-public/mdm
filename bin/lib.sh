@@ -57,9 +57,9 @@ certs_dir="$mdm_path/certs"
 hosts_backup_dir="$mdm_path/hosts.bak"
 
 mdm_config_file="$mdm_path/.mdm_config.sh"
-menu_log_file="$mdm_path/current/menu.log"
-handler_log_file="$mdm_path/current/handler.log"
-dockerize_log_file="$mdm_path/current/dockerize.log"
+menu_log_file="$mdm_path/menu.log"
+handler_log_file="$mdm_path/handler.log"
+dockerize_log_file="$mdm_path/dockerize.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 advanced_mode_flag_file="$mdm_path/advanced-mode-on"
 mdm_ver_file="$mdm_path/latest-sem-ver"
@@ -1072,7 +1072,9 @@ handle_mdm_args() {
 }
 
 ensure_mdm_log_files_exist() {
-  touch "$menu_log_file" "$handler_log_file"
+  [[ -f ""$menu_log_file"" ]] && return 0
+  mkdir -p "$mdm_path"
+  touch "$menu_log_file" "$handler_log_file" "$dockerize_log_file"
 }
 
 run_bundled_app_as_script() {
@@ -1145,6 +1147,8 @@ init_mac_quit_detection() {
 # initialization logic
 #
 ##
+
+ensure_mdm_log_files_exist
 
 # the mdm config enables additional features
 # a dockerized app will include an mdm config file but in CI testing, it will not exist 
@@ -1237,7 +1241,6 @@ self_uninstall() {
 }
 
 lib_sourced_for_specific_bundled_app && {
-  ensure_mdm_log_files_exist
   init_app_specific_vars
   [[ "$debug" ]] && init_mdm_logging
   ! is_detached && is_mac && ! is_CI && init_mac_quit_detection
