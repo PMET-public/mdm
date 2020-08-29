@@ -520,8 +520,8 @@ get_docker_host_ip() {
 }
 
 get_hostname_for_this_app() {
-  [[ -f "$apps_resources_dir/app/docker-compose.yml" ]] &&
-    perl -ne 's/.*VIRTUAL_HOST=\s*(.*)\s*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml" ||
+  [[ -f "$apps_resources_dir/app/.mdm_app_config" ]] &&
+    perl -ne 's/.*APP_HOSTNAME=\s*(.*)\s*/\1/ and print' "$apps_resources_dir/app/.mdm_app_config" ||
     error "Host not found"
 }
 
@@ -537,8 +537,8 @@ print_local_hosts_file_entry() {
 set_hostname_for_this_app() {
   local hostname="$1"
   is_valid_hostname "$hostname" || error "Invalid hostname"
-  [[ -f "$apps_resources_dir/app/docker-compose.yml" ]] &&
-    perl -i -pe "s/(.*VIRTUAL_HOST=\s*)(.*)(\s*)/\1$hostname\3/" "$apps_resources_dir/app/docker-compose.yml" ||
+  [[ -f "$apps_resources_dir/app/.mdm_app_config" ]] &&
+    perl -i -pe "s/(.*APP_HOSTNAME=\s*)(.*)(\s*)/\1$hostname\3/" "$apps_resources_dir/app/.mdm_app_config" ||
     error "Host not found"
 }
 
@@ -572,8 +572,8 @@ find_web_service_hostname_by_network() {
   [[ "$cid" ]] || return 0
   apps_resources_dir="$(docker inspect "$cid" | \
       perl -ne 's/.*com.docker.compose.project.working_dir.*?(\/[^"]*).*/$1\/../ and print')"
-  [[ "$apps_resources_dir" && -f "$apps_resources_dir/app/docker-compose.yml" ]] || return 0
-  perl -ne 's/.*VIRTUAL_HOST\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/docker-compose.yml"
+  [[ "$apps_resources_dir" && -f "$apps_resources_dir/app/.mdm_app_config" ]] || return 0
+  perl -ne 's/.*APP_HOSTNAME\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/.mdm_app_config"
 }
 
 find_mdm_hostnames() {
@@ -920,14 +920,10 @@ adjust_compose_project_name_for_docker_compose_version() {
 }
 
 get_compose_project_name() {
-  local cpn_file="$apps_resources_dir/app/COMPOSE_PROJECT_NAME" name
-  # return previously written compose project name
-  [[ -f "$cpn_file" ]] && cat "$cpn_file" && return 0
-  # else create a unique one & write it to file
-  name="$(perl -ne 's/.*VIRTUAL_HOST=([^.]*).*/\1/ and print' "$apps_resources_dir/app/docker-compose.yml")"
-  name+="-$(head /dev/urandom | LC_ALL=C tr -dc '[:lower:]' | head -c 4)"
-  name="$(adjust_compose_project_name_for_docker_compose_version "$name")"
-  printf "%s" "$name" | tee "$cpn_file"
+  local name
+  name="$(perl -ne 's/COMPOSE_PROJECT_NAME=(.*)/\1/ and print $1' "$apps_resources_dir/app/.mdm_app_config")"
+  [[ "$name" ]] || error "Can not get COMPOSE_PROJECT_NAME."
+  printf "%s" "$name"
 }
 
 export_compose_project_name() {
