@@ -547,7 +547,7 @@ stop_other_apps() {
       perl -pe 's/_db_1$//'
     )"
     for name in $compose_project_names; do
-      [[ $name == "COMPOSE_PROJECT_NAME" ]] && continue
+      [[ $name == "$COMPOSE_PROJECT_NAME" ]] && continue
       # shellcheck disable=SC2046
       docker stop $(docker ps -q -f "name=^${name}_")
     done
