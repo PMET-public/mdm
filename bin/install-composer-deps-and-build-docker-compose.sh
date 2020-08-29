@@ -10,4 +10,4 @@ grep -q 'pmet-public/magento-cloud-docker' composer.json ||
   composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
 composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
 
-./vendor/bin/ece-docker build:compose --host="$app_hostname"
+./vendor/bin/ece-docker build:compose --host="$app_hostname" --port=80
