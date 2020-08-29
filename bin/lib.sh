@@ -940,7 +940,6 @@ export_compose_file() {
     COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml"
   else
     COMPOSE_FILE="$apps_resources_dir/app/docker-compose.yml"
-    # check for a CWD override file
     [[ -f "$apps_resources_dir/docker-compose.override.yml" ]] && {
       COMPOSE_FILE+=":$apps_resources_dir/app/docker-compose.override.yml"
     }
