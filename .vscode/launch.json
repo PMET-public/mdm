@@ -93,11 +93,11 @@
         //"vsc_debugger_arg": "rm_magento_docker_images",
         //"vsc_debugger_arg": "start_pwa_with_remote",
         //"vsc_debugger_arg": "rm_magento_docker_images",
-        "vsc_debugger_arg": "start_pwa_with_app",
+        "vsc_debugger_arg": "install_app",
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir": 
           //"${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"
-          "${env:HOME}/Downloads/app-from-repo-test-2.4.0.app/Contents/Resources"
+          "${env:HOME}/Downloads/mc-2.4.0-p1.app/Contents/Resources"
       },
       "args": []
     },
