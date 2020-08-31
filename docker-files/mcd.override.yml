@@ -11,21 +11,13 @@ services:
         aliases:
           - database.internal
   varnish:
-    image: varnish:6.2
     ports:
       - 80
   build:
-    image: $php_cli_docker_image
     environment:
       - COMPOSER_HOME=/app/.composer
-    command: cloud-build
+      - COMPOSER_AUTH
   deploy:
-    image: $php_cli_docker_image
-    command: cloud-deploy
-    volumes:
-      - 'magento:/app:rw'
-      - 'magento-vendor:/app/vendor:rw'
-      - 'magento-generated:/app/generated:rw'
     environment:
       - COMPOSER_AUTH
   elasticsearch:
@@ -34,6 +26,5 @@ services:
         aliases:
           - elasticsearch.internal
   web:
-    image: 'pmetpublic/magento-cloud-docker-nginx'
     ports:
       - 80

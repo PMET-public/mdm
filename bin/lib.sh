@@ -951,11 +951,6 @@ export_compose_file() {
   export COMPOSE_FILE
 }
 
-export_image_vars_for_override_yml() {
-  #TODO - properly derive this value by examining config
-  export php_cli_docker_image="pmetpublic/magento-cloud-docker-php:7.3-cli-1.1"
-}
-
 get_docker_compose_runtime_services() {
   # get only runtime services build and deploy restarts may be interfering; tls and generic are unused
 
@@ -1092,9 +1087,6 @@ init_app_specific_vars() {
   export_pwa_hostnames
   export_compose_project_name
   export_compose_file
-  if ! is_detached; then
-    export_image_vars_for_override_yml
-  fi
   apps_mdm_dir="$launched_apps_dir/$COMPOSE_PROJECT_NAME"
   apps_mdm_jobs_dir="$apps_mdm_dir/jobs"
   mkdir -p "$apps_mdm_jobs_dir"
