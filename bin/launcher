@@ -37,16 +37,18 @@ is_docker_compatible() {
   ! ( is_mac && is_CI )
 }
 
-# allow mdm_script_path to be set by env var for debugging or testing
-if [[ -z "$MDM_REPO_DIR" ]]; then
-  if [[ $GITHUB_WORKSPACE ]]; then
+if [[ -z "$MDM_REPO_DIR" ]]; then # allow repo dir to be set by env var for debugging or testing
+  if [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then
     MDM_REPO_DIR="$GITHUB_WORKSPACE"
   elif [[ $TRAVIS ]]; then
     MDM_REPO_DIR="$TRAVIS_BUILD_DIR"
   fi
 fi
 
-mdm_path="$HOME/.mdm" # must be set in lib.sh and launcher b/c each can be used independently
+# must be set in launcher and lib.sh b/c each can be used independently
+mdm_path="$HOME/.mdm"
+mdm_config_filename=".mdm_config.sh"
+mdm_config_file="$mdm_path/$mdm_config_filename"
 
 if [[
 
@@ -79,9 +81,9 @@ else
     else
       curl -sL "https://raw.githubusercontent.com/PMET-public/mdm/master/bin/lib.sh" > "$installer"
       # when MDM_REPO_DIR exists (dev|CI), config can be acconted for (see self_install)
-      # otherwise, in an end user's app, copy current app's config to $mdm_path
+      # but, in an end user's app, copy current app's config to $mdm_path
       mkdir -p "$mdm_path"
-      cp "$(dirname "${BASH_SOURCE[0]}")/../.mdm_config.sh" "$mdm_path/" || :
+      cp "$(dirname "${BASH_SOURCE[0]}")/../$mdm_config_filename" "$mdm_config_file" || :
     fi
     echo "self_install" >> "$installer" # add the self_install function at the end to auto-run
     chmod +x "$installer"

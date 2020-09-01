@@ -9,18 +9,33 @@ load '../../libs/bats-file/load'
 
 load '../../../bin/lib.sh'
 
+# this E2E test can 
+# - test MDM itself using a specified magento-cloud project (default: PMET-public/magento-cloud) on a specified branch (default: master)
+# - test a magento-cloud repo on its current commit and the specified ref of MDM
+# - test a change to a dependency of a magento-cloud project and/or MDM
+
+
 setup() {
   shopt -s nocasematch
-  if [[ -z "$GITHUB_REPOSITORY" || "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then
-    # default when none specified (developer's machine) or mdm is the primary repo
-    # so mdm is testing itself rather than being included to test another repo
-    MAGENTO_CLOUD_REPO="https://github.com/PMET-public/magento-cloud.git"
-    MAGENTO_CLOUD_REF_TO_TEST="${MAGENTO_CLOUD_REF_TO_TEST:-master}"
-  else
-    MAGENTO_CLOUD_REPO="https://github.com/$GITHUB_REPOSITORY.git"
-    MAGENTO_CLOUD_REF_TO_TEST="$GITHUB_SHA"
+  # if repo is not specified
+  if [[ -z "$MAGENTO_CLOUD_REPO" ]]; then
+    if [[ -f "$GITHUB_WORKSPACE/.magento.app.yaml" ]]; then # if workspace is a mc project, use that repo
+      MAGENTO_CLOUD_REPO="https://github.com/$GITHUB_REPOSITORY.git"
+    else
+      MAGENTO_CLOUD_REPO="https://github.com/PMET-public/magento-cloud.git"
+    fi
   fi
-  # app name will be truncated by dockerize but prevent very long symlink too
+
+  # if ref is not specified
+  if [[ -z "$MAGENTO_CLOUD_REF_TO_TEST" ]]; then
+    if [[ -f "$GITHUB_WORKSPACE/.magento.app.yaml" ]]; then # if workspace is a mc project, use the current ref
+      MAGENTO_CLOUD_REF_TO_TEST="$GITHUB_SHA"
+    else
+      MAGENTO_CLOUD_REF_TO_TEST="master"
+    fi
+  fi
+
+  # app name will be truncated by dockerize and prevent very long symlink, too
   app_name="${MAGENTO_CLOUD_REF_TO_TEST:0:12}"
 }
 

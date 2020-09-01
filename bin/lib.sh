@@ -56,7 +56,8 @@ launched_apps_dir="$mdm_path/launched-apps"
 certs_dir="$mdm_path/certs"
 hosts_backup_dir="$mdm_path/hosts.bak"
 
-mdm_config_file="$mdm_path/.mdm_config.sh"
+mdm_config_filename=".mdm_config.sh"
+mdm_config_file="$mdm_path/$mdm_config_filename"
 menu_log_file="$mdm_path/menu.log"
 handler_log_file="$mdm_path/handler.log"
 dockerize_log_file="$mdm_path/dockerize.log"
@@ -1163,14 +1164,16 @@ self_install() {
   # create expected directory structure
   mkdir -p "$launched_apps_dir" "$certs_dir" "$hosts_backup_dir"
   
-  # get config accounting for env: CI, dev, end user
-  if is_CI; then
-    download_and_link_repo_ref "$GITHUB_SHA"
-    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
-  elif [[ "$MDM_REPO_DIR" ]]; then
+  # determine which MDM version to install and what MDM config to use 
+  if [[ "$MDM_REPO_DIR" ]]; then # dev's env or mdm is checked out for another project
     rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
     ln -sfn "$mdm_path/repo/" "$mdm_path/current"
-  else
+    [[ -f "$MDM_REPO_DIR/.mdm_config.sh" ]] && cp "$MDM_REPO_DIR/.mdm_config.sh" "$mdm_config_file"
+    [[ ! -f "$mdm_config_file" && "$MDM_CONFIG_URL" ]] && download_mdm_config
+  elif [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then # mdm is testing itself
+    download_and_link_repo_ref "$GITHUB_SHA"
+    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
+  else # end user, config should already be copied from launcher
     download_and_link_repo_ref # no param = latest sem ver
   fi
 
