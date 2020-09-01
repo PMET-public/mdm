@@ -122,7 +122,7 @@ install_app() {
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     cd "$apps_resources_dir/app" || exit 1
-    docker-compose pull # check for new versions
+    docker-compose pull || : # check for new versions; don't fail if DNE b/c they may exist locally
     # create containers but do not start
     docker-compose up --no-start
     # copy db files to db container & start it up
