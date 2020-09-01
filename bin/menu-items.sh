@@ -390,39 +390,6 @@ mdm_menu_items_keys+=("end submenu")
 
 ###
 #
-# start CLI references
-#
-###
-
-is_advanced_mode && {
-
-  key="CLI refences"
-  mdm_menu_items_keys+=("$key")
-
-  key="Magento CLI commands"
-  mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cli-reference.html"
-
-  key="Magento Cloud CLI commands"
-  mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-link"]="https://htmlpreview.github.io/?https://github.com/PMET-public/mdm/blob/master/docs/magento-cloud-cli-reference.html"
-
-  key="Docker Reference"
-  mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-link"]="https://docs.docker.com/reference/"
-
-  mdm_menu_items_keys+=("end submenu")
-
-}
-
-###
-#
-# end cli references
-#
-###
-
-###
-#
 # start logs submenu
 #
 ###
