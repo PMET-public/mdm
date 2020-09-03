@@ -21,7 +21,7 @@ prepare_cert_and_key_for_hostname() {
   if [[ "$hostname" =~ \.$mdm_domain$ ]]; then
     get_wildcard_cert_and_key_for_mdm_domain &&
       cp_wildcard_mdm_domain_cert_and_key_for_subdomain $hostname &&
-      return
+      return 0
   fi
 
   mkcert_for_domain "$hostname"
