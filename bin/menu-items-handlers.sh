@@ -135,12 +135,6 @@ install_app() {
     extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
-    # 2 options to start build & deploy
-    # option 1 relies on default cmds in image or set by docker-compose.override.yml file
-      # docker-compose up build
-      # docker-compose up deploy || :
-      # docker-compose logs deploy
-    # option 2 creates containers (when *_1 already exist) but doesn't have reliance on default cmds
     docker-compose run build cloud-build
     docker-compose run deploy cloud-deploy
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
