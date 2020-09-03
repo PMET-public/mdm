@@ -908,11 +908,10 @@ adjust_compose_project_name_for_docker_compose_version() {
   local docker_compose_ver more_recent_of_two
   docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
   more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | "$sort_cmd" -V | tail -1)"
-  # now strip dashes if 1.21.0 is more recent
   if [[ "$more_recent_of_two" != "$docker_compose_ver" ]]; then
-    echo "$1" | perl -pe 's/-//g'
+    echo "$1" | perl -pe 's/[\-\.]//g' # strip dashes and dots if 1.21.0 is more recent
   else
-    echo "$1"
+    echo "$1" | perl -pe 's/\.//g' # only strip dots
   fi
 }
 
