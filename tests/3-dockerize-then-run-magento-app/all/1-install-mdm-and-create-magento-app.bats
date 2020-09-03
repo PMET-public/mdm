@@ -169,10 +169,10 @@ setup() {
 @test 'check admin login user:pass == admin:pass4mdmCI' {
   base_url="$("./$app_link_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"' | perl -ne 's/\/\s*$// and print')"
   rm /tmp/myc 2> /dev/null || :
-  admin_output="$(curl -L -c /tmp/myc -b /tmp/myc "$base_url/admin/")"
+  admin_output="$(wget --save-cookies /tmp/myc --quiet --no-check-certificate -O - "$base_url/admin/")"
   form_url="$(echo "$admin_output" | perl -ne '/.*BASE_URL[\s='\''"]+([^'\''"]+).*/ and print $1')"
   form_key="$(echo "$admin_output" | perl -ne '/.*FORM_KEY[\s='\''"]+([^'\''"]+).*/ and print $1')"
-  run curl -Lv --max-redirs 3 -c /tmp/myc -b /tmp/myc -d "login[username]=admin&login[password]=pass4mdmCI&form_key=$form_key" "$form_url"
+  run wget --load-cookies /tmp/myc --no-check-certificate -O - --post-data "login[username]=admin&login[password]=pass4mdmCI&form_key=$form_key" "$form_url"
   assert_success
   assert_output -e "Location.*admin/dashboard"
 }
