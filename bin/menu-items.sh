@@ -339,10 +339,9 @@ mdm_menu_items_keys+=("end submenu")
 key="Useful resources"
 mdm_menu_items_keys+=("$key")
 
-key="About MDM (v. $mdm_version)"
+key="About MDM"
 mdm_menu_items_keys+=("$key")
 mdm_menu_items["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/SitePages/local-demo-solution-using-docker.aspx"
-
 is_adobe_system && {
 
   key="Docker Folder (OneDrive)"
@@ -514,11 +513,11 @@ is_advanced_mode && {
 ###
 
 if is_advanced_mode; then
-  key="💡Advanced mode is ON"
+  key="💡Advanced mode is ON             (v. $mdm_version)"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=toggle_advanced_mode
 else
-  key="○ Advanced mode is OFF"
+  key="○ Advanced mode is OFF            (v. $mdm_version)"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=toggle_advanced_mode
 fi
