@@ -40,7 +40,7 @@ yellow='\033[1;33m'
 no_color='\033[0m'
 recommended_vm_cpu=4
 recommended_vm_mem_mb=4096
-recommended_vm_swap_mb=2048
+recommended_vm_swap_mb=4096
 recommended_vm_disk_mb=64000
 bytes_in_mb=1048576
 detached_project_name="detached-mdm"
@@ -217,7 +217,10 @@ is_magento_app_running() {
   magento_app_is_running=0 # assume up and will return 0 unless an expected up service is not found
   for service in $services; do
     # if a service sets to 1, func will have non-zero exit, so false (app is not fully running)
-    echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" || magento_app_is_running=1
+    echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" || {
+      magento_app_is_running=1
+      break
+    }
   done
   return "$magento_app_is_running"
 }
