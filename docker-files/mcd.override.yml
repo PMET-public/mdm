@@ -21,6 +21,8 @@ services:
     environment:
       - COMPOSER_AUTH
   elasticsearch:
+    environment:
+      - ES_JAVA_OPTS="-Xms512m -Xmx512m"
     networks:
       default:
         aliases:
