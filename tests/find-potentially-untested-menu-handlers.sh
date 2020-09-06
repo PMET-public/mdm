@@ -8,7 +8,7 @@ find_all_handlers_in_menu_items() {
 }
 
 find_all_tests() {
-  find "$this_dir/../tests/bats" -type f -name "*.bats" -exec cat {} \;
+  find "$this_dir/../tests" -type f -name "*.bats" -not -path "*/libs/*" -exec cat {} \;
 }
 
 this_dir="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
