@@ -17,4 +17,6 @@ find_all_funcs_in_lib > "$patterns_file"
 contents_file="$(mktemp)"
 find_all_tests > "$contents_file"
 
-grep -oFf "$patterns_file" "$contents_file" | ggrep -vFf - "$patterns_file"
+grep '^@test' "$contents_file" | grep -oFf "$patterns_file" | ggrep -vFf - "$patterns_file"
+
+rm "$patterns_file" "$contents_file"
