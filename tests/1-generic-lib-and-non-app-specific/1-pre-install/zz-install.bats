@@ -13,7 +13,7 @@ setup() {
   shopt -s nocasematch
 }
 
-@test "self_install" {
+@test 'self_install' {
   self_uninstall
   run self_install
   assert_success

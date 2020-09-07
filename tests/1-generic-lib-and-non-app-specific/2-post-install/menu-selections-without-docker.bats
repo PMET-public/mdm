@@ -13,7 +13,7 @@ setup() {
   shopt -s nocasematch
 }
 
-@test "toggle_advanced mode" {
+@test 'toggle_advanced mode' {
   # if the outputs are the same, it did not toggle
   is_advanced_mode || output1="off"
   "$lib_dir/launcher" toggle_advanced_mode
@@ -22,7 +22,7 @@ setup() {
   assert_failure
 }
 
-@test "force_check_mdm_ver" {
+@test 'force_check_mdm_ver' {
   is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
   output1="$("$stat_cmd" "$mdm_ver_file")"
   "$lib_dir/launcher" force_check_mdm_ver
@@ -33,7 +33,7 @@ setup() {
   assert_failure
 }
 
-@test "toggle_mkcert_CA_install" {
+@test 'toggle_mkcert_CA_install' {
   is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
   output1="$("$lib_dir/launcher")"
   "$lib_dir/launcher" toggle_mkcert_CA_install

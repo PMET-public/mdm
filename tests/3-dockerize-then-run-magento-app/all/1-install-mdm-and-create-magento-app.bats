@@ -57,7 +57,7 @@ setup() {
   assert_output -p "installed"
 }
 
-@test "toggle_mkcert_CA_install" {
+@test 'toggle_mkcert_CA_install' {
   is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
   is_mkcert_CA_installed || "$lib_dir/launcher" toggle_mkcert_CA_install
   run "$lib_dir/launcher"
