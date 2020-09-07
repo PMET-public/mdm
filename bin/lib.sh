@@ -736,8 +736,13 @@ mkcert_for_domain() {
 }
 
 cp_wildcard_mdm_domain_cert_and_key_for_subdomain() {
-  local subdomain="$1"
-  [[ "$subdomain" =~ $mdm_domain$ ]] || error "$domain is not a subdomain of $mdm_domain"
+  local subdomain="$1" num_parts_mdm_domain num_parts_subdomain
+
+  # verify immediate subdomain (not subdomain of subdomain)
+  num_parts_mdm_domain="$(echo "$mdm_domain" | tr -cd "." | wc -c)" # count dots
+  num_parts_subdomain="$(echo "$subdomain" | tr -cd "." | wc -c)" # count dots
+  [[ "$subdomain" =~ "$mdm_domain"$ && "$num_parts_subdomain" -eq "$(( "$num_parts_mdm_domain" + 1 ))" ]] || return 1
+
   is_new_cert_required_for_domain "$subdomain" || return 0 # still valid
   is_new_cert_required_for_domain ".$mdm_domain" && get_wildcard_cert_and_key_for_mdm_domain
   rsync -az "$certs_dir/.$mdm_domain/" "$certs_dir/$subdomain/"
