@@ -112,3 +112,9 @@ setup() {
   assert_success
   assert_output -e "Location.*admin/dashboard"
 }
+
+@test 'change_base_url' {
+  run "./$app_link_name" change_base_url
+  assert_success
+  assert_output -e "no active"
+}
