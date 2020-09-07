@@ -51,6 +51,7 @@ mdm_path="$HOME/.mdm" # must be set in lib.sh and launcher b/c each can be used 
 launched_apps_dir="$mdm_path/launched-apps"
 certs_dir="$mdm_path/certs"
 hosts_backup_dir="$mdm_path/hosts.bak"
+see_docs_msg="See docs."
 
 mdm_config_filename=".mdm_config.sh"
 mdm_config_file="$mdm_path/$mdm_config_filename"
@@ -104,6 +105,10 @@ is_mkcert_installed() {
 
 is_tmate_installed() {
   [[ -n "$(which tmate)" ]]
+}
+
+is_web_tunnel_configured() {
+  [[ "$mdm_tunnel_ssh_url" ]]
 }
 
 are_additional_tools_installed() {

@@ -301,18 +301,24 @@ is_adobe_system && {
 }
 
 is_tmate_installed && {
-  key="💻 Remote access to this system"
+  key="💻 Remote access to the system"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=start_tmate_session
+
+  key="🛑💻 Stop remote system access"
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=stop_tmate_session
 }
 
-key="🔓 Remote access to this app"
-mdm_menu_items_keys+=("$key")
-mdm_menu_items["$key-handler"]=start_remote_web_access
+is_web_tunnel_configured && {
+  key="🔓 Remote web access to the app"
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=start_remote_web_access
 
-key="🛑 Stop all remote access"
-mdm_menu_items_keys+=("$key")
-mdm_menu_items["$key-handler"]=stop_remote_access
+  key="🛑🔓 Stop remote web access"
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=stop_remote_web_access
+}
 
 key="#cloud-docker (Magento Community Slack)"
 mdm_menu_items_keys+=("$key")

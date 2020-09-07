@@ -476,7 +476,7 @@ start_tmate_session() {
       [[ "$auth_keys_md5" = "$(md5sum "$auth_keys_file")" ]] ||
         msg_w_newlines "Successfully updated authorized keys."
     else
-      warning_w_newlines "No authorized ssh keys set. (Please refer to the documentation.)
+      warning_w_newlines "No authorized ssh keys set. $see_docs_msg
 If you continue, anyone with your unique url will be able to access to your system."
       confirm_or_exit
     fi
@@ -493,9 +493,18 @@ If you continue, anyone with your unique url will be able to access to your syst
   }
 }
 
+stop_tmate_session() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    if pkill tmate; then
+      msg_w_newlines "Succcessfully stopped 1 or more remote system access sessions."
+    else
+      msg_w_newlines "No active remote access sessions."
+    fi
+  }
+}
+
 start_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    [[ "$mdm_tunnel_ssh_url" ]] || warning_w_newlines "Remote web access is not configured. See docs."
     if pgrep -f "ssh.*$mdm_tunnel_ssh_url" > /dev/null; then
       msg_w_newlines "Already running remote web access. If unresponsive, use the menu to stop remote connection and try again."
       return 1
@@ -532,13 +541,9 @@ start_remote_web_access() {
   }
 }
 
-stop_remote_access() {
+stop_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    if pkill tmate; then
-      msg_w_newlines "Succcessfully stopped 1 or more remote system access sessions."
-    else
-      msg_w_newlines "No active remote access sessions."
-    fi
+    is_web_tunnel_configured || return 0
     if pkill -f "ssh.*$mdm_tunnel_ssh_url"; then
       msg_w_newlines "Succcessfully stopped 1 or more remote web sessions."
     else
