@@ -367,7 +367,7 @@ get_branch_from_mc_url() {
 
 is_hostname_resolving_to_local() {
   local curl_output
-  curl_output="$(curl -vI "$1" 2>&1 >/dev/null | grep Trying)"
+  curl_output="$(curl --max-time 0.5 -vI "$1" 2>&1 >/dev/null | grep Trying)"
   [[ "$curl_output" =~ ::1 || "$curl_output" =~ 127\.0\.0\.1 ]]
 }
 
