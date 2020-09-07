@@ -80,7 +80,9 @@ write_nginx_configs() {
 tmp_nginx_conf_dir="$(mktemp -d)"
 hostnames="$(find_mdm_hostnames)"
 hostnames_not_resolving_to_local="$(find_hostnames_not_resolving_to_local "$hostnames")"
-add_hostnames_to_hosts_file "$hostnames_not_resolving_to_local"
+# do not add tunneled hosts
+hosts_to_add="$(echo $hostnames_not_resolving_to_local | perl -pe "s/\s?\d+\.$mdm_tunnel_domain//g")"
+[[ "$hosts_to_add" ]] && add_hostnames_to_hosts_file "$hosts_to_add"
 prepare_certs_and_keys "$hostnames"
 write_nginx_configs "$hostnames"
 
