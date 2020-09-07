@@ -173,7 +173,7 @@ You must provide either:
     app_hostname="$pid-$env"
   else
     is_valid_git_url "$git_url" || error "Please check your git url."
-    git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/\1/')
+    git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/$1/')
     app_hostname="$git_repo-$branch$tag"
   fi
   is_valid_hostname "$app_hostname" ||

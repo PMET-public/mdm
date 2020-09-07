@@ -117,24 +117,24 @@ are_additional_tools_installed() {
 }
 
 can_optimize_vm_cpus() {
-  cpus_for_vm=$(grep '"cpus"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
-  cpus_available=$(sysctl -n hw.logicalcpu)
+  cpus_for_vm="$(grep '"cpus"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/$1/')"
+  cpus_available="$(sysctl -n hw.logicalcpu)"
   [[ cpus_for_vm -lt recommended_vm_cpu && cpus_available -gt recommended_vm_cpu ]]
 }
 
 can_optimize_vm_mem() {
-  memory_for_vm=$(grep '"memoryMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
-  memory_available=$(( $(sysctl -n hw.memsize) / bytes_in_mb ))
+  memory_for_vm="$(grep '"memoryMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/$1/')"
+  memory_available="$(( $(sysctl -n hw.memsize) / bytes_in_mb ))"
   [[ memory_for_vm -lt recommended_vm_mem_mb && memory_available -ge 8192 ]]
 }
 
 can_optimize_vm_swap() {
-  swap_for_vm=$(grep '"swapMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
+  swap_for_vm="$(grep '"swapMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/$1/')"
   [[ swap_for_vm -lt recommended_vm_swap_mb ]]
 }
 
 can_optimize_vm_disk() {
-  disk_for_vm=$(grep '"diskSizeMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
+  disk_for_vm="$(grep '"diskSizeMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/$1/')"
   [[ disk_for_vm -lt recommended_vm_disk_mb ]]
 }
 
@@ -399,7 +399,7 @@ has_valid_composer_auth() {
   [[ "$COMPOSER_AUTH" =~ \{.*github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com.*\} ]] && return 0
   if [[ -f "$HOME/.composer/auth.json" ]]; then
     # print auth.json as 1 line and assign to var
-    COMPOSER_AUTH="$(perl -0777 -pe 's/\r?\n//g;s/\s*("|{|})\s*/\1/g' "$HOME/.composer/auth.json")"
+    COMPOSER_AUTH="$(perl -0777 -pe 's/\r?\n//g;s/\s*("|{|})\s*/$1/g' "$HOME/.composer/auth.json")"
     if [[ "$COMPOSER_AUTH" =~ github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com ]]; then
       export COMPOSER_AUTH && return 0
     fi
@@ -519,7 +519,7 @@ get_docker_host_ip() {
 
 get_hostname_for_this_app() {
   [[ -f "$apps_resources_dir/app/.mdm_app_config" ]] &&
-    perl -ne 's/.*APP_HOSTNAME=\s*(.*)\s*/\1/ and print' "$apps_resources_dir/app/.mdm_app_config" ||
+    perl -ne 's/.*APP_HOSTNAME=\s*(.*)\s*/$1/ and print' "$apps_resources_dir/app/.mdm_app_config" ||
     error "Host not found"
 }
 
@@ -536,7 +536,7 @@ set_hostname_for_this_app() {
   local hostname="$1"
   is_valid_hostname "$hostname" || error "Invalid hostname"
   [[ -f "$apps_resources_dir/app/.mdm_app_config" ]] &&
-    perl -i -pe "s/(.*APP_HOSTNAME=\s*)(.*)(\s*)/\1$hostname\3/" "$apps_resources_dir/app/.mdm_app_config" ||
+    perl -i -pe "s/(.*APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$hostname\${3}/" "$apps_resources_dir/app/.mdm_app_config" ||
     error "Host not found"
 }
 
@@ -907,7 +907,7 @@ download_and_link_repo_ref() {
 # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
 adjust_compose_project_name_for_docker_compose_version() {
   local docker_compose_ver more_recent_of_two
-  docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
+  docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/$1/ and print')"
   more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | "$sort_cmd" -V | tail -1)"
   if [[ "$more_recent_of_two" != "$docker_compose_ver" ]]; then
     echo "$1" | perl -pe 's/[\-\.]//g' # strip dashes and dots if 1.21.0 is more recent
@@ -918,7 +918,7 @@ adjust_compose_project_name_for_docker_compose_version() {
 
 get_compose_project_name() {
   local name
-  name="$(perl -ne 's/COMPOSE_PROJECT_NAME=(.*)/\1/ and print $1' "$apps_resources_dir/app/.mdm_app_config")"
+  name="$(perl -ne 's/COMPOSE_PROJECT_NAME=(.*)/$1/ and print $1' "$apps_resources_dir/app/.mdm_app_config")"
   [[ "$name" ]] || error "Can not get COMPOSE_PROJECT_NAME."
   printf "%s" "$name"
 }
@@ -1237,7 +1237,7 @@ lib_sourced_for_specific_bundled_app && {
   # if docker is up, then cache this output to parse when adding and filtering additional available menu options
   is_docker_ready && formatted_cached_docker_ps_output="$(
     docker ps -a -f "label=com.docker.compose.service" --format "{{.Names}} {{.Status}}" | \
-      perl -pe 's/ (Up|Exited) .*/ \1/'
+      perl -pe 's/ (Up|Exited) .*/ $1/'
   )"
 }
 
