@@ -493,7 +493,8 @@ If you continue, anyone with your unique url will be able to access to your syst
 
 start_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    if pgrep -f "ssh.*$mdm_tunnel_ssh_url"; then
+    [[ "$mdm_tunnel_ssh_url" ]] || warning_w_newlines "Remote web access is not configured. See docs."
+    if pgrep -f "ssh.*$mdm_tunnel_ssh_url" > /dev/null; then
       msg_w_newlines "Already running remote web access. If unresponsive, use the menu to stop remote connection and try again."
       return 0
     fi
@@ -516,15 +517,14 @@ start_remote_web_access() {
       "$mdm_tunnel_ssh_url"
     # TODO !DRY - similar to change_base_url
     hostname="$remote_port.$mdm_tunnel_domain"
-    echo "$hostname" >> /tmp/del-me
     set_hostname_for_this_app "$hostname"
     run_as_bash_cmds_in_app "
       /app/bin/magento config:set web/unsecure/base_url https://$hostname/
       /app/bin/magento config:set web/secure/base_url https://$hostname/
       /app/bin/magento cache:flush
     "
-    reload_rev_proxy
-    warm_cache
+    msg_w_newlines "Successfully opened public url https://$hostname/."
+    warm_cache > /dev/null 2>&1 &
     rm "$tmp_file"
   }
 }
