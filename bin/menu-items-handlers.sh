@@ -413,7 +413,9 @@ change_base_url() {
       /app/bin/magento cache:flush
     "
     reload_rev_proxy
-    warm_cache
+    msg_w_newlines "Successfully set url to https://$hostname/."
+    warm_cache > /dev/null 2>&1 &
+    open_app
   }
 }
 
@@ -496,7 +498,7 @@ start_remote_web_access() {
     [[ "$mdm_tunnel_ssh_url" ]] || warning_w_newlines "Remote web access is not configured. See docs."
     if pgrep -f "ssh.*$mdm_tunnel_ssh_url" > /dev/null; then
       msg_w_newlines "Already running remote web access. If unresponsive, use the menu to stop remote connection and try again."
-      return 0
+      return 1
     fi
     local remote_port local_port tmp_file hostname
     remote_port="$(( $RANDOM + 20000 ))" # RANDOM is between 0-32767 (2^16 / 2 - 1)
@@ -526,6 +528,7 @@ start_remote_web_access() {
     msg_w_newlines "Successfully opened public url https://$hostname/."
     warm_cache > /dev/null 2>&1 &
     rm "$tmp_file"
+    open_app
   }
 }
 
