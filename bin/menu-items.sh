@@ -298,17 +298,21 @@ is_adobe_system && {
   key="#m2-demo-support (Magento Org Slack)"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-link"]="slack://channel?team=T025FJ55H&id=C0MQZ62DV"
-
-  is_tmate_installed && {
-    key="💻 SI Team remote access"
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=start_tmate_session
-  }
-
-  key="🔓 Web remote access"
-  mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-handler"]=toggle_remote_web_access
 }
+
+is_tmate_installed && {
+  key="💻 Remote access to this system"
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=start_tmate_session
+}
+
+key="🔓 Remote access to this app"
+mdm_menu_items_keys+=("$key")
+mdm_menu_items["$key-handler"]=start_remote_web_access
+
+key="🛑 Stop all remote access"
+mdm_menu_items_keys+=("$key")
+mdm_menu_items["$key-handler"]=stop_remote_access
 
 key="#cloud-docker (Magento Community Slack)"
 mdm_menu_items_keys+=("$key")
