@@ -55,7 +55,7 @@ setup() {
   assert_output -e "already" # already opened connection
 }
 
-@test 'stop_remote_access' {
+@test 'stop_remote_access again' {
   run "./$app_link_name" stop_remote_access
   assert_success
   assert_output -e "success.*success" # should successfully close 2 connections (tmate & web)
