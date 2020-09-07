@@ -493,8 +493,10 @@ If you continue, anyone with your unique url will be able to access to your syst
 
 start_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    if pgrep -f "ssh.*$mdm_tunnel_ssh_url"; then
-      :
+    local existing_tunnel
+    existing_tunnel="$(pgrep -f "ssh.*$mdm_tunnel_ssh_url")"
+    if [[ "$existing_tunnel" ]]; then
+      msg_w_newlines "Already running remote web access. If unresponsive, use the menu to stop remote connection and try again."
     fi
     local remote_port local_port tmp_file hostname
     remote_port="$(( $RANDOM + 20000 ))" # RANDOM is between 0-32767 (2^16 / 2 - 1)
@@ -515,6 +517,7 @@ start_remote_web_access() {
       "$mdm_tunnel_ssh_url"
     # TODO !DRY - similar to change_base_url
     hostname="$remote_port.$mdm_tunnel_domain"
+    echo "$hostname" >> /tmp/del-me
     set_hostname_for_this_app "$hostname"
     run_as_bash_cmds_in_app "
       /app/bin/magento config:set web/unsecure/base_url https://$hostname/
