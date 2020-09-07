@@ -31,13 +31,13 @@ setup() {
 @test 'confirm_or_exit "y"' {
   run confirm_or_exit <<< 'y'
   assert_success
-  refute_output 'unchanged'
+  refute_output "unchanged"
 }
 
 @test 'confirm_or_exit "n"' {
   run confirm_or_exit <<< 'n'
   assert_success
-  assert_output -p 'unchanged'
+  assert_output -p "unchanged"
 }
 
 @test 'trim " removed left space"' {

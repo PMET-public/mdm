@@ -217,10 +217,8 @@ is_magento_app_running() {
   magento_app_is_running=0 # assume up and will return 0 unless an expected up service is not found
   for service in $services; do
     # if a service sets to 1, func will have non-zero exit, so false (app is not fully running)
-    echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" || {
-      magento_app_is_running=1
-      break
-    }
+    echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" ||
+      { magento_app_is_running=1; break; }
   done
   return "$magento_app_is_running"
 }
