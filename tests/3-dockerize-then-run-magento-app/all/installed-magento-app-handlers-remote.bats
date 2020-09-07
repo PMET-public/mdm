@@ -49,7 +49,7 @@ setup() {
   assert_output -e "success"
 }
 
-@test 'start_remote_web_access' {
+@test 'start_remote_web_access again' {
   run "./$app_link_name" start_remote_web_access
   assert_failure
   assert_output -e "already" # already opened connection
