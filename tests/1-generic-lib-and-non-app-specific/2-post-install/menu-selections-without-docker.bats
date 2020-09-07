@@ -13,7 +13,7 @@ setup() {
   shopt -s nocasematch
 }
 
-@test 'toggle_advanced mode' {
+@test 'toggle_advanced_mode' {
   # if the outputs are the same, it did not toggle
   is_advanced_mode || output1="off"
   "$lib_dir/launcher" toggle_advanced_mode
