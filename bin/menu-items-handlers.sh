@@ -493,10 +493,9 @@ If you continue, anyone with your unique url will be able to access to your syst
 
 start_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local existing_tunnel
-    existing_tunnel="$(pgrep -f "ssh.*$mdm_tunnel_ssh_url")"
-    if [[ "$existing_tunnel" ]]; then
+    if pgrep -f "ssh.*$mdm_tunnel_ssh_url"; then
       msg_w_newlines "Already running remote web access. If unresponsive, use the menu to stop remote connection and try again."
+      return 0
     fi
     local remote_port local_port tmp_file hostname
     remote_port="$(( $RANDOM + 20000 ))" # RANDOM is between 0-32767 (2^16 / 2 - 1)
