@@ -15,12 +15,6 @@ setup() {
   post_magento_install_setup
 }
 
-@test 'change_base_url' {
-  run "./$app_link_name" change_base_url
-  assert_success
-  assert_output -e "no active"
-}
-
 @test 'stop_remote_access' {
   # run twice to ensure no active sessions msg the 2nd time (in case dev env has 1+ open)
   "./$app_link_name" stop_remote_access
@@ -30,17 +24,27 @@ setup() {
 }
 
 @test 'start_tmate_session' {
-  printf " " >> "$HOME/.ssh/authorized_keys" # add space at end to detect change
-  run "./$app_link_name" start_tmate_session
+  is_tmate_installed || skip
+  if [[ "$mdm_tmate_authorized_keys_url" ]]; then
+    output="$("./$app_link_name" start_tmate_session)"
+  else 
+    output="$(yes | "./$app_link_name" start_tmate_session)" # if no key url, have to confirm to continue
+  fi
+  run echo "$output"
   assert_success
   assert_output -e "updated.*ssh.*tmate.io"
 }
 
 @test 'start_tmate_session again' {
-  printf " " >> "$HOME/.ssh/authorized_keys"
-  run "./$app_link_name" start_tmate_session
+  is_tmate_installed || skip
+  if [[ "$mdm_tmate_authorized_keys_url" ]]; then
+    output="$("./$app_link_name" start_tmate_session)"
+  else 
+    output="$(yes | "./$app_link_name" start_tmate_session)" # if no key url, have to confirm to continue
+  fi
+  run echo "$output"
   assert_success
-  assert_output -e "updated.*ssh.*tmate.io"
+  assert_output -e "ssh.*tmate.io"
 }
 
 @test 'start_remote_web_access' {

@@ -114,7 +114,8 @@ setup() {
 }
 
 @test 'change_base_url' {
-  run "./$app_link_name" change_base_url
+  output="$(yes 'mysite.com' | "./$app_link_name" change_base_url)"
+  run echo "$output"
   assert_success
-  assert_output -e "no active"
+  assert_output -e "success.*mysite.com"
 }
