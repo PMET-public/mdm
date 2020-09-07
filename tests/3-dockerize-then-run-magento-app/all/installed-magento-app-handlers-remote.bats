@@ -58,7 +58,7 @@ setup() {
   refute_output -e "updated"
 }
 
-@test 'stop_remote_web_access again' {
+@test 'stop_remote_web_access' {
   is_web_tunnel_configured || skip
   run "./$app_link_name" stop_remote_web_access
   assert_success
