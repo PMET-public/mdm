@@ -20,3 +20,4 @@ CI only tests are labeled with [CI] and can assume a blank slate with each test 
 Dev only tests are labeled with [dev]. They may make assumptions about the current development environment and will avoid disruptive tests.
 
 
+Labels are simply designations. They are not enforced unless there is specific code in the setup or test that forces those conditions to be met independently.

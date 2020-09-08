@@ -48,4 +48,7 @@ $ sudo shutdown -r now
 ## 2. clone this repo
 
 
-
+|MDM Config||
+|---|---|
+|COMPOSER_AUTH | test|
+|MDM_CONFIG_URL| test|
