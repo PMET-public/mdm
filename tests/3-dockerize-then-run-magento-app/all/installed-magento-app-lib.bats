@@ -20,39 +20,46 @@ setup() {
   # get the most recently created app dir
   app_dir="$(ls -dtr "$HOME"/Downloads/*.app | tail -1 || :)"
   export apps_resources_dir="$app_dir/Contents/Resources"
-  export ORIGINAL_APP_HOSTNAME
+  hostname1="34653.some-new.site.dev"
+  hostname2="blah.testing.io"
+  hostname3="reset.com"
+}
+
+
+@test 'set_hostname_for_this_app' {
+  run set_hostname_for_this_app "$hostname1"
+  assert_success
+  assert_output ""
+}
+
+@test 'set_hostname_for_this_app (2)' {
+  run set_hostname_for_this_app "$hostname2"
+  assert_success
+  assert_output ""
 }
 
 @test 'get_hostname_for_this_app' {
-  output="$(get_hostname_for_this_app)"
-  export ORIGINAL_APP_HOSTNAME="$output"
-  run echo "$output"
+  run get_hostname_for_this_app
   assert_success
-  assert_output -e "[A-Za-z0-9]+"
+  assert_output "$hostname2"
 }
 
 @test 'get_prev_hostname_for_this_app' {
   run get_prev_hostname_for_this_app
   assert_success
-  assert_output "$ORIGINAL_APP_HOSTNAME"
+  assert_output "$hostname1"
 }
 
-@test 'set_hostname_for_this_app' {
-  run set_hostname_for_this_app "34653.some-new.site.dev"
+@test 'set_hostname_for_this_app (3)' {
+  run set_hostname_for_this_app "$hostname3"
   assert_success
   assert_output ""
-}
-
-@test 'get_hostname_for_this_app (2)' {
-  run get_hostname_for_this_app
-  assert_success
-  assert_output -e "34653.some-new.site.dev"
 }
 
 @test 'get_prev_hostname_for_this_app (2)' {
   run get_prev_hostname_for_this_app
   assert_success
-  assert_output "$ORIGINAL_APP_HOSTNAME"
+  assert_output "$hostname2"
 }
 
 @test 'export_compose_project_name' {
