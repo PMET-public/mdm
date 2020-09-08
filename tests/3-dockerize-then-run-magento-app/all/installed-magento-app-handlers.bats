@@ -114,7 +114,7 @@ setup() {
 }
 
 @test 'change_base_url' {
-  is_CI || skip
+  is_CI && skip
   # should work but there's a bug with this version of docker
   # unix @->/var/run/docker.sock: read: connection reset by peer
   output="$(yes 'mysite.com' | "./$app_link_name" change_base_url)"
