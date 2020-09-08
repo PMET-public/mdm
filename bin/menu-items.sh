@@ -297,7 +297,7 @@ mdm_menu_items_keys+=("$key")
 is_adobe_system && {
   key="#m2-demo-support (Magento Org Slack)"
   mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-link"]="slack://channel?team=T025FJ55H&id=C0MQZ62DV"
+  mdm_menu_items["$key-link"]="slack://channel?team=T016XBMUQLA&id=C018FCG0HHS"
 }
 
 is_tmate_installed && {
