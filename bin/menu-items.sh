@@ -301,21 +301,21 @@ is_adobe_system && {
 }
 
 is_tmate_installed && {
-  key="💻 Remote access to the system"
+  key="💻 Grant remote access to the system"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=start_tmate_session
 
-  key="🛑💻 Stop remote system access"
+  key="🛑 Stop remote system access"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=stop_tmate_session
 }
 
-is_web_tunnel_configured && {
-  key="🔓 Remote web access to the app"
+is_magento_app_running && is_web_tunnel_configured && {
+  key="🔓 Grant remote web access"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=start_remote_web_access
 
-  key="🛑🔓 Stop remote web access"
+  key="🛑 Stop remote web access and revert url"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=stop_remote_web_access
 }
