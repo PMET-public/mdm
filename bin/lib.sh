@@ -60,6 +60,7 @@ handler_log_file="$mdm_path/handler.log"
 dockerize_log_file="$mdm_path/dockerize.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 advanced_mode_flag_file="$mdm_path/advanced-mode-on"
+rel_app_config_file="app/.mdm_app_config"
 mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
@@ -570,13 +571,13 @@ find_varnish_port_by_network() {
 }
 
 find_web_service_hostname_by_network() {
-  local cid apps_resources_dir
+  local cid resources_dir
   cid="$(docker ps -a --filter "network=$1" --filter "label=com.docker.compose.service=web" --format "{{.ID}}")"
   [[ "$cid" ]] || return 0
-  apps_resources_dir="$(docker inspect "$cid" | \
+  resources_dir="$(docker inspect "$cid" | \
       perl -ne 's/.*com.docker.compose.project.working_dir.*?(\/[^"]*).*/$1\/../ and print')"
-  [[ "$apps_resources_dir" && -f "$apps_resources_dir/app/.mdm_app_config" ]] || return 0
-  perl -ne 's/.*APP_HOSTNAME\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/.mdm_app_config"
+  [[ "$resources_dir" && -f "$resources_dir/$rel_app_config_file" ]] || return 0
+  perl -ne 's/^APP_HOSTNAME\s*=\s*([^ ]*).*/$1/ and print' "$resources_dir/$rel_app_config_file"
 }
 
 find_mdm_hostnames() {
@@ -872,7 +873,6 @@ start_docker_service() {
   fi
 }
 
-
 stop_docker_service() {
   if is_mac; then
     osascript -e 'quit app "Docker"'
@@ -928,7 +928,7 @@ adjust_compose_project_name_for_docker_compose_version() {
 
 get_compose_project_name() {
   local name
-  name="$(perl -ne 's/COMPOSE_PROJECT_NAME=(.*)/$1/ and print $1' "$apps_resources_dir/app/.mdm_app_config")"
+  name="$(perl -ne 's/COMPOSE_PROJECT_NAME=(.*)/$1/ and print $1' "$apps_resources_dir/$rel_app_config_file")"
   [[ "$name" ]] || error "Can not get COMPOSE_PROJECT_NAME."
   printf "%s" "$name"
 }
