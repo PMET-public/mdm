@@ -95,7 +95,8 @@
         //"vsc_debugger_arg": "rm_magento_docker_images",
         //"vsc_debugger_arg": "install_app",
         //"vsc_debugger_arg": "start_remote_web_access",
-        "vsc_debugger_arg": "open_app",
+        //"vsc_debugger_arg": "open_app",
+        "vsc_debugger_arg": "change_base_url",
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir": 
           //"${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"

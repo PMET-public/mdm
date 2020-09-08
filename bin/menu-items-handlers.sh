@@ -406,16 +406,9 @@ change_base_url() {
     read -r -p ''
     hostname="$REPLY"
     is_valid_hostname "$hostname" || error "Invalid domain. Exiting unchanged."
-    set_hostname_for_this_app "$hostname"
-    run_as_bash_cmds_in_app "
-      /app/bin/magento config:set web/unsecure/base_url https://$hostname/
-      /app/bin/magento config:set web/secure/base_url https://$hostname/
-      /app/bin/magento cache:flush
-    "
-    reload_rev_proxy
+    stop_ssh_tunnel
+    update_hostname "$hostname"
     msg_w_newlines "Successfully set url to https://$hostname/."
-    warm_cache > /dev/null 2>&1 &
-    open_app
   }
 }
 
@@ -430,7 +423,6 @@ switch_to_production_mode() {
 switch_to_developer_mode() {
   run_as_bash_cmds_in_app "/app/bin/magento deploy:mode:set developer"
 }
-
 
 start_mdm_shell() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
@@ -506,7 +498,7 @@ stop_tmate_session() {
 start_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     if pgrep -f "ssh.*$mdm_tunnel_ssh_url" > /dev/null; then
-      msg_w_newlines "Already running remote web access. If unresponsive, use the menu to stop remote connection and try again."
+      msg_w_newlines "Remote web access is already running. If the url is unresponsive, use the menu to stop remote connection and try again."
       return 1
     fi
     local remote_port local_port tmp_file hostname
@@ -526,29 +518,18 @@ start_remote_web_access() {
       -i "$tmp_file" \
       -NR "$remote_port":127.0.0.1:"$local_port" \
       "$mdm_tunnel_ssh_url"
-    # TODO !DRY - similar to change_base_url
-    hostname="$remote_port.$mdm_tunnel_domain"
-    set_hostname_for_this_app "$hostname"
-    run_as_bash_cmds_in_app "
-      /app/bin/magento config:set web/unsecure/base_url https://$hostname/
-      /app/bin/magento config:set web/secure/base_url https://$hostname/
-      /app/bin/magento cache:flush
-    "
+    update_hostname "$remote_port.$mdm_tunnel_domain"
     msg_w_newlines "Successfully opened public url https://$hostname/."
-    warm_cache > /dev/null 2>&1 &
     rm "$tmp_file"
-    open_app
   }
 }
 
 stop_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local hostname
     is_web_tunnel_configured || return 0
-    if pkill -f "ssh.*$mdm_tunnel_ssh_url"; then
-      msg_w_newlines "Succcessfully stopped 1 or more remote web sessions."
-    else
-      msg_w_newlines "No active remote web sessions."
-    fi
+    stop_ssh_tunnel
+    update_hostname "$(get_prev_hostname_for_this_app)"
   }
 }
 

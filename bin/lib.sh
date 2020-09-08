@@ -523,12 +523,6 @@ get_docker_host_ip() {
   printf '%s' "$docker_host_ip"
 }
 
-get_hostname_for_this_app() {
-  [[ -f "$apps_resources_dir/app/.mdm_app_config" ]] &&
-    perl -ne 's/.*APP_HOSTNAME=\s*(.*)\s*/$1/ and print' "$apps_resources_dir/app/.mdm_app_config" ||
-    error "Host not found"
-}
-
 print_containers_hosts_file_entry() {
   printf '%s' "$(get_docker_host_ip) $(get_hostname_for_this_app) $hosts_file_line_marker"
 }
@@ -538,12 +532,66 @@ print_local_hosts_file_entry() {
   printf '%s' "127.0.0.1 $hostname $hosts_file_line_marker"
 }
 
-set_hostname_for_this_app() {
-  local hostname="$1"
-  is_valid_hostname "$hostname" || error "Invalid hostname"
-  [[ -f "$apps_resources_dir/app/.mdm_app_config" ]] &&
-    perl -i -pe "s/(.*APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$hostname\${3}/" "$apps_resources_dir/app/.mdm_app_config" ||
+get_hostname_for_this_app() {
+  [[ -f "$apps_resources_dir/$rel_app_config_file" ]] &&
+    perl -ne 's/^APP_HOSTNAME=\s*(.*)\s*/$1/ and print' "$apps_resources_dir/$rel_app_config_file" ||
     error "Host not found"
+}
+
+get_prev_hostname_for_this_app() {
+  [[ -f "$apps_resources_dir/$rel_app_config_file" ]] &&
+    perl -ne 's/^PREV_APP_HOSTNAME=\s*(.*)\s*/$1/ and print' "$apps_resources_dir/$rel_app_config_file" ||
+    error "Host not found"
+}
+
+set_hostname_for_this_app() {
+  local new_hostname="$1" cur_hostname prev_hostname
+  is_valid_hostname "$new_hostname" || error "Invalid hostname"
+  if [[ -f "$apps_resources_dir/$rel_app_config_file" ]]; then
+    cur_hostname="$(perl -ne '/^(APP_HOSTNAME=\s*)(.*)(\s*)/ and print $2' "$apps_resources_dir/$rel_app_config_file")"
+    prev_hostname="$(perl -ne '/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/ and print $2' "$apps_resources_dir/$rel_app_config_file")"
+    [[ "$cur_hostname" != "$new_hostname" ]] &&
+      perl -i -pe "s/^(APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$new_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
+    # update prev hostname unless a tunnel domain to prevent reverting to a tunnel domain
+    [[ "$cur_hostname" != "$prev_hostname" && ! "$cur_hostname" =~ "$mdm_tunnel_domain"$ ]] &&
+      perl -i -pe "s/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$cur_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
+    return 0
+  else
+    error "Host not found"
+  fi
+}
+
+stop_ssh_tunnel() {
+  if pkill -f "ssh.*$mdm_tunnel_ssh_url"; then
+    msg_w_newlines "Succcessfully stopped 1 or more remote web sessions."
+  else
+    msg_w_newlines "No active remote web sessions."
+  fi
+}
+
+update_hostname() {
+  local new_hostname="$1" cur_hostname prev_hostname
+  cur_hostname="$(get_hostname_for_this_app)"
+  prev_hostname="$(get_prev_hostname_for_this_app)"
+  if [[ "$cur_hostname" != "$new_hostname" ]]; then
+    set_hostname_for_this_app "$new_hostname"
+    run_as_bash_cmds_in_app "
+      /app/bin/magento config:set web/unsecure/base_url https://$new_hostname/
+      /app/bin/magento config:set web/secure/base_url https://$new_hostname/
+      /app/bin/magento cache:flush
+    "
+    warm_cache > /dev/null 2>&1 &
+    # reload the proxy if the new hostname is not a tunnel domain b/c it will be a public url
+    # UNLESS reverting from a tunnel domain to the previous hostname b/c proxy settings will not have changed
+    if [[ ! "$new_hostname" =~ "$mdm_tunnel_domain"$ ]]; then 
+      if [[ "$cur_hostname" =~ "$mdm_tunnel_domain"$ && "$new_hostname" = "$prev_hostname" ]]; then 
+        : # do nothing b/c reverting from tunnel domain that did not change proxy settings
+      else
+        reload_rev_proxy
+      fi
+    fi
+    open_app
+  fi
 }
 
 get_pwa_hostname() {
