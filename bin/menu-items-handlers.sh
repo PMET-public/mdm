@@ -224,24 +224,19 @@ force_check_mdm_ver() {
 }
 
 revert_to_prev_mdm() {
-  # what about when verion in lib.sh doesn't match containing dir name?
-  # should only happen on dev machine, right?
-  # have version determined by path only so it's authoritative?
-  local current vers
-  cd "$mdm_path" || exit 1
-  current="$(readlink current)"
-  # find available version not including 0.0.x
-  vers="$(
-    find . -type d -maxdepth 1 |
-    perl -ne 's/.*\/// and /^[0-9.]+$/ and print' |
-    grep -v '^0\.0\.' |
-    "$sort_cmd" -rV |
-    xargs
+  local current prev
+  current="$(readlink "$mdm_path/current")"
+  current="${current/*\/}"
+  # assumes every version starts with number dot number
+  prev="$(
+    find "$mdm_path" -type d -maxdepth 1 -name "[0-9]*\.[0-9]*" |
+      sort -V |
+      perl -pe 's/^.*\///' |
+      perl -0777 -ne "/([\d\.]+)\s*(?=$current)/ and print \$1"
   )"
-  prev=$(echo "${vers/* $current / }" | perl -pe 's/.*?\b([0-9.]+).*/$1/')
-  [[ -d "$prev" ]] && {
+  if [[ "$prev" ]]; then
     ln -sfn "$prev" current
-  }
+  fi
 }
 
 toggle_mdm_debug_mode() {
