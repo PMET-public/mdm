@@ -298,7 +298,7 @@ lib_sourced_for_specific_bundled_app() {
 }
 
 lookup_latest_remote_sem_ver() {
-  curl -svL "$repo_url/releases" | \
+  curl -sL "$repo_url/releases" | \
     perl -ne 'BEGIN{undef $/;} /archive\/([\d.]+)\.tar\.gz/ and print $1'
 }
 
