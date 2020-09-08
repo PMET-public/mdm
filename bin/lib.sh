@@ -562,6 +562,7 @@ set_hostname_for_this_app() {
 }
 
 stop_ssh_tunnel() {
+  is_web_tunnel_configured || return 0
   if pkill -f "ssh.*$mdm_tunnel_ssh_url"; then
     msg_w_newlines "Succcessfully stopped 1 or more remote web sessions."
   else
