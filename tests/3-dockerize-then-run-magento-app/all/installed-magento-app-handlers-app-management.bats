@@ -17,27 +17,29 @@ setup() {
 
 @test 'stop_app' {
   "./$app_link_name" stop_app
-  while is_magento_app_running; do
+  output="$(./$app_link_name)"
+  # when app stops menu items should disappear
+  while [[ "$output" =~ reindex.*run_cron ]]; do
     sleep 5
+    output="$(./$app_link_name)"
   done
-  run is_magento_app_running
-  assert_failure
-  assert_output ""
+  run echo "$output"
+  refute_output -p "stop_app"
+  assert_output -p "restart_app"
 }
-
-# validate menu items unavailable
 
 @test 'restart_app' {
   "./$app_link_name" restart_app
-  while ! is_magento_app_running; do
+  output="$(./$app_link_name)"
+  # until app starts menu items will be unavailable
+  while [[ ! "$output" =~ reindex.*run_cron ]]; do
     sleep 5
+    output="$(./$app_link_name)"
   done
-  run is_magento_app_running
-  assert_success
-  assert_output ""
+  run echo "$output"
+  refute_output -p "restart_app"
+  assert_output -p "stop_app"
 }
-
-# validate menu items available again
 
 @test 'clear_job_statuses' {
   "./$app_link_name" clear_job_statuses
