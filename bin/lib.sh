@@ -65,7 +65,7 @@ mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
 repo_url="https://github.com/PMET-public/mdm"
-mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
+mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="0-dev?"
 
 [[ -f "$mdm_config_file" ]] && {
   # shellcheck source=../.mdm_config.sh
@@ -304,9 +304,8 @@ lookup_latest_remote_sem_ver() {
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local more_recent_of_two
+  local latest_sem_ver more_recent_of_two
   if [[ -f "$mdm_ver_file" && "$(( $("$date_cmd" +"%s") - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
-    local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using sort -V
