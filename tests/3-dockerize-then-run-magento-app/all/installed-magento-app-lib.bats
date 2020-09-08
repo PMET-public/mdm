@@ -8,6 +8,7 @@ load '../../libs/bats-support/load'
 load '../../libs/bats-file/load'
 
 load '../../../bin/lib.sh'
+load '../../bats-lib.sh'
 
 # this E2E test can 
 # - test MDM itself using a specified magento-cloud project (default: PMET-public/magento-cloud) on a specified branch (default: master)
@@ -16,7 +17,7 @@ load '../../../bin/lib.sh'
 
 
 setup() {
-  shopt -s nocasematch
+  post_magento_install_setup
   # get the most recently created app dir
   app_dir="$(ls -dtr "$HOME"/Downloads/*.app | tail -1 || :)"
   export apps_resources_dir="$app_dir/Contents/Resources"
