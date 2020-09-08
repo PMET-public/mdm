@@ -25,6 +25,8 @@ setup() {
   assert_output ""
 }
 
+# validate menu items unavailable
+
 @test 'restart_app' {
   "./$app_link_name" restart_app
   while ! is_magento_app_running; do
@@ -34,6 +36,8 @@ setup() {
   assert_success
   assert_output ""
 }
+
+# validate menu items available again
 
 @test 'clear_job_statuses' {
   "./$app_link_name" clear_job_statuses

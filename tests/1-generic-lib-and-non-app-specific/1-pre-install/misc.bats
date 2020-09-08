@@ -93,3 +93,9 @@ setup() {
   assert_failure
   assert_output ""
 }
+
+@test 'no_op' {
+  run no_op
+  assert_success
+  assert_output ""
+}

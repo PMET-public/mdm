@@ -30,7 +30,7 @@ setup() {
   assert_output -e "no authorized.*ssh.*tmate.io"
 }
 
-@test 'start_tmate_session w/o authorized keys again' { # should simply run again
+@test 'start_tmate_session w/o authorized keys (2)' { # should simply run again
   is_tmate_installed || skip
   [[ "$mdm_tmate_authorized_keys_url" ]] && skip
   output="$(yes | "./$app_link_name" start_tmate_session)" # if no key url, have to confirm to continue
@@ -48,7 +48,7 @@ setup() {
   assert_output -e "updated.*ssh.*tmate.io"
 }
 
-@test 'start_tmate_session with authorized keys again' { # no update to keys the 2nd time
+@test 'start_tmate_session with authorized keys (2)' { # no update to keys the 2nd time
   is_tmate_installed || skip
   [[ "$mdm_tmate_authorized_keys_url" ]] || skip
   output="$("./$app_link_name" start_tmate_session)"
@@ -72,14 +72,14 @@ setup() {
   assert_output -e "success"
 }
 
-@test 'start_remote_web_access again' {
+@test 'start_remote_web_access (2)' {
   is_web_tunnel_configured || skip
   run "./$app_link_name" start_remote_web_access
   assert_failure
   assert_output -e "already" # already opened connection
 }
 
-@test 'stop_remote_web_access again' {
+@test 'stop_remote_web_access (2)' {
   is_web_tunnel_configured || skip
   run "./$app_link_name" stop_tmate_session
   assert_success
