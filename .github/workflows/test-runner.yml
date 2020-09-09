@@ -60,6 +60,7 @@ jobs:
           # install the master and a 2nd to test simultaneous compatibility
           ./tests/libs/bats/bin/bats -T ./tests/3-dockerize-then-run-magento-app/all/1-install-mdm-and-create-magento-app.bats
           ./tests/libs/bats/bin/bats -T ./tests/3-dockerize-then-run-magento-app/all/installed-magento-app-lib.bats
+          exit 1
       - name: bats tests for 2nd app
         run: |
           export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.0-ref
