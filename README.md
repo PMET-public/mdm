@@ -24,6 +24,14 @@
     - [2. clone this repo](#2-clone-this-repo)
 
 # Overview
+| OSX Menu App | CLI Menu App
+|:-:|:-:|
+|<img src="imgs/osx-menu.png" height="25%" width="25%"> |<img src="imgs/cli-menu.png" height="25%" width="25%">|
+
+Magento Docker Manager (MDM) is a cross platform (Mac/Linux/Windows) application to run multiple, simultaneous Magento applications on your local system via Docker. Once installed, simply select options from the available menu items to manage your applications.
+
+MDM's menus are **contextual**. Only applicable options are shown. For example, if a tool is not installed, you will be prompted to install it before continuing to unlock a feature. If the application is stopped, you'll 
+
 
 # MDM Users
 
