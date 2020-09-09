@@ -1,18 +1,35 @@
-# Development on a Mac
+# Overview
 
-## 1. clone this repo
+# MDM Users
+
+
+
+
+
+
+# MDM Developers
+
+## Configuration
+
+## Configuration of MDM
+
+## Configuration of an MDM app
+
+## Development on a Mac
+
+### 1. clone this repo
 
 ```
 $ git clone https://github.com/PMET-public/mdm.git && cd mdm
 ```
 
-## 2. configure additional features
+### 2. configure additional features
 
 ```
 cp .mdm_config.tmpl.sh .mdm_config.sh
 ```
 
-## 3. set up your env
+### 3. set up your env
 
 ```
 $ export debug=1 MDM_REPO_DIR=. COMPOSER_AUTH='{"github-oauth":{"github.com":"..."}}'
@@ -22,7 +39,7 @@ $ export debug=1 MDM_REPO_DIR=. COMPOSER_AUTH='{"github-oauth":{"github.com":"..
 
 To debug the launching script, `export debug_launcher=1`, too. This is currently a separate var because the launching script debugging output would otherwise pollute the menu output before the logging initialization can run. Also, it represents the output of the app's `<osx_appp>/Contents/Resources/script`, not the output of ~/.mdm/current/launcher because it is bundled with the app.  The launcher should not need to be debugged often because it's relatively minimal, stable code to bootstrap the app.
 
-# Development on Linux
+## Development on Linux
 
 Since the included Travis CI and GitHub Workflow configuration use Ubuntu Bionic (18.04) for testing, you will probably also want a local version for faster feedback and debugging.
 
@@ -36,7 +53,7 @@ $ vagrant ssh
 
 In your test vm, there's are just a few remaining setup steps.
 
-## 1. add the default user to the docker group
+### 1. add the default user to the docker group
 
 ```
 $ sudo apt update && sudo apt upgrade -y
@@ -45,10 +62,5 @@ $ sudo usermod -aG docker vagrant
 $ sudo shutdown -r now
 ```
 
-## 2. clone this repo
+### 2. clone this repo
 
-
-|MDM Config||
-|---|---|
-|COMPOSER_AUTH | test|
-|MDM_CONFIG_URL| test|
