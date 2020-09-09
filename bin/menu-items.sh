@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-# N.B. be wary of colliding (repeating) keys where one is a top level menu item and another is a submenu
+# N.B.
+# 1. be wary of colliding (repeating) keys where one is a top level menu item and another is a submenu
 # TODO - ^why? key collision with different values? need to document this note better
+# 2. the submenu heading are used to help generate documentation
+
 
 declare -A mdm_menu_items
 
@@ -272,7 +275,7 @@ if is_network_state_ok; then
 
   ###
   #
-  # end PWA subemenu
+  # end PWA submenu
   #
   ###
 
