@@ -41,7 +41,7 @@ setup() {
   is_mac && rm "$(brew --prefix)"/etc/bash_completion.d/docker* || :
   run "$lib_dir/launcher"
   assert_success
-  assert_output -p "additional tools"
+  assert_output -p "additional_tools"
 }
 
 # additional tools part 2 opt a
