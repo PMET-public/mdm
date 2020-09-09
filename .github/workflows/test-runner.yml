@@ -55,6 +55,8 @@ jobs:
         run: |
           # install the master and a 2nd to test simultaneous compatibility
           ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
+      - name: bats tests for 2nd app
+        run: |
           export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.0-ref
           ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
       - name: keep alive to debug
