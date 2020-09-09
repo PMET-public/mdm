@@ -2,6 +2,10 @@ name: test runner
 
 on:
   push:
+    branches:
+      - master
+      - develop
+      - feature*
 
 env:
   # set a default terminal for various cmds that expect it
