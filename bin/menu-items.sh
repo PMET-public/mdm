@@ -24,7 +24,7 @@ has_uncleared_jobs_statuses && {
 }
 
 ! are_additional_tools_installed && {
-  key="🔼 Install additional tools for additional features"
+  key="🔼 Install additional tools for more features"
   description="Highly recommended - includes the magento-cloud CLI, mkcert, tmate, platypus, docker CLI completion"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=install_additional_tools
@@ -63,7 +63,7 @@ is_docker_compatible && {
   ! is_docker_ready && return 0
 
   has_valid_composer_auth || {
-    key="⚠️ Missing credentials - some features limited"
+    key="⚠️ Missing credentials - features limited"
     description="MDM can not find your auth.json file. The link to doc shows how to create it."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-link"]="https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
@@ -87,7 +87,7 @@ is_update_available && {
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=install_app
     else
-      key="⚠️🔼 Can't install. Local ports in use."
+      key="⚠️🔼 Can't install - ports in use."
       description="Some local service other than docker is using port 80 or 443."
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=no_op
@@ -116,7 +116,7 @@ is_update_available && {
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=restart_app
     else 
-      key="⚠️▶️ Can't restart Magento app. Local ports in use."
+      key="⚠️▶️ Can't restart Magento app - ports in use."
       description=""
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=no_op
@@ -287,7 +287,7 @@ if is_network_state_ok; then
 
     ! is_detached && is_pwa_module_installed && {
       if is_magento_app_running; then
-        key="(Re)start latest PWA using this Magento app"
+        key="(Re)start PWA using this Magento app"
         description="The PWA will use the local Magento app as the backend."
       else
         key="🛑 App stopped. Start PWA offline"
@@ -297,7 +297,7 @@ if is_network_state_ok; then
       mdm_menu_items["$key-handler"]=start_pwa_with_app
     }
 
-    key="(Re)start latest PWA using a remote backend"
+    key="(Re)start PWA using a remote backend"
     description=""
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=start_pwa_with_remote
@@ -305,7 +305,7 @@ if is_network_state_ok; then
   }
 
   # the pwa github repo
-  key="Storystore PWA @ GitHub - Docs, Issues, etc."
+  key="Storystore PWA @ GitHub"
   description=""
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-link"]="https://github.com/PMET-public/storystore-pwa/blob/master/README.md"
@@ -320,7 +320,7 @@ if is_network_state_ok; then
 
 else
 
-  key="⚠️ Can't run PWA. Local ports in use."
+  key="⚠️ Can't run PWA - ports in use."
   description="A local service is already using the required ports."
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=no_op
@@ -346,7 +346,7 @@ is_adobe_system && {
 }
 
 is_tmate_installed && {
-  key="💻 Grant remote access to the system"
+  key="💻 Grant remote access to system"
   description="Only remote users with pre-authorized keys will be able to connect *1* time. If not configured, a warning appears. Choose if you want to continue and provide the secret url to a remote user."
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=start_tmate_session
@@ -577,8 +577,9 @@ is_advanced_mode && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=rm_added_hostnames_from_hosts_file
 
-    key="⚠️  Remove Magento images (breaks stopped apps)"
-    description=""
+    # can this be removed now that docker pull is being used each time?
+    key="⚠️  Remove Magento Docker images "
+    description="breaks stopped apps"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=rm_magento_docker_images
 
@@ -605,12 +606,12 @@ is_advanced_mode && {
 ###
 
 if is_advanced_mode; then
-  key="💡Advanced mode is ON             (v. $mdm_version)"
+  key="💡Advanced mode is ON         (v. $mdm_version)"
   description="Show more advanced menu items and display the current version of MDM"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=toggle_advanced_mode
 else
-  key="○ Advanced mode is OFF            (v. $mdm_version)"
+  key="○ Advanced mode is OFF        (v. $mdm_version)"
   description=""
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=toggle_advanced_mode
