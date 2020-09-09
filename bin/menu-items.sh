@@ -64,7 +64,7 @@ is_docker_compatible && {
 
   has_valid_composer_auth || {
     key="⚠️ Missing credentials - features limited"
-    description="MDM can not find your auth.json file. The link to doc shows how to create it."
+    description="MDM can not find your ~/.composer/auth.json file. You will not be able to create new apps from the source, but a prepackaged app will still work. The link to doc shows how to create it."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-link"]="https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
   }
