@@ -35,7 +35,6 @@
 |:---|:-:|:--|
 |▶️ Complete Docker install. Run this.|   |Complete the install by running Docker for the 1st time to reveal more menu items.|
 |🔼 Install added tools for more features|   |Highly recommended - includes the magento-cloud CLI, mkcert, tmate, platypus, docker CLI completion|
-|🔄 Setup OneDrive -> Click 'Sync' button |[link](https://adobe.sharepoint.com/sites/SITeam/Shared%20Documents/adobe-internal/docker)|   |
 |🎚 Adjust Docker for min reqs|   |Update the docker vm settings for better performance.|
 |▶️ Start Docker to continue|   |Docker is not running.|
 |⚠️ Missing credentials - features limited |[link](https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth)|MDM can not find your auth.json file. The link to doc shows how to create it.|
@@ -134,7 +133,7 @@
 
 |Logs|   |   |
 |:---|:-:|:--|
-|Show errors from MDM logs|   |   |
+|Show errors from MDM logs|   |Show just the recorded errors|
 |Show advanced MDM logs|   |   |
 |Show Magento app logs|   |   |
 |<nobr>                  </nobr>|<nobr>   </nobr>|   |
