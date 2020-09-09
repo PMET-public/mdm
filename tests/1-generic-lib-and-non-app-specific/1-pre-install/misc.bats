@@ -31,13 +31,13 @@ setup() {
 @test 'confirm_or_exit "y"' {
   run confirm_or_exit <<< 'y'
   assert_success
-  refute_output 'unchanged'
+  refute_output "unchanged"
 }
 
 @test 'confirm_or_exit "n"' {
   run confirm_or_exit <<< 'n'
   assert_success
-  assert_output -p 'unchanged'
+  assert_output -p "unchanged"
 }
 
 @test 'trim " removed left space"' {
@@ -93,3 +93,10 @@ setup() {
   assert_failure
   assert_output ""
 }
+
+# bats says no_op not found! b/c in handlers? and how that's sourced?
+# @test 'no_op' {
+#   run no_op
+#   assert_success
+#   assert_output ""
+# }

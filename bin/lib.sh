@@ -4,11 +4,7 @@ set -e
 # don't trap errors while using VSC debugger
 [[ $VSCODE_PID ]] || {
   set -E # If set, the ERR trap is inherited by shell functions.
-#   trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE.
-# Env when error occurred:
-# $(env | "$sort_cmd")
-# "' ERR
-    trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE."' ERR
+  trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE."' ERR
 }
 
 # this lib is used by dockerize, mdm, tests, etc. but logging to STDOUT is problematic for platypus apps
@@ -44,7 +40,7 @@ yellow='\033[1;33m'
 no_color='\033[0m'
 recommended_vm_cpu=4
 recommended_vm_mem_mb=4096
-recommended_vm_swap_mb=2048
+recommended_vm_swap_mb=4096
 recommended_vm_disk_mb=64000
 bytes_in_mb=1048576
 detached_project_name="detached-mdm"
@@ -55,18 +51,21 @@ mdm_path="$HOME/.mdm" # must be set in lib.sh and launcher b/c each can be used 
 launched_apps_dir="$mdm_path/launched-apps"
 certs_dir="$mdm_path/certs"
 hosts_backup_dir="$mdm_path/hosts.bak"
+see_docs_msg="See docs."
 
-mdm_config_file="$mdm_path/.mdm_config.sh"
+mdm_config_filename=".mdm_config.sh"
+mdm_config_file="$mdm_path/$mdm_config_filename"
 menu_log_file="$mdm_path/menu.log"
 handler_log_file="$mdm_path/handler.log"
 dockerize_log_file="$mdm_path/dockerize.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 advanced_mode_flag_file="$mdm_path/advanced-mode-on"
+rel_app_config_file="app/.mdm_app_config"
 mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
 repo_url="https://github.com/PMET-public/mdm"
-mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="dev?"
+mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="0-dev?"
 
 [[ -f "$mdm_config_file" ]] && {
   # shellcheck source=../.mdm_config.sh
@@ -109,6 +108,10 @@ is_tmate_installed() {
   [[ -n "$(which tmate)" ]]
 }
 
+is_web_tunnel_configured() {
+  [[ "$mdm_tunnel_ssh_url" ]]
+}
+
 are_additional_tools_installed() {
   is_magento_cloud_cli_installed || return 1
   is_mac && {
@@ -120,24 +123,24 @@ are_additional_tools_installed() {
 }
 
 can_optimize_vm_cpus() {
-  cpus_for_vm=$(grep '"cpus"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
-  cpus_available=$(sysctl -n hw.logicalcpu)
+  cpus_for_vm="$(grep '"cpus"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/$1/')"
+  cpus_available="$(sysctl -n hw.logicalcpu)"
   [[ cpus_for_vm -lt recommended_vm_cpu && cpus_available -gt recommended_vm_cpu ]]
 }
 
 can_optimize_vm_mem() {
-  memory_for_vm=$(grep '"memoryMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
-  memory_available=$(( $(sysctl -n hw.memsize) / bytes_in_mb ))
+  memory_for_vm="$(grep '"memoryMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/$1/')"
+  memory_available="$(( $(sysctl -n hw.memsize) / bytes_in_mb ))"
   [[ memory_for_vm -lt recommended_vm_mem_mb && memory_available -ge 8192 ]]
 }
 
 can_optimize_vm_swap() {
-  swap_for_vm=$(grep '"swapMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
+  swap_for_vm="$(grep '"swapMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/$1/')"
   [[ swap_for_vm -lt recommended_vm_swap_mb ]]
 }
 
 can_optimize_vm_disk() {
-  disk_for_vm=$(grep '"diskSizeMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/\1/')
+  disk_for_vm="$(grep '"diskSizeMiB"' "$docker_settings_file" | perl -pe 's/.*: (\d+),/$1/')"
   [[ disk_for_vm -lt recommended_vm_disk_mb ]]
 }
 
@@ -220,7 +223,8 @@ is_magento_app_running() {
   magento_app_is_running=0 # assume up and will return 0 unless an expected up service is not found
   for service in $services; do
     # if a service sets to 1, func will have non-zero exit, so false (app is not fully running)
-    echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" || magento_app_is_running=1
+    echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" ||
+      { magento_app_is_running=1; break; }
   done
   return "$magento_app_is_running"
 }
@@ -294,15 +298,14 @@ lib_sourced_for_specific_bundled_app() {
 }
 
 lookup_latest_remote_sem_ver() {
-  curl -svL "$repo_url/releases" | \
+  curl -sL "$repo_url/releases" | \
     perl -ne 'BEGIN{undef $/;} /archive\/([\d.]+)\.tar\.gz/ and print $1'
 }
 
 is_update_available() {
   # check for a new version once a day (86400 secs)
-  local more_recent_of_two
+  local latest_sem_ver more_recent_of_two
   if [[ -f "$mdm_ver_file" && "$(( $("$date_cmd" +"%s") - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
-    local latest_sem_ver
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using sort -V
@@ -369,7 +372,7 @@ get_branch_from_mc_url() {
 
 is_hostname_resolving_to_local() {
   local curl_output
-  curl_output="$(curl -vI "$1" 2>&1 >/dev/null | grep Trying)"
+  curl_output="$(curl --max-time 0.5 -vI "$1" 2>&1 >/dev/null | grep Trying)"
   [[ "$curl_output" =~ ::1 || "$curl_output" =~ 127\.0\.0\.1 ]]
 }
 
@@ -401,7 +404,7 @@ has_valid_composer_auth() {
   [[ "$COMPOSER_AUTH" =~ \{.*github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com.*\} ]] && return 0
   if [[ -f "$HOME/.composer/auth.json" ]]; then
     # print auth.json as 1 line and assign to var
-    COMPOSER_AUTH="$(perl -0777 -pe 's/\r?\n//g;s/\s*("|{|})\s*/\1/g' "$HOME/.composer/auth.json")"
+    COMPOSER_AUTH="$(perl -0777 -pe 's/\r?\n//g;s/\s*("|{|})\s*/$1/g' "$HOME/.composer/auth.json")"
     if [[ "$COMPOSER_AUTH" =~ github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com ]]; then
       export COMPOSER_AUTH && return 0
     fi
@@ -519,12 +522,6 @@ get_docker_host_ip() {
   printf '%s' "$docker_host_ip"
 }
 
-get_hostname_for_this_app() {
-  [[ -f "$apps_resources_dir/app/.mdm_app_config" ]] &&
-    perl -ne 's/.*APP_HOSTNAME=\s*(.*)\s*/\1/ and print' "$apps_resources_dir/app/.mdm_app_config" ||
-    error "Host not found"
-}
-
 print_containers_hosts_file_entry() {
   printf '%s' "$(get_docker_host_ip) $(get_hostname_for_this_app) $hosts_file_line_marker"
 }
@@ -534,12 +531,71 @@ print_local_hosts_file_entry() {
   printf '%s' "127.0.0.1 $hostname $hosts_file_line_marker"
 }
 
-set_hostname_for_this_app() {
-  local hostname="$1"
-  is_valid_hostname "$hostname" || error "Invalid hostname"
-  [[ -f "$apps_resources_dir/app/.mdm_app_config" ]] &&
-    perl -i -pe "s/(.*APP_HOSTNAME=\s*)(.*)(\s*)/\1$hostname\3/" "$apps_resources_dir/app/.mdm_app_config" ||
+get_hostname_for_this_app() {
+  [[ -f "$apps_resources_dir/$rel_app_config_file" ]] &&
+    perl -ne 's/^APP_HOSTNAME=\s*(.*)\s*/$1/ and print' "$apps_resources_dir/$rel_app_config_file" ||
     error "Host not found"
+}
+
+get_prev_hostname_for_this_app() {
+  [[ -f "$apps_resources_dir/$rel_app_config_file" ]] &&
+    perl -ne 's/^PREV_APP_HOSTNAME=\s*(.*)\s*/$1/ and print' "$apps_resources_dir/$rel_app_config_file" ||
+    error "Host not found"
+}
+
+set_hostname_for_this_app() {
+  local new_hostname="$1" cur_hostname prev_hostname
+  is_valid_hostname "$new_hostname" || error "Invalid hostname"
+  if [[ -f "$apps_resources_dir/$rel_app_config_file" ]]; then
+    cur_hostname="$(perl -ne '/^(APP_HOSTNAME=\s*)(.*)(\s*)/ and print $2' "$apps_resources_dir/$rel_app_config_file")"
+    prev_hostname="$(perl -ne '/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/ and print $2' "$apps_resources_dir/$rel_app_config_file")"
+    [[ "$cur_hostname" != "$new_hostname" ]] &&
+      perl -i -pe "s/^(APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$new_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
+    # update prev hostname unless a tunnel domain to prevent reverting to a tunnel domain
+    [[ "$cur_hostname" != "$prev_hostname" && ! "$cur_hostname" =~ "$mdm_tunnel_domain"$ ]] &&
+      perl -i -pe "s/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$cur_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
+    return 0
+  else
+    error "Host not found"
+  fi
+}
+
+stop_ssh_tunnel() {
+  is_web_tunnel_configured || return 0
+  if pkill -f "ssh.*$mdm_tunnel_ssh_url"; then
+    msg_w_newlines "Succcessfully stopped 1 or more remote web sessions."
+  else
+    msg_w_newlines "No active remote web sessions."
+  fi
+}
+
+update_hostname() {
+  local new_hostname="$1" cur_hostname prev_hostname
+  cur_hostname="$(get_hostname_for_this_app)"
+  prev_hostname="$(get_prev_hostname_for_this_app)"
+  if [[ "$cur_hostname" != "$new_hostname" ]]; then
+    set_hostname_for_this_app "$new_hostname"
+    run_as_bash_cmds_in_app "
+      /app/bin/magento config:set web/unsecure/base_url https://$new_hostname/
+      /app/bin/magento config:set web/secure/base_url https://$new_hostname/
+      /app/bin/magento cache:flush
+    "
+    warm_cache > /dev/null 2>&1 &
+    if is_web_tunnel_configured; then
+      # reload the proxy if the new hostname is not a tunnel domain b/c it will be a public url
+      # UNLESS reverting from a tunnel domain to the previous hostname b/c proxy settings will not have changed
+      if [[ ! "$new_hostname" =~ "$mdm_tunnel_domain"$ ]]; then
+        if [[ "$cur_hostname" =~ "$mdm_tunnel_domain"$ && "$new_hostname" = "$prev_hostname" ]]; then
+          : # do nothing b/c reverting from tunnel domain that did not change proxy settings
+        else
+          reload_rev_proxy
+        fi
+      fi
+    else
+      reload_rev_proxy
+    fi
+    open_app
+  fi
 }
 
 get_pwa_hostname() {
@@ -567,13 +623,13 @@ find_varnish_port_by_network() {
 }
 
 find_web_service_hostname_by_network() {
-  local cid apps_resources_dir
+  local cid resources_dir
   cid="$(docker ps -a --filter "network=$1" --filter "label=com.docker.compose.service=web" --format "{{.ID}}")"
   [[ "$cid" ]] || return 0
-  apps_resources_dir="$(docker inspect "$cid" | \
+  resources_dir="$(docker inspect "$cid" | \
       perl -ne 's/.*com.docker.compose.project.working_dir.*?(\/[^"]*).*/$1\/../ and print')"
-  [[ "$apps_resources_dir" && -f "$apps_resources_dir/app/.mdm_app_config" ]] || return 0
-  perl -ne 's/.*APP_HOSTNAME\s*=\s*([^ ]*).*/$1/ and print' "$apps_resources_dir/app/.mdm_app_config"
+  [[ "$resources_dir" && -f "$resources_dir/$rel_app_config_file" ]] || return 0
+  perl -ne 's/^APP_HOSTNAME\s*=\s*([^ ]*).*/$1/ and print' "$resources_dir/$rel_app_config_file"
 }
 
 find_mdm_hostnames() {
@@ -738,8 +794,13 @@ mkcert_for_domain() {
 }
 
 cp_wildcard_mdm_domain_cert_and_key_for_subdomain() {
-  local subdomain="$1"
-  [[ "$subdomain" =~ $mdm_domain$ ]] || error "$domain is not a subdomain of $mdm_domain"
+  local subdomain="$1" num_parts_mdm_domain num_parts_subdomain
+
+  # verify immediate subdomain (not subdomain of subdomain)
+  num_parts_mdm_domain="$(echo "$mdm_domain" | tr -cd "." | wc -c)" # count dots
+  num_parts_subdomain="$(echo "$subdomain" | tr -cd "." | wc -c)" # count dots
+  [[ "$subdomain" =~ "$mdm_domain"$ && "$num_parts_subdomain" -eq "$(( "$num_parts_mdm_domain" + 1 ))" ]] || return 1
+
   is_new_cert_required_for_domain "$subdomain" || return 0 # still valid
   is_new_cert_required_for_domain ".$mdm_domain" && get_wildcard_cert_and_key_for_mdm_domain
   rsync -az "$certs_dir/.$mdm_domain/" "$certs_dir/$subdomain/"
@@ -864,7 +925,6 @@ start_docker_service() {
   fi
 }
 
-
 stop_docker_service() {
   if is_mac; then
     osascript -e 'quit app "Docker"'
@@ -902,6 +962,8 @@ download_and_link_repo_ref() {
   curl -sLO "$repo_url/archive/$ref.tar.gz"
   tar -zxf "$ref.tar.gz" --strip-components 1 -C "$ref_dir"
   rm "$ref.tar.gz" # cleanup
+  # if not a link, preserve contents just in case - should only happen to dev that has rsynced to current
+  [[ -d "$mdm_path/current" && ! -L "$mdm_path/current" ]] && mv "$mdm_path/current" "$mdm_path/current.$(date "+%s")"
   ln -sfn "$ref_dir" "$mdm_path/current"
   [[ -d "$mdm_path/current" ]] && rsync -az "$mdm_path/current/certs/" "$mdm_path/certs/" || : # cp over any new certs if the exist
 }
@@ -909,19 +971,18 @@ download_and_link_repo_ref() {
 # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
 adjust_compose_project_name_for_docker_compose_version() {
   local docker_compose_ver more_recent_of_two
-  docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/\1/ and print')"
+  docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/$1/ and print')"
   more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | "$sort_cmd" -V | tail -1)"
-  # now strip dashes if 1.21.0 is more recent
   if [[ "$more_recent_of_two" != "$docker_compose_ver" ]]; then
-    echo "$1" | perl -pe 's/-//g'
+    echo "$1" | perl -pe 's/[\-\.]//g' # strip dashes and dots if 1.21.0 is more recent
   else
-    echo "$1"
+    echo "$1" | perl -pe 's/\.//g' # only strip dots
   fi
 }
 
 get_compose_project_name() {
   local name
-  name="$(perl -ne 's/COMPOSE_PROJECT_NAME=(.*)/\1/ and print $1' "$apps_resources_dir/app/.mdm_app_config")"
+  name="$(perl -ne 's/COMPOSE_PROJECT_NAME=(.*)/$1/ and print $1' "$apps_resources_dir/$rel_app_config_file")"
   [[ "$name" ]] || error "Can not get COMPOSE_PROJECT_NAME."
   printf "%s" "$name"
 }
@@ -1163,14 +1224,16 @@ self_install() {
   # create expected directory structure
   mkdir -p "$launched_apps_dir" "$certs_dir" "$hosts_backup_dir"
   
-  # get config accounting for env: CI, dev, end user
-  if is_CI; then
-    download_and_link_repo_ref "$GITHUB_SHA"
-    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
-  elif [[ "$MDM_REPO_DIR" ]]; then
+  # determine which MDM version to install and what MDM config to use 
+  if [[ "$MDM_REPO_DIR" ]]; then # dev's env or mdm is checked out for another project
     rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
     ln -sfn "$mdm_path/repo/" "$mdm_path/current"
-  else
+    [[ -f "$MDM_REPO_DIR/.mdm_config.sh" ]] && cp "$MDM_REPO_DIR/.mdm_config.sh" "$mdm_config_file"
+    [[ ! -f "$mdm_config_file" && "$MDM_CONFIG_URL" ]] && download_mdm_config
+  elif [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then # mdm is testing itself
+    download_and_link_repo_ref "$GITHUB_SHA"
+    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
+  else # end user, config should already be copied from launcher
     download_and_link_repo_ref # no param = latest sem ver
   fi
 
@@ -1238,7 +1301,7 @@ lib_sourced_for_specific_bundled_app && {
   # if docker is up, then cache this output to parse when adding and filtering additional available menu options
   is_docker_ready && formatted_cached_docker_ps_output="$(
     docker ps -a -f "label=com.docker.compose.service" --format "{{.Names}} {{.Status}}" | \
-      perl -pe 's/ (Up|Exited) .*/ \1/'
+      perl -pe 's/ (Up|Exited) .*/ $1/'
   )"
 }
 

@@ -173,7 +173,7 @@ You must provide either:
     app_hostname="$pid-$env"
   else
     is_valid_git_url "$git_url" || error "Please check your git url."
-    git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/\1/')
+    git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/$1/')
     app_hostname="$git_repo-$branch$tag"
   fi
   is_valid_hostname "$app_hostname" ||
@@ -211,7 +211,8 @@ cp -a "$tmp_app_dir" "$app_dir"
 new_compose_project_name="$app_hostname"
 new_compose_project_name+="-$(head /dev/urandom | LC_ALL=C tr -dc '[:lower:]' | head -c 4)"
 new_compose_project_name="$(adjust_compose_project_name_for_docker_compose_version "$new_compose_project_name")"
-printf "APP_HOSTNAME=%s\nCOMPOSE_PROJECT_NAME=%s" "$app_hostname" "$new_compose_project_name" > "$app_dir/.mdm_app_config"
+printf "APP_HOSTNAME=%s\nPREV_APP_HOSTNAME=%s\nCOMPOSE_PROJECT_NAME=%s" \
+  "$app_hostname" "$app_hostname" "$new_compose_project_name" > "$app_dir/.mdm_app_config"
 
 # if cloning existing env, download the media dir minus the cache
 # this will cause significant redundancy of images until can be deduped
@@ -281,7 +282,7 @@ app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml
 composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
 docker pull "$composer_image"
 cid="$(docker create $ssh_auth_opts \
-  -e COMPOSER_AUTH -e COMPOSER_HOME=/app/.composer -e app_hostname="$app_hostname" \
+  -e COMPOSER_AUTH -e COMPOSER_HOME=/app/.composer -e app_hostname="$app_hostname" -e OVERRIDE_MCD_IMAGE_VERSION \
   "$composer_image" /tmp/script)"
 docker cp . "$cid:/app/"
 docker cp "$lib_dir/install-composer-deps-and-build-docker-compose.sh" "$cid:/tmp/script"

@@ -179,20 +179,20 @@ setup() {
   assert_output ".test.com"
 }
 
-@test "lookup_latest_remote_sem_ver" {
+@test 'lookup_latest_remote_sem_ver' {
   run lookup_latest_remote_sem_ver
   assert_success
   assert_output -e ".+\..+\..+"
 }
 
-@test "download_and_link_repo_ref" {
+@test 'download_and_link_repo_ref' {
   ver="$(lookup_latest_remote_sem_ver)"
   run download_and_link_repo_ref
   assert_success
   assert_symlink_to "$HOME/.mdm/$ver" "$HOME/.mdm/current"
 }
 
-@test "download_and_link_repo_ref develop" {
+@test 'download_and_link_repo_ref develop' {
   run download_and_link_repo_ref develop
   assert_success
   assert_symlink_to "$HOME/.mdm/develop" "$HOME/.mdm/current"

@@ -18,17 +18,17 @@ setup() {
   }
 }
 
-@test "[docker] extract_tar_to_existing_container_path some.tar" {
+@test '[docker] extract_tar_to_existing_container_path some.tar' {
   run extract_tar_to_existing_container_path some.tar.gz
   assert_failure
 }
 
-@test "[docker] extract_tar_to_existing_container_path some.tar some_container" {
+@test '[docker] extract_tar_to_existing_container_path some.tar some_container' {
   run extract_tar_to_existing_container_path some.tar.gz some_container
   assert_failure
 }
 
-@test "[docker] extract_tar_to_existing_container_path some.tar some_container:/some_dir" {
+@test '[docker] extract_tar_to_existing_container_path some.tar some_container:/some_dir' {
   mkdir -p a/1 a/2
   msg="hello, world!"
   echo "$msg" > a/1/file1
@@ -42,13 +42,13 @@ setup() {
   assert_output "$msg"
 }
 
-@test "[docker] are_required_ports_free with no running containers" {
+@test '[docker] are_required_ports_free with no running containers' {
   docker stop $(docker ps -qa) || :
   run are_required_ports_free
   assert_success
 }
 
-@test "[docker] are_required_ports_free 80" {
+@test '[docker] are_required_ports_free 80' {
   docker stop $(docker ps -qa) || :
   docker run -p 80:80 -d nginx
   sleep 5 # docker background process may take a moment
@@ -56,7 +56,7 @@ setup() {
   assert_failure
 }
 
-@test "[docker] are_required_ports_free 443" {
+@test '[docker] are_required_ports_free 443' {
   docker stop $(docker ps -qa) || :
   docker run -p 443:443 -d nginx
   sleep 5 # docker background process may take a moment

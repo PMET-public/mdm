@@ -122,7 +122,7 @@ install_app() {
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     cd "$apps_resources_dir/app" || exit 1
-    docker-compose pull # check for new versions
+    docker-compose pull || : # check for new versions; don't fail if DNE b/c they may exist locally
     # create containers but do not start
     docker-compose up --no-start
     # copy db files to db container & start it up
@@ -135,12 +135,6 @@ install_app() {
     extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
-    # 2 options to start build & deploy
-    # option 1 relies on default cmds in image or set by docker-compose.override.yml file
-      # docker-compose up build
-      # docker-compose up deploy || :
-      # docker-compose logs deploy
-    # option 2 creates containers (when *_1 already exist) but doesn't have reliance on default cmds
     docker-compose run build cloud-build
     docker-compose run deploy cloud-deploy
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
@@ -230,24 +224,19 @@ force_check_mdm_ver() {
 }
 
 revert_to_prev_mdm() {
-  # what about when verion in lib.sh doesn't match containing dir name?
-  # should only happen on dev machine, right?
-  # have version determined by path only so it's authoritative?
-  local current vers
-  cd "$mdm_path" || exit 1
-  current="$(readlink current)"
-  # find available version not including 0.0.x
-  vers="$(
-    find . -type d -maxdepth 1 |
-    perl -ne 's/.*\/// and /^[0-9.]+$/ and print' |
-    grep -v '^0\.0\.' |
-    "$sort_cmd" -rV |
-    xargs
+  local current prev
+  current="$(readlink "$mdm_path/current")"
+  current="${current/*\/}"
+  # assumes every version starts with number dot number
+  prev="$(
+    find "$mdm_path" -type d -maxdepth 1 -name "[0-9]*\.[0-9]*" |
+      sort -V |
+      perl -pe 's/^.*\///' |
+      perl -0777 -ne "/([\d\.]+)\s*(?=$current)/ and print \$1"
   )"
-  prev=$(echo "${vers/* $current / }" | perl -pe 's/.*?\b([0-9.]+).*/$1/')
-  [[ -d "$prev" ]] && {
+  if [[ "$prev" ]]; then
     ln -sfn "$prev" current
-  }
+  fi
 }
 
 toggle_mdm_debug_mode() {
@@ -412,14 +401,9 @@ change_base_url() {
     read -r -p ''
     hostname="$REPLY"
     is_valid_hostname "$hostname" || error "Invalid domain. Exiting unchanged."
-    set_hostname_for_this_app "$hostname"
-    run_as_bash_cmds_in_app "
-      /app/bin/magento config:set web/unsecure/base_url https://$hostname/
-      /app/bin/magento config:set web/secure/base_url https://$hostname/
-      /app/bin/magento cache:flush
-    "
-    reload_rev_proxy
-    warm_cache
+    stop_ssh_tunnel
+    update_hostname "$hostname"
+    msg_w_newlines "Successfully set url to https://$hostname/."
   }
 }
 
@@ -434,7 +418,6 @@ switch_to_production_mode() {
 switch_to_developer_mode() {
   run_as_bash_cmds_in_app "/app/bin/magento deploy:mode:set developer"
 }
-
 
 start_mdm_shell() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
@@ -464,23 +447,32 @@ show_app_logs() {
 
 start_tmate_session() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local start_pattern="# start mdm keys" end_pattern="# end mdm keys" tmate_socket
+    local start_pattern="# start mdm keys" end_pattern="# end mdm keys" auth_keys_file="$HOME/.ssh/authorized_keys" \
+      auth_keys_md5 auth_keys_to_add tmate_socket
+    if [[ "$mdm_tmate_authorized_keys_url" ]]; then
+      auth_keys_to_add="$(curl -sL "$mdm_tmate_authorized_keys_url")"
+      [[ "$auth_keys_to_add" =~ ssh\- ]] ||
+        error "Url $mdm_tmate_authorized_keys_url does not contain valid public ssh key(s)."
+      [[ ! -d "$HOME/.ssh/" ]] && mkdir "$HOME/.ssh/"
+      chmod 700 "$HOME/.ssh/"
+      [[ ! -f "$auth_keys_file" ]] && touch "$auth_keys_file"
+      chmod 600 "$auth_keys_file"
+      auth_keys_md5="$(md5sum "$auth_keys_file")"
+      perl -i.bak -0777 -pe "s/$start_pattern.*$end_pattern\r?\n//s" "$auth_keys_file" # rm old if exists
+      printf "%s\n%s\n%s\n" "$start_pattern" "$auth_keys_to_add" "$end_pattern" >> "$auth_keys_file" # add new
+      [[ "$auth_keys_md5" = "$(md5sum "$auth_keys_file")" ]] ||
+        msg_w_newlines "Successfully updated authorized keys."
+    else
+      warning_w_newlines "No authorized ssh keys set. $see_docs_msg
+If you continue, anyone with your unique url will be able to access to your system."
+      confirm_or_exit
+    fi
     tmate_socket="/tmp/tmate.$("$date_cmd" "+%s")"
-    [[ ! -d "$HOME/.ssh/" ]] && mkdir "$HOME/.ssh/"
-    chmod 700 "$HOME/.ssh/"
-    [[ ! -f "$HOME/.ssh/authorized_keys" ]] && touch "$HOME/.ssh/authorized_keys"
-    chmod 600 "$HOME/.ssh/authorized_keys"
-    perl -i.bak -0777 -pe "s/$start_pattern.*$end_pattern\r?\n//s" "$HOME/.ssh/authorized_keys"
-    { 
-      echo "$start_pattern"
-      curl -sL "$mdm_tmate_authorized_keys_url"
-      echo "$end_pattern"
-    } >> "$HOME/.ssh/authorized_keys"
     [[ "$(pgrep tmate)" ]] && { 
-      pkill tmate
-      sleep 5
+      pkill tmate # kill any existing session
+      sleep 3
     }
-    tmate -a "$HOME/.ssh/authorized_keys" -S "$tmate_socket" new-session -d
+    tmate -a "$auth_keys_file" -S "$tmate_socket" new-session -d
     tmate -S "$tmate_socket" wait tmate-ready
     ssh_url="$(tmate -S "$tmate_socket" display -p '#{tmate_ssh}')"
     msg_w_newlines "Provide this url to your remote collaborator. Access will end when they close their session or after a period of inactivity."
@@ -488,19 +480,52 @@ start_tmate_session() {
   }
 }
 
-toggle_remote_web_access() {
-  local remote_port local_port
-  remote_port="$(( $RANDOM + 20000 ))" # RANDOM is between 0-32767 (2^16 / 2 - 1)
-  local_port="$(docker ps -a --filter "name=varnish" --format "{{.Ports}}" | tr ',' '\n' | perl -ne "s/.*:(?=\d{5})// and s/-.*// and print")"
-  [[ ! "$local_port" =~ ^[0-9]+$ ]] && echo "Could not find valid local port" && exit 1
-  ssh -f \
-    -F /dev/null \
-    -o IdentitiesOnly=yes \
-    -o ExitOnForwardFailure=yes \
-    -o StrictHostKeyChecking=no \
-    -i "$HOME/pk" \
-    -NR "$remote_port":127.0.0.1:"$local_port" \
-    "$TUNNEL_SSH_URL"
+stop_tmate_session() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    if pkill tmate; then
+      msg_w_newlines "Succcessfully stopped 1 or more remote system access sessions."
+    else
+      msg_w_newlines "No active remote access sessions."
+    fi
+  }
+}
+
+start_remote_web_access() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    if pgrep -f "ssh.*$mdm_tunnel_ssh_url" > /dev/null; then
+      msg_w_newlines "Remote web access is already running. If the url is unresponsive, use the menu to stop remote connection and try again."
+      return 1
+    fi
+    local remote_port local_port tmp_file hostname
+    remote_port="$(( $RANDOM + 20000 ))" # RANDOM is between 0-32767 (2^16 / 2 - 1)
+    local_port="$(docker ps -a --filter "name=varnish" --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME" --format "{{.Ports}}" | \
+      tr ',' '\n' | \
+      perl -ne "s/.*:(?=\d{5})// and s/-.*// and print"
+    )"
+    [[ ! "$local_port" =~ ^[0-9]+$ ]] && echo "Could not find valid local port" && exit 1
+    tmp_file="$(mktemp)"
+    get_github_file_contents "$mdm_tunnel_pk_url" > "$tmp_file"
+    ssh -f \
+      -F /dev/null \
+      -o IdentitiesOnly=yes \
+      -o ExitOnForwardFailure=yes \
+      -o StrictHostKeyChecking=no \
+      -i "$tmp_file" \
+      -NR "$remote_port":127.0.0.1:"$local_port" \
+      "$mdm_tunnel_ssh_url"
+    update_hostname "$remote_port.$mdm_tunnel_domain"
+    msg_w_newlines "Successfully opened public url https://$hostname/."
+    rm "$tmp_file"
+  }
+}
+
+stop_remote_web_access() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local hostname
+    is_web_tunnel_configured || return 0
+    stop_ssh_tunnel
+    update_hostname "$(get_prev_hostname_for_this_app)"
+  }
 }
 
 show_errors_from_mdm_logs() {

@@ -10,9 +10,11 @@ grep -q 'pmet-public/magento-cloud-docker' composer.json ||
   composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
 composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
 
-./vendor/bin/ece-docker build:compose --host="$app_hostname" --port=8080
+# creates docker-compose.yml and .docker/config.env that contains base64 encoded values
+# that service "generic" uses and other services extend
+./vendor/bin/ece-docker build:compose --host="$app_hostname"
 
 [[ "$OVERRIDE_MCD_IMAGE_VERSION" ]] && {
   echo "Overriding docker-compose.yml image versions ..."
-  perl -pe "/image.*pmetpublic\// and s/-[a-f0-9]{7}'/-$OVERRIDE_MCD_IMAGE_VERSION'/" docker-compose.yml
-}
+  perl -i -pe "/image.*pmetpublic\// and s/-[a-f0-9]{7}'/-$OVERRIDE_MCD_IMAGE_VERSION'/" docker-compose.yml
+} || :

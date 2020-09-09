@@ -13,7 +13,7 @@ setup() {
   shopt -s nocasematch
 }
 
-@test "toggle_advanced mode" {
+@test 'toggle_advanced_mode' {
   # if the outputs are the same, it did not toggle
   is_advanced_mode || output1="off"
   "$lib_dir/launcher" toggle_advanced_mode
@@ -22,18 +22,7 @@ setup() {
   assert_failure
 }
 
-@test "force_check_mdm_ver" {
-  is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
-  output1="$("$stat_cmd" "$mdm_ver_file")"
-  "$lib_dir/launcher" force_check_mdm_ver
-  sleep 5
-  output2="$("$stat_cmd" "$mdm_ver_file")"
-  # mdm_ver_file metadata should be different even if content hasn't changed
-  run diff <(echo "$output1") <(echo "$output2")
-  assert_failure
-}
-
-@test "toggle_mkcert_CA_install" {
+@test 'toggle_mkcert_CA_install' {
   is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
   output1="$("$lib_dir/launcher")"
   "$lib_dir/launcher" toggle_mkcert_CA_install

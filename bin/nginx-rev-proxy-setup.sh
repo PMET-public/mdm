@@ -21,7 +21,7 @@ prepare_cert_and_key_for_hostname() {
   if [[ "$hostname" =~ \.$mdm_domain$ ]]; then
     get_wildcard_cert_and_key_for_mdm_domain &&
       cp_wildcard_mdm_domain_cert_and_key_for_subdomain $hostname &&
-      return
+      return 0
   fi
 
   mkcert_for_domain "$hostname"
@@ -80,7 +80,9 @@ write_nginx_configs() {
 tmp_nginx_conf_dir="$(mktemp -d)"
 hostnames="$(find_mdm_hostnames)"
 hostnames_not_resolving_to_local="$(find_hostnames_not_resolving_to_local "$hostnames")"
-add_hostnames_to_hosts_file "$hostnames_not_resolving_to_local"
+# do not add tunneled hosts
+hosts_to_add="$(echo $hostnames_not_resolving_to_local | perl -pe "s/\s?\d+\.$mdm_tunnel_domain//g")"
+[[ "$hosts_to_add" ]] && add_hostnames_to_hosts_file "$hosts_to_add"
 prepare_certs_and_keys "$hostnames"
 write_nginx_configs "$hostnames"
 
