@@ -298,7 +298,7 @@ key="Help / Support"
 mdm_menu_items_keys+=("$key")
 
 is_adobe_system && {
-  key="#m2-demo-support (Magento Org Slack)"
+  key="Magento Org Slack #m2-demo-support"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-link"]="slack://channel?team=T016XBMUQLA&id=C018FCG0HHS"
 }
@@ -323,7 +323,7 @@ is_magento_app_running && is_web_tunnel_configured && {
   mdm_menu_items["$key-handler"]=stop_remote_web_access
 }
 
-key="#cloud-docker (Magento Community Slack)"
+key="Magento Community Slack #cloud-docker"
 mdm_menu_items_keys+=("$key")
 mdm_menu_items["$key-link"]="slack://channel?team=T4YUW69CM&id=CJ6F3F8NS"
 
