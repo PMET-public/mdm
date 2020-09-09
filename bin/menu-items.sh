@@ -54,7 +54,7 @@ is_docker_compatible && {
 
   ! is_docker_running && {
     key="▶️ Start Docker to continue"
-    description="Docker is not running."
+    description="Docker is not running. Start it."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=start_docker
     return 0
@@ -64,7 +64,7 @@ is_docker_compatible && {
 
   has_valid_composer_auth || {
     key="⚠️ Missing credentials - features limited"
-    description="MDM can not find your ~/.composer/auth.json file. You will not be able to create new apps from the source, but a prepackaged app will still work. The link to doc shows how to create it."
+    description="MDM can not find your \`~/.composer/auth.json\` file. You won't be able to create new apps from the source, but a prepackaged app will work. The link to doc shows how to create it."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-link"]="https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
   }
@@ -73,7 +73,7 @@ is_docker_compatible && {
 
 is_update_available && {
   key="🔄 Update MDM"
-  description="There is a new version of MDM available. Under *Advanced*, there is an option to revert if needed."
+  description="There is a new version of MDM available. Under *Maintenance*, there is an option to revert if needed."
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=update_mdm
 }
@@ -264,7 +264,7 @@ is_docker_compatible && has_valid_composer_auth && {
 
   ! is_advanced_mode && {
     key="📝 Show MDM logs"
-    description="Watch the MDM output in realtime. Combine with MDM debugging under *Advanced*"
+    description="*Advanced* Watch the MDM output in realtime. Combine with MDM debugging under *Maintenance*"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=show_mdm_logs
   }
@@ -469,15 +469,15 @@ mdm_menu_items_keys+=("end submenu")
 is_advanced_mode && {
 
   key="Logs"
-  description=""
+  description="*Advanced*"
   mdm_menu_items_keys+=("$key")
 
-  key="Show errors from MDM logs"
+  key="Show errors from MDM log"
   description="Show just the recorded errors"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=show_errors_from_mdm_logs
 
-  key="Show advanced MDM logs"
+  key="Show entire MDM log"
   description=""
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=show_mdm_logs
@@ -513,7 +513,7 @@ is_advanced_mode && {
 is_advanced_mode && {
 
   key="Maintenance"
-  description=""
+  description="*Advanced*"
   mdm_menu_items_keys+=("$key")
 
   # this option only applies to a specific app so should not appear when testing from a repo dir
