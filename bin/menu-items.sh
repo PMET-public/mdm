@@ -9,8 +9,8 @@
 declare -A mdm_menu_items
 
 ! is_docker_installed && is_docker_compatible && {
-  key="▶️ Complete Docker install by running for 1st time"
-  description="Complete the install to reveal more menu items."
+  key="▶️ Complete Docker install. Run this."
+  description="Complete the install by running Docker for the 1st time to reveal more menu items."
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=start_docker
   return 0
@@ -24,25 +24,25 @@ has_uncleared_jobs_statuses && {
 }
 
 ! are_additional_tools_installed && {
-  key="🔼 Install additional tools for more features"
+  key="🔼 Install added tools for more features"
   description="Highly recommended - includes the magento-cloud CLI, mkcert, tmate, platypus, docker CLI completion"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=install_additional_tools
 }
 
-is_adobe_system && ! is_onedrive_linked && {
-  key="🔄 Setup OneDrive -> Click 'Sync' button"
-  description=""
-  mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/Shared%20Documents/adobe-internal/docker"
-}
+# is_adobe_system && ! is_onedrive_linked && {
+#   key="🔄 Setup OneDrive -> Click 'Sync' button"
+#   description=""
+#   mdm_menu_items_keys+=("$key")
+#   mdm_menu_items["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/Shared%20Documents/adobe-internal/docker"
+# }
 
 is_docker_compatible && {
 
   is_mac && {
 
     is_docker_suboptimal && {
-      key="🎚 Adjust Docker for minimum requirements"
+      key="🎚 Adjust Docker for min reqs"
       description="Update the docker vm settings for better performance."
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-display-condition"]=""
@@ -82,7 +82,7 @@ is_update_available && {
 
   ! is_magento_app_installed && {
     if is_network_state_ok; then
-      key="🔼 Install & open Magento app in browser"
+      key="🔼 Install & open Magento app"
       description=""
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=install_app
@@ -116,7 +116,7 @@ is_update_available && {
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=restart_app
     else 
-      key="⚠️▶️ Can't restart Magento app - ports in use."
+      key="⚠️▶️ Can't restart app - ports in use."
       description=""
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=no_op
@@ -339,8 +339,8 @@ description=""
 mdm_menu_items_keys+=("$key")
 
 is_adobe_system && {
-  key="Magento Org Slack #m2-demo-support"
-  description=""
+  key="Magento Org #m2-demo-support"
+  description="link to slack channel"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-link"]="slack://channel?team=T016XBMUQLA&id=C018FCG0HHS"
 }
@@ -363,14 +363,14 @@ is_magento_app_running && is_web_tunnel_configured && {
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=start_remote_web_access
 
-  key="🛑 Stop remote web access and revert url"
+  key="🛑 Stop remote web access; revert url"
   description=""
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=stop_remote_web_access
 }
 
-key="Magento Community Slack #cloud-docker"
-description=""
+key="Magento Community #cloud-docker"
+description="link to slack channel"
 mdm_menu_items_keys+=("$key")
 mdm_menu_items["$key-link"]="slack://channel?team=T4YUW69CM&id=CJ6F3F8NS"
 
@@ -473,7 +473,7 @@ is_advanced_mode && {
   mdm_menu_items_keys+=("$key")
 
   key="Show errors from MDM logs"
-  description=""
+  description="Show just the recorded errors"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=show_errors_from_mdm_logs
 
@@ -572,7 +572,7 @@ is_advanced_mode && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=reload_rev_proxy
 
-    key="🧹 Remove hostnames added to /etc/hosts file"
+    key="🧹 Remove hosts added to /etc/hosts"
     description=""
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=rm_added_hostnames_from_hosts_file
@@ -604,17 +604,18 @@ is_advanced_mode && {
 # end maintenance submenu
 #
 ###
-
+tmp_var_if_used="$v"; v="$mdm_version" # for MD formatting
 if is_advanced_mode; then
-  key="💡Advanced mode is ON         (v. $mdm_version)"
+  key="💡Advanced mode is ON         (v. $v)"
   description="Show more advanced menu items and display the current version of MDM"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=toggle_advanced_mode
 else
-  key="○ Advanced mode is OFF        (v. $mdm_version)"
+  key="○ Advanced mode is OFF        (v. $v)"
   description=""
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=toggle_advanced_mode
 fi
+v="$tmp_var_if_used";
 
 : # need to return true or will exit when sourced with "-e" and last test = false

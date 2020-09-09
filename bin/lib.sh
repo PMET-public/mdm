@@ -65,7 +65,7 @@ mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
 repo_url="https://github.com/PMET-public/mdm"
-mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="0-dev?"
+mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="0.0.0-dev"
 
 [[ -f "$mdm_config_file" ]] && {
   # shellcheck source=../.mdm_config.sh
