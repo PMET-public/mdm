@@ -1034,13 +1034,13 @@ render_platypus_status_menu() {
   local index key key_length menu_output is_submenu
   key_length=${#mdm_menu_items_keys[@]}
   menu_output=""
-  is_submenu=false
+  is_submenu=""
   # based on Platypus menu syntax, submenu headers are not seletctable so no handler or link entry (unlike actual submenu items)
   for (( index=0; index < key_length; index++ )); do
     key="${mdm_menu_items_keys[$index]}"
     if [[ $key = "end submenu" ]]; then
       $is_submenu && {
-        is_submenu=false
+        is_submenu=""
         launched_from_mac_menu && menu_output+=$'\n'
         continue
       }
@@ -1063,19 +1063,23 @@ render_platypus_status_menu() {
       menu_output+="$key"$'\n'
     else
       if launched_from_mac_menu; then
-        $is_submenu && menu_output+="|"
+        # OSX menu output
+        [[ "$is_submenu" ]] && menu_output+="|"
         menu_output+="$key"
-        $is_submenu || menu_output+=$'\n'
+        [[ "$is_submenu" ]] || menu_output+=$'\n'
       else
-        #$is_submenu || menu_output+=$'\n'
-        [[ -n "${mdm_menu_items["$key-handler"]}" ]] && {
-          if $is_submenu; then
-            menu_output+="   $key  $(warning "${mdm_menu_items["$key-handler"]}")"$'\n'
-          else
-            menu_output+="$key  $(warning "${mdm_menu_items["$key-handler"]}")"$'\n'
-          fi
-        }
-        #[[ -n "${mdm_menu_items["$key-link"]}" ]] && menu_output+="$key  $(msg "${mdm_menu_items["$key-link"]}")"
+        # CLI output
+        [[ "$is_submenu" ]] && menu_output+="   " # indent
+        menu_output+="$key"
+        if [[ "${mdm_menu_items["$key-handler"]}" ]]; then
+          # warning function used to highlight handlers
+          menu_output+="  $(warning "${mdm_menu_items["$key-handler"]}")"
+        else
+          # msg func used to highlight links
+          [[ "${mdm_menu_items["$key-link"]}" ]] && menu_output+="  $(msg "${mdm_menu_items["$key-link"]}")"
+        fi
+        menu_output+=$'\n'
+
       fi
     fi
   done
