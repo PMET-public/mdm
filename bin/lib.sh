@@ -400,16 +400,28 @@ is_mkcert_CA_installed() {
   fi
 }
 
-has_valid_composer_auth() {
-  [[ "$COMPOSER_AUTH" =~ \{.*github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com.*\} ]] && return 0
-  if [[ -f "$HOME/.composer/auth.json" ]]; then
-    # print auth.json as 1 line and assign to var
-    COMPOSER_AUTH="$(perl -0777 -pe 's/\r?\n//g;s/\s*("|{|})\s*/$1/g' "$HOME/.composer/auth.json")"
-    if [[ "$COMPOSER_AUTH" =~ github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com ]]; then
-      export COMPOSER_AUTH && return 0
-    fi
-  fi
-  return 1
+is_string_valid_composer_credentials() {
+  echo "$1" |
+    jq -e -c '[."github-oauth"."github.com", ."http-basic"."repo.magento.com"["username","password"]] |
+      map(strings) |
+      length == 3' > /dev/null 2>&1
+}
+
+has_valid_composer_credentials() {
+  # has this been checked already
+  [[ "$mdm_valid_COMPOSER_AUTH" ]] || {
+    [[ "$COMPOSER_AUTH" ]] && 
+      is_string_valid_composer_credentials "$COMPOSER_AUTH" && 
+      mdm_valid_COMPOSER_AUTH="true" && 
+      return 0
+    [[ -f "$HOME/.composer/auth.json" ]] && 
+      COMPOSER_AUTH="$(<$HOME/.composer/auth.json)" && 
+      is_string_valid_composer_credentials "$COMPOSER_AUTH" &&
+      mdm_valid_COMPOSER_AUTH="true" &&
+      export COMPOSER_AUTH &&
+      return 0
+    return 1
+  }
 }
 
 ###

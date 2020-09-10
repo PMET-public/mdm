@@ -62,9 +62,13 @@ is_docker_compatible && {
 
   ! is_docker_ready && return 0
 
-  has_valid_composer_auth || {
-    key="⚠️ Missing credentials - features limited"
-    description="MDM can not find your \`~/.composer/auth.json\` file. You won't be able to create new apps from source or use features tied to your GH org configuration, but a prepackaged app will work. The link to doc shows how to create it."
+  has_valid_composer_credentials || {
+    if [[ -f "$HOME/.composer/auth.json" ]]; then
+      key="⚠️ Credential found but invalid"
+    else
+      key="⚠️ Missing credentials - features limited"
+    fi
+    description="MDM can not find your \`~/.composer/auth.json\` file, or it's invalid. You won't be able to create new apps from source or use features tied to your GH org configuration, but a prepackaged app will work. The link to doc shows how to create it."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-link"]="https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
   }
@@ -155,7 +159,7 @@ is_docker_compatible && are_other_magento_apps_running && {
   mdm_menu_items["$key-handler"]=stop_other_apps
 }
 
-is_docker_compatible && has_valid_composer_auth && {
+is_docker_compatible && has_valid_composer_credentials && {
   key="📦 Create a new Magento app"
   description="Asks for a Magento Cloud project to recreate locally"
   mdm_menu_items_keys+=("$key")
