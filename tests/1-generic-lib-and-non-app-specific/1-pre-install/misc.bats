@@ -94,6 +94,55 @@ setup() {
   assert_output ""
 }
 
+@test 'is_string_valid_composer_credentials valid 1' {
+  input='{"github-oauth":{"github.com":"test"},"http-basic":{"repo.magento.com":{"username":"test","password":"test"}}}'
+  run is_string_valid_composer_credentials "$input"
+  assert_success
+  assert_output ""
+}
+
+@test 'is_string_valid_composer_credentials valid 2' {
+  input='{"github-oauth":{"github.com":"test"},
+    "http-basic":{"repo.magento.com":{"username":"test","password":"test"}}}'
+  run is_string_valid_composer_credentials "$input"
+  assert_success
+  assert_output ""
+}
+
+@test 'is_string_valid_composer_credentials valid 3' {
+  input='{
+    "github-oauth":{"github.com":"test"},
+    "http-basic":{
+      "repo.magento.com":{"username":"test","password":"test"},
+      "connect20-qa01":{"username":"test","password":"test"}
+      }
+    }'
+  run is_string_valid_composer_credentials "$input"
+  assert_success
+  assert_output ""
+}
+
+@test 'is_string_valid_composer_credentials invalid 1' {
+  input='{"github-oauth":{"github.com":"test"},"http-basic":{"repo.magento.com":{"username":"test","password":"test"}}'
+  run is_string_valid_composer_credentials "$input"
+  assert_failure
+  assert_output ""
+}
+
+@test 'is_string_valid_composer_credentials invalid 2' {
+  input='"github-oauth":{"github.com":"test"},"http-basic":{"repo.magento.com":{"username":"test","password":"test"}}}'
+  run is_string_valid_composer_credentials "$input"
+  assert_failure
+  assert_output ""
+}
+
+@test 'is_string_valid_composer_credentials invalid 3' {
+  input='{"github-oauth":{"github.com":"test"},"http-basic":{"repo.magento.com":{"username":"test","password":"test"}},}'
+  run is_string_valid_composer_credentials "$input"
+  assert_failure
+  assert_output ""
+}
+
 # bats says no_op not found! b/c in handlers? and how that's sourced?
 # @test 'no_op' {
 #   run no_op
