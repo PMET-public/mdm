@@ -529,18 +529,20 @@ is_advanced_mode && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=toggle_xdebug
 
-    if [[ "$debug" ]]; then
-      key="🐞 MDM debugging is ON for this app"
-      description="Turn on|off debugging of MDM - much more info written to the logs"
-    else
-      key="🐞 MDM debugging is OFF for this app"
-      description=""
-    fi
-    is_magento_app_running && {
-      key+=" (stops running app)"
+    launched_from_mac_menu && {
+      if [[ "$debug" ]]; then
+        key="🐞 MDM debugging is ON for this app"
+        description="Turn on|off debugging of MDM - much more info written to the logs"
+      else
+        key="🐞 MDM debugging is OFF for this app"
+        description=""
+      fi
+      is_magento_app_running && {
+        key+=" (stops running app)"
+      }
+      mdm_menu_items_keys+=("$key")
+      mdm_menu_items["$key-handler"]=toggle_mdm_debug_mode
     }
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=toggle_mdm_debug_mode
   fi
 
   key="Force check for new MDM version"
