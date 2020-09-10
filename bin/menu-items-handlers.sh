@@ -472,7 +472,11 @@ If you continue, anyone with your unique url will be able to access to your syst
       pkill tmate # kill any existing session
       sleep 3
     }
-    tmate -a "$auth_keys_file" -S "$tmate_socket" new-session -d
+    if [[ "$mdm_tmate_authorized_keys_url" ]]; then
+      tmate -a "$auth_keys_file" -S "$tmate_socket" new-session -d
+    else
+      tmate -S "$tmate_socket" new-session -d
+    fi
     tmate -S "$tmate_socket" wait tmate-ready
     ssh_url="$(tmate -S "$tmate_socket" display -p '#{tmate_ssh}')"
     msg_w_newlines "Provide this url to your remote collaborator. Access will end when they close their session or after a period of inactivity."
