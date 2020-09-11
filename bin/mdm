@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+# Profiling notes:
+# uncomment the following line to use prompt string 4 for realtime data in xtrace with file and line #; useful for profiling
+# PS4='+\011 ${EPOCHREALTIME:9:4} ${BASH_SOURCE[0]##*/}:$LINENO \011'
+# to improve profiling output and only see changes, filter the output thru:
+# perl -ne '/^\++\s+[\d]/ and s{^(\++\s+)([\d\.]+)(.*)}{"$1".($prev_match eq $2 ? "-.--" : (($prev_match="$2") && ("$2")))."$3"}e and print'
+# then can further filter with:
+# grep -B1 '^\+*\s*\d' | grep -v '^-'
+
 # shellcheck source=lib.sh
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh" || :
 
