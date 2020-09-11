@@ -355,16 +355,6 @@ is_valid_mc_url() {
   [[ "$url" =~ https?://.*magento\.cloud/ ]]
 }
 
-get_project_from_mc_url() {
-  local url="$1"
-  echo "$url" | perl -ne '/.*?\/projects\/([^\/]+)/ and print $1'
-}
-
-get_branch_from_mc_url() {
-  local url="$1"
-  echo "$url" | perl -ne '/.*?\/environments\/([^\/]+)/ and print $1'
-}
-
 is_hostname_resolving_to_local() {
   local curl_output
   curl_output="$(curl --max-time 0.5 -vI "$1" 2>&1 >/dev/null | grep Trying)"
@@ -511,6 +501,16 @@ get_github_token_from_composer_auth() {
     [[ "$token" =~ [a-zA-Z0-9]{20,} ]] && echo "$token" && return
   }
   return 1
+}
+
+get_project_from_mc_url() {
+  local url="$1"
+  echo "$url" | perl -ne '/.*?\/projects\/([^\/]+)/ and print $1'
+}
+
+get_branch_from_mc_url() {
+  local url="$1"
+  echo "$url" | perl -ne '/.*?\/environments\/([^\/]+)/ and print $1'
 }
 
 ###
