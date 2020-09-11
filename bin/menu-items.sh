@@ -63,12 +63,13 @@ is_docker_compatible && {
   ! is_docker_ready && return 0
 
   has_valid_composer_credentials || {
-    if [[ -f "$HOME/.composer/auth.json" ]]; then
-      key="⚠️ Credential found but invalid"
-    else
+    if [[ ! -f "$HOME/.composer/auth.json" ]]; then
       key="⚠️ Missing credentials - features limited"
+      description="MDM can not find your \`~/.composer/auth.json\` file. You won't be able to create new apps from source or use features tied to your GitHub org configuration, but a prepackaged app will work. The link to doc shows how to create it."
+    else
+      key="⚠️ Credentials found but invalid"
+      description="Your \`~/.composer/auth.json\` file exists, but the JSON contents aren't parsing correctly OR it doesn't have the required GitHub token & Magento keys. Please verify its contents."
     fi
-    description="MDM can not find your \`~/.composer/auth.json\` file, or it's invalid. You won't be able to create new apps from source or use features tied to your GH org configuration, but a prepackaged app will work. The link to doc shows how to create it."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-link"]="https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
   }

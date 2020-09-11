@@ -60,7 +60,8 @@ determined it's not currently appropiate. Many items only become available after
 |🔼 Install added tools for more features|   |Highly recommended - includes the magento-cloud CLI, mkcert, tmate, platypus, docker CLI completion|
 |🎚 Adjust Docker for min reqs|   |Update the docker vm settings for better performance.|
 |▶️ Start Docker to continue|   |Docker is not running. Start it.|
-|⚠️ Missing credentials - features limited |[link](https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth)|MDM can not find your `~/.composer/auth.json` file. You won't be able to create new apps from source or use features tied to your GH org configuration, but a prepackaged app will work. The link to doc shows how to create it.|
+|⚠️ Missing credentials - features limited|   |MDM can not find your `~/.composer/auth.json` file. You won't be able to create new apps from source or use features tied to your GitHub org configuration, but a prepackaged app will work. The link to doc shows how to create it.|
+|⚠️ Credentials found but invalid |[link](https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth)|Your `~/.composer/auth.json` file exists, but the JSON contents aren't parsing correctly OR it doesn't have the required GitHub token & Magento keys. Please verify its contents.|
 |🔄 Update MDM|   |There is a new version of MDM available. Under *Maintenance*, there is an option to revert if needed.|
 |🔼 Install & open Magento app|   |   |
 |⚠️🔼 Can't install - ports in use.|   |Some local service other than docker is using port 80 or 443.|
