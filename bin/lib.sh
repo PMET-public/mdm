@@ -628,6 +628,11 @@ find_bridged_docker_networks() {
   docker network ls -q --filter 'driver=bridge' --filter 'name=_default'
 }
 
+network_has_running_web_service() {
+  [[ "$(docker ps -a --filter "network=$1" \
+    --filter "label=com.docker.compose.service=web" --format "{{.Ports}}")" =~ \-\>80 ]]
+}
+
 find_varnish_port_by_network() {
   docker ps -a --filter "network=$1" \
     --filter "label=com.docker.compose.service=varnish" --format "{{.Ports}}" | \
