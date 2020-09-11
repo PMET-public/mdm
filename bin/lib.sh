@@ -195,11 +195,6 @@ is_docker_ready() {
   docker ps > /dev/null 2>&1
 }
 
-is_onedrive_linked() {
-  [[ -d "$HOME/Adobe Systems Incorporated/SITeam - docker" ]] ||
-    [[ -d "$HOME/Adobe/SITeam - docker" ]]
-}
-
 is_detached() {
   [[ ! -d "$apps_resources_dir/app" ]]
 }

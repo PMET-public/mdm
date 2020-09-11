@@ -30,13 +30,6 @@ has_uncleared_jobs_statuses && {
   mdm_menu_items["$key-handler"]=install_additional_tools
 }
 
-# is_adobe_system && ! is_onedrive_linked && {
-#   key="🔄 Setup OneDrive -> Click 'Sync' button"
-#   description=""
-#   mdm_menu_items_keys+=("$key")
-#   mdm_menu_items["$key-link"]="https://adobe.sharepoint.com/sites/SITeam/Shared%20Documents/adobe-internal/docker"
-# }
-
 is_docker_compatible && {
 
   is_mac && {
