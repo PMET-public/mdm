@@ -170,7 +170,7 @@ install_app() {
     echo "$finished_msg"
   } >> "$handler_log_file" 2>&1 &
   background_install_pid="$!"
-  if launched_from_mac_menu; then
+  if launched_from_mac_menu_cached; then
     show_mdm_logs
   else
     # https://superuser.com/a/449307/10719
@@ -423,7 +423,7 @@ switch_to_developer_mode() {
 start_mdm_shell() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local services_status
-    if is_magento_app_installed; then
+    if is_magento_app_installed_cached; then
       services_status="$(docker-compose ps)"
     else
       services_status="$(warning_w_newlines "Magento app not installed yet.")"

@@ -12,7 +12,7 @@ load '../../../bin/lib.sh'
 setup() {
   shopt -s nocasematch
   is_docker_compatible || skip
-  is_docker_ready || {
+  is_docker_running || {
     printf "Docker not ready. Starting docker ..." | tee /dev/tty
     start_docker_service
   }

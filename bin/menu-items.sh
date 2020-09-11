@@ -45,7 +45,7 @@ is_docker_compatible && {
 
   }
 
-  ! is_docker_running && {
+  ! is_docker_running_cached && {
     key="▶️ Start Docker to continue"
     description="Docker is not running. Start it."
     mdm_menu_items_keys+=("$key")
@@ -53,9 +53,7 @@ is_docker_compatible && {
     return 0
   }
 
-  ! is_docker_ready && return 0
-
-  has_valid_composer_credentials || {
+  has_valid_composer_credentials_cached || {
     if [[ ! -f "$HOME/.composer/auth.json" ]]; then
       key="⚠️ Missing credentials - features limited"
       description="MDM can not find your \`~/.composer/auth.json\` file. You won't be able to create new apps from source or use features tied to your GitHub org configuration, but a prepackaged app will work. The link to doc shows how to create it."
@@ -78,7 +76,7 @@ is_update_available && {
 
 ! is_detached && {
 
-  ! is_magento_app_installed && {
+  ! is_magento_app_installed_cached && {
     if is_network_state_ok; then
       key="🔼 Install & open Magento app"
       description=""
@@ -93,21 +91,21 @@ is_update_available && {
     fi
   }
 
-  is_magento_app_running && is_network_state_ok && {
+  is_magento_app_running_cached && is_network_state_ok && {
     key="🚀 Open Magento app in browser"
     description=""
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=open_app
   }
 
-  is_magento_app_installed && is_magento_app_running && {
+  is_magento_app_installed_cached && is_magento_app_running_cached && {
     key="🛑 Stop Magento app"
     description="If not actively being using, stopping the app will free memory."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=stop_app
   }
 
-  is_magento_app_installed && ! is_magento_app_running && {
+  is_magento_app_installed_cached && ! is_magento_app_running_cached && {
     if is_network_state_ok; then
       key="▶️ Restart Magento app"
       description=""
@@ -122,7 +120,7 @@ is_update_available && {
     fi
   }
 
-  # is_advanced_mode && ! is_magento_app_running && {
+  # is_advanced_mode && ! is_magento_app_running_cached && {
   #   key="TODO Sync Magento app to remote env"
   #   description=""
   #   mdm_menu_items_keys+=("$key")
@@ -130,7 +128,7 @@ is_update_available && {
   #   mdm_menu_items["$key-disabled"]=true
   # }
 
-  # is_advanced_mode && ! is_magento_app_running && {
+  # is_advanced_mode && ! is_magento_app_running_cached && {
   #   key="TODO Clone to new Magento app"
   #   description=""
   #   mdm_menu_items_keys+=("$key")
@@ -138,7 +136,7 @@ is_update_available && {
   #   mdm_menu_items["$key-disabled"]=true
   # }
 
-  is_magento_app_installed && {
+  is_magento_app_installed_cached && {
     key="🚨 Uninstall this Magento app"
     description="If an error occurred during install, this option allows you to try again."
     mdm_menu_items_keys+=("$key")
@@ -153,7 +151,7 @@ is_docker_compatible && are_other_magento_apps_running && {
   mdm_menu_items["$key-handler"]=stop_other_apps
 }
 
-is_docker_compatible && has_valid_composer_credentials && {
+is_docker_compatible && has_valid_composer_credentials_cached && {
   key="📦 Create a new Magento app"
   description="Asks for a Magento Cloud project to recreate locally"
   mdm_menu_items_keys+=("$key")
@@ -161,18 +159,19 @@ is_docker_compatible && has_valid_composer_credentials && {
 }
 
 ! is_detached && {
+
   ###
   #
   # start Magento commands submenu
   #
   ###
 
-  is_magento_app_installed && {
+  is_magento_app_installed_cached && {
     key="Magento commands"
     description=""
     mdm_menu_items_keys+=("$key")
 
-    ! is_magento_app_running && {
+    ! is_magento_app_running_cached && {
       key="🛑 App stopped. Many cmds N/A"
       description="Start Magento to reveal more options"
       mdm_menu_items_keys+=("$key")
@@ -184,7 +183,7 @@ is_docker_compatible && has_valid_composer_credentials && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=start_shell_in_app
 
-    is_magento_app_running && {
+    is_magento_app_running_cached && {
 
       key="Reindex"
       description=""
@@ -284,7 +283,7 @@ if is_network_state_ok; then
   is_docker_compatible && {
 
     ! is_detached && is_pwa_module_installed && {
-      if is_magento_app_running; then
+      if is_magento_app_running_cached; then
         key="(Re)start PWA using this Magento app"
         description="The PWA will use the local Magento app as the backend."
       else
@@ -355,7 +354,7 @@ is_tmate_installed && {
   mdm_menu_items["$key-handler"]=stop_tmate_session
 }
 
-is_magento_app_running && is_web_tunnel_configured && {
+is_magento_app_running_cached && is_web_tunnel_configured && {
   key="🔓 Grant remote web access"
   description="If configured, creates a public url able to access this Magenot app."
   mdm_menu_items_keys+=("$key")
@@ -480,7 +479,7 @@ is_advanced_mode && {
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=show_mdm_logs
 
-  is_magento_app_installed && {
+  is_magento_app_installed_cached && {
     key="Show Magento app logs"
     description=""
     mdm_menu_items_keys+=("$key")
@@ -527,7 +526,7 @@ is_advanced_mode && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=toggle_xdebug
 
-    launched_from_mac_menu && {
+    launched_from_mac_menu_cached && {
       if [[ "$debug" ]]; then
         key="🐞 MDM debugging is ON for this app"
         description="Turn on|off debugging of MDM - much more info written to the logs"
@@ -535,7 +534,7 @@ is_advanced_mode && {
         key="🐞 MDM debugging is OFF for this app"
         description=""
       fi
-      is_magento_app_running && {
+      is_magento_app_running_cached && {
         key+=" (stops running app)"
       }
       mdm_menu_items_keys+=("$key")
