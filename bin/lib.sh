@@ -92,8 +92,8 @@ is_magento_cloud_cli_installed() {
   [[ -f "$magento_cloud_cmd" ]]
 }
 
-is_docker_bash_completion_installed() {
-  [[ -f "$(brew --prefix)/etc/bash_completion.d/docker" ]]
+is_docker_bash_completion_installed_on_mac() {
+  [[ -f "/usr/local/etc/bash_completion.d/docker" ]]
 }
 
 is_platypus_installed() {
@@ -115,7 +115,7 @@ is_web_tunnel_configured() {
 are_additional_tools_installed() {
   is_magento_cloud_cli_installed || return 1
   is_mac && {
-    is_docker_compatible && is_docker_bash_completion_installed || return 1
+    is_docker_compatible && is_docker_bash_completion_installed_on_mac || return 1
     is_platypus_installed || return 1
   }
   is_mkcert_installed || return 1
