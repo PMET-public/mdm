@@ -123,6 +123,7 @@ setup() {
 }
 
 @test 'is_string_valid_composer_credentials invalid 1' {
+  [[ "$(jq --version)" =~ 1\.5 ]] && skip # jq 1.5 ignore the missing closing '}'
   input='{"github-oauth":{"github.com":"test"},"http-basic":{"repo.magento.com":{"username":"test","password":"test"}}'
   run is_string_valid_composer_credentials "$input"
   assert_failure
