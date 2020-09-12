@@ -67,7 +67,9 @@ magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 repo_url="https://github.com/PMET-public/mdm"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="0.0.0-dev"
 
-declare -A mdm_store # a mnemonic for storing certain calculated vals
+# a mnemonic for storing certain calculated vals. however b/c this lib needs bash 3 compatibility initially,
+# no functionality requiring the mdm_store can be run until after initialization logic
+declare -A mdm_store  2> /dev/null || :
 
 [[ -f "$mdm_config_file" ]] && {
   # shellcheck source=../.mdm_config.sh
