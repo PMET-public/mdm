@@ -450,8 +450,10 @@ trim() {
   echo "$@" | xargs
 }
 
-error() {
-  printf "\n%b%s%b\n\n" "$red" "[$("$date_cmd" --utc +"%Y-%m-%d %H:%M:%S")] Error: $*" "$no_color" 1>&2 && exit 1
+error() { # this may be invoked before gdate is installed, so have diff logic for date_cmd
+  local date_cmd="date --utc"
+  is_mac && date_cmd="date -u"
+  printf "\n%b%s%b\n\n" "$red" "[$($date_cmd +"%Y-%m-%d %H:%M:%S")] Error: $*" "$no_color" 1>&2 && exit 1
 }
 
 warning() {
