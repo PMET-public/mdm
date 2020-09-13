@@ -7,7 +7,7 @@
 included_by_mdm
 has_uncleared_jobs_statuses
 is_magento_cloud_cli_installed
-is_docker_bash_completion_installed
+is_docker_bash_completion_installed_on_mac
 @test is_platypus_installed
 @test is_mkcert_installed
 @test is_tmate_installed
@@ -20,13 +20,13 @@ can_optimize_vm_disk
 @test is_CI
 is_docker_compatible
 is_docker_installed
-is_docker_suboptimal
+are_docker_settings_optimized
 is_docker_running
-is_docker_ready
+is_docker_running_cached
 is_onedrive_linked
 is_detached
-is_magento_app_installed
-is_magento_app_running
+is_magento_app_installed_cached
+is_magento_app_running_cached
 is_pwa_module_installed
 is_nginx_rev_proxy_running
 is_network_state_ok
@@ -37,10 +37,9 @@ is_update_available
 is_adobe_system
 is_advanced_mode
 is_existing_cloud_env
-launched_from_mac_menu
+launched_from_mac_menu_cached
 is_running_as_sudo
 is_mkcert_CA_installed
-has_valid_composer_auth
 seconds_since
 get_docker_host_ip
 print_containers_hosts_file_entry
