@@ -294,9 +294,13 @@ lib_sourced_for_specific_bundled_app() {
     return 0
   fi
   # else is the sourcing process a specific app instance?
-  # DON'T use ${BASH_SOURCE[-1]} b/c this may be an exceptional reference -> before bash is upgraded on mac
+  # DON'T use ${BASH_SOURCE[-1]} b/c invalid syntax before bash upgraded
   local oldest_parent_path="${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}"
-  [[ -n "$(which realpath)" ]] && oldest_parent_path="$(realpath "$oldest_parent_path")"
+  if which realpath > /dev/null 2>&1; then
+    oldest_parent_path="$(realpath "$oldest_parent_path")"
+  else 
+    return 1 # TODO this is not strictly correct but this func doesn't matter before realpath is installed?
+  fi
   [[ "$oldest_parent_path" =~ \.app\/Contents\/ ]] &&
     apps_resources_dir="${oldest_parent_path/\/Contents\/*/\/Contents\/Resources}" &&
     export apps_resources_dir
@@ -636,6 +640,15 @@ get_pwa_hostname() {
 
 get_pwa_prev_hostname() {
   [[ "$mdm_domain" ]] && echo "pwa-prev.$mdm_domain" || echo "pwa-prev"
+}
+
+get_MAGENTO_CLOUD_vars_as_json() {
+  perl -MMIME::Base64 -ne '/(MAGENTO_CLOUD_.*?)=(.*)/ and print "\"$1\":".decode_base64($2).",\n"' \
+    "$app_resources_dir/app/.docker/config.env" | perl -0777 -pe 's/^/{/;s/.$/}/;'
+}
+
+set_MAGENTO_CLOUD_vars_json_to_env() {
+  jq -r 'to_entries|map("\(.key)=\(.value|tostring|@base64)")|.[]'
 }
 
 export_pwa_hostnames() {
