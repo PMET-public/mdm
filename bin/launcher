@@ -60,6 +60,7 @@ if [[
   ${BASH_VERSINFO[0]} -ge 4 && \
   -n "$(which realpath)" && \
   -n "$(which mkcert)" && \
+  -n "$(which jq)" && \
   ( -n "$(which docker)" || ! "$(is_docker_compatible)" )
 
 ]]; then
