@@ -42,7 +42,7 @@ get_job_statuses() {
       fi
     else
       prefix="DISABLED|⏳ "
-      duration=" $(convert_secs_to_hms "$(( $("$date_cmd" +"%s") - "$job_start" ))")"
+      duration=" $(convert_secs_to_hms "$(( $(date +"%s") - "$job_start" ))")"
     fi
     echo "$prefix $job_msg $duration"
   done
@@ -468,7 +468,7 @@ start_tmate_session() {
 If you continue, anyone with your unique url will be able to access to your system."
       confirm_or_exit
     fi
-    tmate_socket="/tmp/tmate.$("$date_cmd" "+%s")"
+    tmate_socket="/tmp/tmate.$(date "+%s")"
     [[ "$(pgrep tmate)" ]] && { 
       pkill tmate # kill any existing session
       sleep 3

@@ -310,7 +310,7 @@ lookup_latest_remote_sem_ver() {
 is_update_available() {
   # check for a new version once a day (86400 secs)
   local latest_sem_ver more_recent_of_two
-  if [[ -f "$mdm_ver_file" && "$(( $("$date_cmd" +"%s") - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
+  if [[ -f "$mdm_ver_file" && "$(( $(date +"%s") - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using sort -V
@@ -450,10 +450,8 @@ trim() {
   echo "$@" | xargs
 }
 
-error() { # this may be invoked before gdate is installed, so have diff logic for date_cmd
-  local date_cmd="date --utc"
-  is_mac && date_cmd="date -u"
-  printf "\n%b%s%b\n\n" "$red" "[$($date_cmd +"%Y-%m-%d %H:%M:%S")] Error: $*" "$no_color" 1>&2 && exit 1
+error() {
+  printf "\n%b%s%b\n\n" "$red" "[$(date +"%FT%TZ")] Error: $*" "$no_color" 1>&2 && exit 1
 }
 
 warning() {
@@ -477,7 +475,7 @@ $*
 }
 
 msg_w_timestamp() {
-  msg "[$("$date_cmd" -u +%FT%TZ)] $*"
+  msg "[$(date +"%FT%TZ")] $*"
 }
 
 convert_secs_to_hms() {
@@ -490,7 +488,7 @@ convert_secs_to_hms() {
 }
 
 seconds_since() {
-  echo "$(( $("$date_cmd" +"%s") - $1 ))"
+  echo "$(( $(date +"%s") - $1 ))"
 }
 
 reverse_array() {
@@ -695,7 +693,7 @@ backup_hosts() {
     warning "Creating hosts back up dir - should only need to do this if MDM install was skipped (e.g. testing/development)"
     mkdir -p "$hosts_backup_dir"
   }
-  cp /etc/hosts "$hosts_backup_dir/hosts.$("$date_cmd" "+%s")"
+  cp /etc/hosts "$hosts_backup_dir/hosts.$(date "+%s")"
 }
 
 add_hostnames_to_hosts_file() {
@@ -932,10 +930,10 @@ track_job_status_and_wait_for_exit() {
     wait "$pid_to_wait_for" # wait but don't track b/c no app's mdm job dir to associate job to
   else
     msg="$2"
-    job_file="$apps_mdm_jobs_dir/$("$date_cmd" +"%s").$pid_to_wait_for"
+    job_file="$apps_mdm_jobs_dir/$(date +"%s").$pid_to_wait_for"
     echo "$msg" > "$job_file"
     wait "$pid_to_wait_for" || exit_code=$?
-    mv "$job_file" "$job_file.$("$date_cmd" +"%s").$exit_code.done"
+    mv "$job_file" "$job_file.$(date +"%s").$exit_code.done"
   fi
 }
 
