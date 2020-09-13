@@ -149,7 +149,10 @@ can_optimize_vm_disk() {
 }
 
 is_mac() {
-  [[ "$(uname)" = "Darwin" ]]
+  # [[ "$(uname)" = "Darwin" ]]
+  # matching against uname is relatively slow compared to checking for safari and the users dir
+  # and if this funct is called 20x to render the menu, it makes a diff
+  [[ -d /Applications/Safari.app && -d /Users ]]
 }
 
 # override default linux docker host ip with mac dns alias host.docker.internal
