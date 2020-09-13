@@ -245,7 +245,7 @@ are_required_ports_free() {
 }
 
 is_nginx_rev_proxy_running() {
-  [[ "$(echo "${mdm_store["formatted_docker_ps_output"]}" | perl -ne '/^[^\s]+ Up .*mdm-nginx-rev-proxy/ and print')" ]]
+  echo "${mdm_store["formatted_docker_ps_output"]}" | grep -q ' Up .*mdm-nginx-rev-proxy'
 }
 
 is_network_state_ok() {
