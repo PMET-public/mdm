@@ -185,8 +185,16 @@ is_docker_installed() {
   [[ -n $(which docker) || -f "$docker_settings_file" ]]
 }
 
-is_docker_suboptimal() {
-  can_optimize_vm_cpus || can_optimize_vm_mem || can_optimize_vm_swap || can_optimize_vm_disk
+are_docker_settings_optimized() {
+  local md5 md5_file
+  md5="$(md5sum "$docker_settings_file" | sed 's/ .*//')"
+  md5_file="$mdm_path/.md5-of-optimized-docker-settings-${md5}"
+  [[ -f "$md5_file" ]] && return 0
+  if can_optimize_vm_cpus || can_optimize_vm_mem || can_optimize_vm_swap || can_optimize_vm_disk; then
+    return 1
+  fi
+  touch "$md5_file"
+  return 0
 }
 
 is_docker_running() {
@@ -394,10 +402,18 @@ is_mkcert_CA_installed() {
 }
 
 is_string_valid_composer_credentials() {
-  echo "$1" |
-    jq -e -c '[."github-oauth"."github.com", ."http-basic"."repo.magento.com"["username","password"]] |
+  local str="$1" status=0 md5 md5_file
+  md5="$(echo "$1" | md5sum | sed 's/ .*//')"
+  md5_file="$mdm_path/.md5-of-passed-composer-cred-${md5}"
+  # for max menu rendering speed, check for md5 of prev passed credentials
+  [[ -f "$md5_file" ]] && return 0
+  echo "$1" | jq -e -c '[."github-oauth"."github.com", ."http-basic"."repo.magento.com"["username","password"]] |
       map(strings) |
-      length == 3' > /dev/null 2>&1
+      length == 3' > /dev/null 2>&1 || status="$?"
+  if [[ "$status" -eq 0 ]]; then
+    touch "$md5_file"
+  fi
+  return "$status"
 }
 
 has_valid_composer_credentials_cached() {

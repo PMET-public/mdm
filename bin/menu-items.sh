@@ -34,7 +34,7 @@ is_docker_compatible && {
 
   is_mac && {
 
-    is_docker_suboptimal && {
+    ! are_docker_settings_optimized && {
       key="🎚 Adjust Docker for min reqs"
       description="Update the docker vm settings for better performance."
       mdm_menu_items_keys+=("$key")
