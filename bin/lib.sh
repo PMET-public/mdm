@@ -64,6 +64,7 @@ rel_app_config_file="app/.mdm_app_config"
 mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
+docker_install_link="https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
 repo_url="https://github.com/PMET-public/mdm"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="0.0.0-dev"
 
@@ -182,7 +183,11 @@ is_docker_compatible() {
 }
 
 is_docker_installed() {
-  [[ -n $(which docker) || -f "$docker_settings_file" ]]
+  which docker > /dev/null 2>&1
+}
+
+is_docker_initialized_on_mac() {
+  [[ -f "$docker_settings_file" ]]
 }
 
 are_docker_settings_optimized() {
@@ -1327,11 +1332,11 @@ Once all requirements are installed and validated, this script will not need to 
       msg_w_newlines "
     Press ANY key to continue to the Docker Desktop For Mac download page. Then download and install that app.
 
-    https://hub.docker.com/editions/community/docker-ce-desktop-mac/
+    $docker_install_link
   "
       ! is_CI && read -n 1 -s -r -p ""
       # open docker for mac installation page
-      open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
+      open "$docker_install_link"
     }
 
     msg_w_newlines "CLI dependencies successfully installed. Once you download and install Docker Desktop for Mac, this script should not run again."
