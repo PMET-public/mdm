@@ -255,12 +255,14 @@ toggle_mkcert_CA_install() {
     if is_mkcert_CA_installed; then
       warning_w_newlines "Removing your local certificate authority. Your password is required to make these changes."
       mkcert -uninstall
+      rm "$mkcert_installed_flag_file"
       ! is_mkcert_CA_installed && msg_w_newlines "Successfully removed." || msg_w_newlines "Please try again."
     else
       warning_w_newlines "Please be careful when installing a local certificate authority and only continue if you understand the risks.
 This will require your password.
       "
       mkcert -install
+      touch "$mkcert_installed_flag_file"
       is_mkcert_CA_installed && msg_w_newlines "Successfully installed." || msg_w_newlines "Please try again."
     fi
   }

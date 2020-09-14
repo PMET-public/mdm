@@ -60,6 +60,7 @@ handler_log_file="$mdm_path/handler.log"
 dockerize_log_file="$mdm_path/dockerize.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 advanced_mode_flag_file="$mdm_path/advanced-mode-on"
+mkcert_installed_flag_file="$mdm_path/.mkcert-installed"
 rel_app_config_file="app/.mdm_app_config"
 mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
@@ -396,18 +397,9 @@ is_running_as_sudo() {
 }
 
 is_mkcert_CA_installed() {
-  local warning_count status=0
-  is_mkcert_installed || return 1
-  if is_mac; then
-    security dump-trust-settings -d | grep -q mkcert || status="$?"
-    return "$status"
-  elif is_CI; then
-    warning_count="$(mkcert 2>&1 | grep -c "Warning:")"
-    # no chrome or firefox installed on CI so a warning remains
-    [[ "$warning_count" -eq 1 ]]
-  else
-    [[ "$warning_count" -eq 0 ]]
-  fi
+  # if user install mkcert CA out of band, this will be inaccurate
+  # but using the menu item to install/uninstall again will bring it back in sync
+  [[ -f "$mkcert_installed_flag_file" ]]
 }
 
 is_string_valid_composer_credentials() {
