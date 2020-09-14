@@ -56,7 +56,8 @@ determined it's not currently appropiate. Many items only become available after
 
 |Top Level Menu Items|   |   |
 |:---|:-:|:--|
-|▶️ Complete Docker install. Run this.|   |Complete the install by running Docker for the 1st time to reveal more menu items.|
+|⚠️▶️ Docker not installed. Click for download. |[link]($docker_install_link)|Complete the install by running Docker for the 1st time to reveal more menu items.|
+|▶️ Finish Docker install by running for the 1st time.|   |Finish the install by running Docker for the 1st time and revealing more menu items.|
 |🔼 Install added tools for more features|   |Highly recommended - includes the magento-cloud CLI, mkcert, tmate, platypus, docker CLI completion|
 |🎚 Adjust Docker for min reqs|   |Update the docker vm settings for better performance.|
 |▶️ Start Docker to continue|   |Docker is not running. Start it.|
