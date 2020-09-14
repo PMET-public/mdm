@@ -22,21 +22,15 @@ setup() {
 
 @test '[CI][osx] Check for newly missing requirements' {
   is_mac && is_CI || skip
-  
-  # mock docker and settings file to show menu options
-  cp /bin/bash /usr/local/bin/docker
-  mkdir -p "$(dirname "$docker_settings_file")"
-  touch "$docker_settings_file"
-
   run "$lib_dir/launcher"
   assert_success
-  assert_output -p "install_additional_tools"
+  assert_output -p "install missing requirements" # text from launcher
 }
 
 @test '[CI][osx] Reinstall missing requirements' {
   is_mac && is_CI || skip
   output="$("$lib_dir/launcher")"
-  run "$lib_dir/launcher" "install_additional_tools"
+  run "$lib_dir/launcher" "$output"
   assert_success
   assert_output -p "installed"
 }
@@ -45,5 +39,5 @@ setup() {
   is_mac && is_CI || skip
   run "$lib_dir/launcher"
   assert_success
-  assert_output -p "advanced mode"
+  refute_output -p "install missing requirements" # text from launcher
 }

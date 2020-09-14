@@ -8,20 +8,21 @@
 
 declare -A mdm_menu_items
 
-! is_docker_installed && is_docker_compatible && {
-  key="⚠️▶️ Docker not installed. Click for download."
-  description="Complete the install by running Docker for the 1st time to reveal more menu items."
-  mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-link"]="$docker_install_link"
-  return 0
-}
-
-is_mac && ! is_docker_initialized_on_mac && {
-  key="▶️ Finish Docker install by running for the 1st time."
-  description="Finish the install by running Docker for the 1st time and revealing more menu items."
-  mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-handler"]=start_docker
-  return 0
+is_docker_compatible && {
+  ! is_docker_installed && {
+    key="⚠️▶️ Docker not installed. Click for download."
+    description="Complete the install by running Docker for the 1st time to reveal more menu items."
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-link"]="$docker_install_link"
+    return 0
+  }
+  ! is_docker_initialized_on_mac && {
+    key="▶️ Finish Docker install by running for the 1st time."
+    description="Finish the install by running Docker for the 1st time and revealing more menu items."
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-handler"]=start_docker
+    return 0
+  }
 }
 
 has_uncleared_jobs_statuses && {
