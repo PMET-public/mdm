@@ -16,7 +16,7 @@ is_docker_compatible && {
     mdm_menu_items["$key-link"]="$docker_install_link"
     return 0
   }
-  ! is_docker_initialized_on_mac && {
+  is_mac && ! is_docker_initialized_on_mac && {
     key="▶️ Finish Docker install by running for the 1st time."
     description="Finish the install by running Docker for the 1st time and revealing more menu items."
     mdm_menu_items_keys+=("$key")
