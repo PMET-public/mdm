@@ -197,8 +197,22 @@ determined it's not currently appropiate. Many items only become available after
 ## Configuration
 
 ### Configuration of MDM
+|Feature|Config Param|
+|-|---|
+| Certs |`mdm_domain`|
+| |`mdm_domain_fullchain_gh_url`|
+| |`mdm_domain_privkey_gh_url`|
+| | |
+| Remote Support/Access |`mdm_tmate_authorized_keys_url`|
+| | |
+| Remote Web Access|`mdm_tunnel_domain`|
+| |`mdm_tunnel_ssh_url`|
+| |`mdm_tunnel_pk_url`|
 
 ### Configuration of an MDM app
+
+
+
 
 ## Development on a Mac
 
