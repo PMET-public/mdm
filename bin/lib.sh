@@ -60,12 +60,18 @@ handler_log_file="$mdm_path/handler.log"
 dockerize_log_file="$mdm_path/dockerize.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 advanced_mode_flag_file="$mdm_path/advanced-mode-on"
+mkcert_installed_flag_file="$mdm_path/.mkcert-installed"
 rel_app_config_file="app/.mdm_app_config"
 mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
+docker_install_link="https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
 repo_url="https://github.com/PMET-public/mdm"
 mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="0.0.0-dev"
+
+# a mnemonic for storing certain calculated vals. however b/c this lib needs bash 3 compatibility initially,
+# no functionality requiring the mdm_store can be run until after initialization logic
+declare -A mdm_store  2> /dev/null || :
 
 [[ -f "$mdm_config_file" ]] && {
   # shellcheck source=../.mdm_config.sh
@@ -92,8 +98,8 @@ is_magento_cloud_cli_installed() {
   [[ -f "$magento_cloud_cmd" ]]
 }
 
-is_docker_bash_completion_installed() {
-  [[ -f "$(brew --prefix)/etc/bash_completion.d/docker" ]]
+is_docker_bash_completion_installed_on_mac() {
+  [[ -f "/usr/local/etc/bash_completion.d/docker" ]]
 }
 
 is_platypus_installed() {
@@ -115,7 +121,7 @@ is_web_tunnel_configured() {
 are_additional_tools_installed() {
   is_magento_cloud_cli_installed || return 1
   is_mac && {
-    is_docker_compatible && is_docker_bash_completion_installed || return 1
+    is_docker_compatible && is_docker_bash_completion_installed_on_mac || return 1
     is_platypus_installed || return 1
   }
   is_mkcert_installed || return 1
@@ -145,7 +151,10 @@ can_optimize_vm_disk() {
 }
 
 is_mac() {
-  [[ "$(uname)" = "Darwin" ]]
+  # [[ "$(uname)" = "Darwin" ]]
+  # matching against uname is relatively slow compared to checking for safari and the users dir
+  # and if this funct is called 20x to render the menu, it makes a diff
+  [[ -d /Applications/Safari.app && -d /Users ]]
 }
 
 # override default linux docker host ip with mac dns alias host.docker.internal
@@ -175,58 +184,61 @@ is_docker_compatible() {
 }
 
 is_docker_installed() {
-  [[ -n $(which docker) || -f "$docker_settings_file" ]]
+  which docker > /dev/null 2>&1
 }
 
-is_docker_suboptimal() {
-  can_optimize_vm_cpus || can_optimize_vm_mem || can_optimize_vm_swap || can_optimize_vm_disk
+is_docker_initialized_on_mac() {
+  [[ -f "$docker_settings_file" ]]
+}
+
+are_docker_settings_optimized() {
+  local md5 md5_file
+  md5="$(md5sum "$docker_settings_file" | sed 's/ .*//')"
+  md5_file="$mdm_path/.md5-of-optimized-docker-settings-${md5}"
+  [[ -f "$md5_file" ]] && return 0
+  if can_optimize_vm_cpus || can_optimize_vm_mem || can_optimize_vm_swap || can_optimize_vm_disk; then
+    return 1
+  fi
+  touch "$md5_file"
+  return 0
 }
 
 is_docker_running() {
-  if is_mac; then
-    # this is faster on mac and speed is important for menu rendering
-    pgrep -q com.docker.hyperkit
-  else
-    docker ps > /dev/null 2>&1 || return 1
-  fi
-}
-
-is_docker_ready() {
   docker ps > /dev/null 2>&1
 }
 
-is_onedrive_linked() {
-  [[ -d "$HOME/Adobe Systems Incorporated/SITeam - docker" ]] ||
-    [[ -d "$HOME/Adobe/SITeam - docker" ]]
+is_docker_running_cached() {
+  [[ "${mdm_store["docker_is_running"]}" ]] && return "${mdm_store["docker_is_running"]}" # already calculated
+  mdm_store["docker_is_running"]=0
+  mdm_store["formatted_docker_ps_output"]="$(docker ps -a --format "{{.Names}} {{.Status}} [labels]: {{.Labels}}" 2> /dev/null)" ||
+    mdm_store["docker_is_running"]="$?"
+  return "${mdm_store["docker_is_running"]}"
 }
 
 is_detached() {
   [[ ! -d "$apps_resources_dir/app" ]]
 }
 
-is_magento_app_installed() {
+is_magento_app_installed_cached() {
   is_detached && return 1
-  # grep once and store result in var
-  [[ -n "$app_is_installed" ]] ||
-    {
-      echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_db_1 "
-      app_is_installed=$?
-    }
-  return "$app_is_installed"
+  [[ "${mdm_store["app_is_installed"]}" ]] && return "${mdm_store["app_is_installed"]}" # already calculated
+  mdm_store["app_is_installed"]=0
+  echo "${mdm_store["formatted_docker_ps_output"]}" | grep -q "^${COMPOSE_PROJECT_NAME}_db_1 " || mdm_store["app_is_installed"]="$?"
+  return "${mdm_store["app_is_installed"]}"
 }
 
-is_magento_app_running() {
+is_magento_app_running_cached() {
   is_detached && return 1 # n/a
-  [[ "$magento_app_is_running" ]] && return "$magento_app_is_running" # already calculated
+  [[ "${mdm_store["magento_app_is_running"]}" ]] && return "${mdm_store["magento_app_is_running"]}" # already calculated
   local service services
   services="$(get_docker_compose_runtime_services)"
-  magento_app_is_running=0 # assume up and will return 0 unless an expected up service is not found
+  mdm_store["magento_app_is_running"]=0 # assume up and will return 0 unless an expected up service is not found
   for service in $services; do
     # if a service sets to 1, func will have non-zero exit, so false (app is not fully running)
-    echo "$formatted_cached_docker_ps_output" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" ||
-      { magento_app_is_running=1; break; }
+    echo "${mdm_store["formatted_docker_ps_output"]}" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" ||
+      { mdm_store["magento_app_is_running"]="$?"; break; }
   done
-  return "$magento_app_is_running"
+  return "${mdm_store["magento_app_is_running"]}"
 }
 
 is_pwa_module_installed() {
@@ -239,21 +251,20 @@ are_required_ports_free() {
 }
 
 is_nginx_rev_proxy_running() {
-  container_id=$(docker ps -q --filter 'label=mdm-nginx-rev-proxy')
-  [[ -n "$container_id" ]]
+  echo "${mdm_store["formatted_docker_ps_output"]}" | grep -q ' Up .*mdm-nginx-rev-proxy'
 }
 
 is_network_state_ok() {
   # check once and store result in var
-  [[ -n "$network_state_is_ok" ]] || {
+  [[ -n "${mdm_store["network_state_is_ok"]}" ]] || {
     are_required_ports_free || is_nginx_rev_proxy_running
-    network_state_is_ok=$?
+    mdm_store["network_state_is_ok"]="$?"
   }
-  return "$network_state_is_ok"
+  return "${mdm_store["network_state_is_ok"]}"
 }
 
 are_other_magento_apps_running() {
-  echo "$formatted_cached_docker_ps_output" | \
+  echo "${mdm_store["formatted_docker_ps_output"]}" | \
     grep "_db_1 " | \
     grep -v "^${COMPOSE_PROJECT_NAME}_db_1 " | \
     grep -q -v ' Exited$'
@@ -289,9 +300,13 @@ lib_sourced_for_specific_bundled_app() {
     return 0
   fi
   # else is the sourcing process a specific app instance?
-  # DON'T use ${BASH_SOURCE[-1]} b/c this may be an exceptional reference -> before bash is upgraded on mac
+  # DON'T use ${BASH_SOURCE[-1]} b/c invalid syntax before bash upgraded
   local oldest_parent_path="${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}"
-  [[ -n "$(which realpath)" ]] && oldest_parent_path="$(realpath "$oldest_parent_path")"
+  if which realpath > /dev/null 2>&1; then
+    oldest_parent_path="$(realpath "$oldest_parent_path")"
+  else 
+    return 1 # TODO this is not strictly correct but this func doesn't matter before realpath is installed?
+  fi
   [[ "$oldest_parent_path" =~ \.app\/Contents\/ ]] &&
     apps_resources_dir="${oldest_parent_path/\/Contents\/*/\/Contents\/Resources}" &&
     export apps_resources_dir
@@ -305,7 +320,7 @@ lookup_latest_remote_sem_ver() {
 is_update_available() {
   # check for a new version once a day (86400 secs)
   local latest_sem_ver more_recent_of_two
-  if [[ -f "$mdm_ver_file" && "$(( $("$date_cmd" +"%s") - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
+  if [[ -f "$mdm_ver_file" && "$(( $(date +"%s") - $("$stat_cmd" -c%Z "$mdm_ver_file") ))" -lt 86400 ]]; then
     latest_sem_ver="$(<"$mdm_ver_file")"
     [[ "$mdm_version" == "$latest_sem_ver" ]] && return 1
     # verify latest is more recent using sort -V
@@ -360,16 +375,6 @@ is_valid_mc_url() {
   [[ "$url" =~ https?://.*magento\.cloud/ ]]
 }
 
-get_project_from_mc_url() {
-  local url="$1"
-  echo "$url" | perl -ne '/.*?\/projects\/([^\/]+)/ and print $1'
-}
-
-get_branch_from_mc_url() {
-  local url="$1"
-  echo "$url" | perl -ne '/.*?\/environments\/([^\/]+)/ and print $1'
-}
-
 is_hostname_resolving_to_local() {
   local curl_output
   curl_output="$(curl --max-time 0.5 -vI "$1" 2>&1 >/dev/null | grep Trying)"
@@ -380,8 +385,11 @@ is_interactive_terminal() {
   [[ $- == *i* ]]
 }
 
-launched_from_mac_menu() {
+launched_from_mac_menu_cached() {
+  [[ "${mdm_store["launched_from_mac_menu_cached"]}" ]] && return "${mdm_store["launched_from_mac_menu_cached"]}" # already calculated
   [[ "$(ps -p $PPID -o comm=)" =~ Contents/MacOS/ ]]
+  mdm_store["launched_from_mac_menu_cached"]="$?"
+  return "${mdm_store["launched_from_mac_menu_cached"]}"
 }
 
 is_running_as_sudo() {
@@ -389,27 +397,42 @@ is_running_as_sudo() {
 }
 
 is_mkcert_CA_installed() {
-  local warning_count
-  is_mkcert_installed || return 1
-  warning_count="$(mkcert 2>&1 | grep -c "Warning:")"
-  if is_CI; then
-    # no chrome or firefox installed on CI so a warning remains
-    [[ "$warning_count" -eq 1 ]]
-  else
-    [[ "$warning_count" -eq 0 ]]
-  fi
+  # if user install mkcert CA out of band, this will be inaccurate
+  # but using the menu item to install/uninstall again will bring it back in sync
+  [[ -f "$mkcert_installed_flag_file" ]]
 }
 
-has_valid_composer_auth() {
-  [[ "$COMPOSER_AUTH" =~ \{.*github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com.*\} ]] && return 0
-  if [[ -f "$HOME/.composer/auth.json" ]]; then
-    # print auth.json as 1 line and assign to var
-    COMPOSER_AUTH="$(perl -0777 -pe 's/\r?\n//g;s/\s*("|{|})\s*/$1/g' "$HOME/.composer/auth.json")"
-    if [[ "$COMPOSER_AUTH" =~ github-oauth && "$COMPOSER_AUTH" =~ repo.magento.com ]]; then
-      export COMPOSER_AUTH && return 0
-    fi
+is_string_valid_composer_credentials() {
+  local str="$1" status=0 md5 md5_file
+  md5="$(echo "$1" | md5sum | sed 's/ .*//')"
+  md5_file="$mdm_path/.md5-of-passed-composer-cred-${md5}"
+  # for max menu rendering speed, check for md5 of prev passed credentials
+  [[ -f "$md5_file" ]] && return 0
+  echo "$1" | jq -e -c '[."github-oauth"."github.com", ."http-basic"."repo.magento.com"["username","password"]] |
+      map(strings) |
+      length == 3' > /dev/null 2>&1 || status="$?"
+  if [[ "$status" -eq 0 ]]; then
+    touch "$md5_file"
   fi
-  return 1
+  return "$status"
+}
+
+has_valid_composer_credentials_cached() {
+  [[ "${mdm_store["composer_credentials_are_valid"]}" ]] && return "${mdm_store["composer_credentials_are_valid"]}" # already calculated
+  # check the env var
+  [[ "$COMPOSER_AUTH" ]] && 
+    is_string_valid_composer_credentials "$COMPOSER_AUTH" && 
+    mdm_store["composer_credentials_are_valid"]=0 && 
+    return "${mdm_store["composer_credentials_are_valid"]}"
+  # check the user's file
+  [[ -f "$HOME/.composer/auth.json" ]] && 
+    COMPOSER_AUTH="$(<$HOME/.composer/auth.json)" && 
+    is_string_valid_composer_credentials "$COMPOSER_AUTH" &&
+    mdm_store["composer_credentials_are_valid"]=0 &&
+    export COMPOSER_AUTH &&
+    return "${mdm_store["composer_credentials_are_valid"]}"
+  mdm_store["composer_credentials_are_valid"]=1
+  return "${mdm_store["composer_credentials_are_valid"]}"
 }
 
 ###
@@ -429,7 +452,7 @@ trim() {
 }
 
 error() {
-  printf "\n%b%s%b\n\n" "$red" "[$("$date_cmd" --utc +"%Y-%m-%d %H:%M:%S")] Error: $*" "$no_color" 1>&2 && exit 1
+  printf "\n%b%s%b\n\n" "$red" "[$(date +"%FT%TZ")] Error: $*" "$no_color" 1>&2 && exit 1
 }
 
 warning() {
@@ -453,7 +476,7 @@ $*
 }
 
 msg_w_timestamp() {
-  msg "[$("$date_cmd" -u +%FT%TZ)] $*"
+  msg "[$(date +"%FT%TZ")] $*"
 }
 
 convert_secs_to_hms() {
@@ -466,7 +489,7 @@ convert_secs_to_hms() {
 }
 
 seconds_since() {
-  echo "$(( $("$date_cmd" +"%s") - $1 ))"
+  echo "$(( $(date +"%s") - $1 ))"
 }
 
 reverse_array() {
@@ -501,6 +524,16 @@ get_github_token_from_composer_auth() {
     [[ "$token" =~ [a-zA-Z0-9]{20,} ]] && echo "$token" && return
   }
   return 1
+}
+
+get_project_from_mc_url() {
+  local url="$1"
+  echo "$url" | perl -ne '/.*?\/projects\/([^\/]+)/ and print $1'
+}
+
+get_branch_from_mc_url() {
+  local url="$1"
+  echo "$url" | perl -ne '/.*?\/environments\/([^\/]+)/ and print $1'
 }
 
 ###
@@ -606,6 +639,15 @@ get_pwa_prev_hostname() {
   [[ "$mdm_domain" ]] && echo "pwa-prev.$mdm_domain" || echo "pwa-prev"
 }
 
+get_MAGENTO_CLOUD_vars_as_json() {
+  perl -MMIME::Base64 -ne '/(MAGENTO_CLOUD_.*?)=(.*)/ and print "\"$1\":".decode_base64($2).",\n"' \
+    "$app_resources_dir/app/.docker/config.env" | perl -0777 -pe 's/^/{/;s/.$/}/;'
+}
+
+set_MAGENTO_CLOUD_vars_json_to_env() {
+  jq -r 'to_entries|map("\(.key)=\(.value|tostring|@base64)")|.[]'
+}
+
 export_pwa_hostnames() {
   PWA_HOSTNAME="$(get_pwa_hostname)"
   PWA_PREV_HOSTNAME="$(get_pwa_prev_hostname)"
@@ -614,6 +656,11 @@ export_pwa_hostnames() {
 
 find_bridged_docker_networks() {
   docker network ls -q --filter 'driver=bridge' --filter 'name=_default'
+}
+
+network_has_running_web_service() {
+  [[ "$(docker ps -a --filter "network=$1" \
+    --filter "label=com.docker.compose.service=web" --format "{{.Ports}}")" =~ \-\>80 ]]
 }
 
 find_varnish_port_by_network() {
@@ -656,7 +703,7 @@ backup_hosts() {
     warning "Creating hosts back up dir - should only need to do this if MDM install was skipped (e.g. testing/development)"
     mkdir -p "$hosts_backup_dir"
   }
-  cp /etc/hosts "$hosts_backup_dir/hosts.$("$date_cmd" "+%s")"
+  cp /etc/hosts "$hosts_backup_dir/hosts.$(date "+%s")"
 }
 
 add_hostnames_to_hosts_file() {
@@ -893,10 +940,10 @@ track_job_status_and_wait_for_exit() {
     wait "$pid_to_wait_for" # wait but don't track b/c no app's mdm job dir to associate job to
   else
     msg="$2"
-    job_file="$apps_mdm_jobs_dir/$("$date_cmd" +"%s").$pid_to_wait_for"
+    job_file="$apps_mdm_jobs_dir/$(date +"%s").$pid_to_wait_for"
     echo "$msg" > "$job_file"
     wait "$pid_to_wait_for" || exit_code=$?
-    mv "$job_file" "$job_file.$("$date_cmd" +"%s").$exit_code.done"
+    mv "$job_file" "$job_file.$(date +"%s").$exit_code.done"
   fi
 }
 
@@ -917,7 +964,7 @@ extract_tar_to_existing_container_path() {
 start_docker_service() {
   if is_mac; then
     open --background -a Docker
-    while ! is_docker_ready; do
+    while ! is_docker_running; do
       sleep 1
     done
   else
@@ -1022,8 +1069,13 @@ get_docker_compose_runtime_services() {
 
   # this method has no reliance on python, but assumes each service is 1 indentation level of 2 spaces
   # that should be a fair assumption since the output is generated by docker-compose config
-  docker-compose config |
-    perl -0777 -ne '/services:[\n]*\n(.*?)\n\w/s and print $1' | # all of top level services key
+
+  # docker-compose config |
+  # perl -0777 -ne '/services:[\n]*\n(.*?)\n\w/s and print $1'
+
+  # the above method using docker-compose is a bit too slow for menu rendering, but since the primary docker-compose.yml
+  # should contain all the services this should be fine
+  perl -0777 -ne '/services:[\n]*\n(.*?)\n\w/s and print $1' "$apps_resources_dir/app/docker-compose.yml" | # all of top level services key
     perl -ne '/^  (\w.*):/ and print "$1 "' | # just service names
     perl -pe 's/\b(build|deploy|generic|tls)\b\s*//g;s/^\s*//;s/\s*$//' # remove non runtime services
 }
@@ -1031,28 +1083,29 @@ get_docker_compose_runtime_services() {
 # if come across entry with no handler or link, entering submenu
 # 
 render_platypus_status_menu() {
-  local index key key_length menu_output is_submenu
+  local index key key_length menu_output is_submenu highlight_func highlight_text tmp_output
   key_length=${#mdm_menu_items_keys[@]}
   menu_output=""
-  is_submenu=false
+  is_submenu=""
   # based on Platypus menu syntax, submenu headers are not seletctable so no handler or link entry (unlike actual submenu items)
   for (( index=0; index < key_length; index++ )); do
     key="${mdm_menu_items_keys[$index]}"
     if [[ $key = "end submenu" ]]; then
-      $is_submenu && {
-        is_submenu=false
-        launched_from_mac_menu && menu_output+=$'\n'
+      [[ "$is_submenu" ]] && {
+        is_submenu=""
+        launched_from_mac_menu_cached && menu_output+=$'\n'
         continue
       }
     fi
     # no handler or link? must be a submenu heading
     [[ -z "${mdm_menu_items["$key-handler"]}" && -z "${mdm_menu_items["$key-link"]}" ]] && {
+      tmp_output=""
       # if menu has some output already & if a submenu heading, was the last char a newline? if not, add one to start new submenu
-      [[ -n $menu_output && ! $menu_output =~ $'\n'$ ]] && menu_output+=$'\n'
-      if launched_from_mac_menu; then
-        menu_output+="SUBMENU|$key"
+      [[ -n "$menu_output" && ! "$menu_output" =~ $'\n'$ ]] && tmp_output=$'\n'
+      if launched_from_mac_menu_cached; then
+        menu_output+="${tmp_output}SUBMENU|$key"
       else
-        menu_output+="$key"$'\n'
+        menu_output+="$tmp_output$key"$'\n'
       fi
       is_submenu=true
       continue
@@ -1062,20 +1115,24 @@ render_platypus_status_menu() {
     if [[ "$key" =~ ^DISABLED && "$key" =~ ---$ ]]; then
       menu_output+="$key"$'\n'
     else
-      if launched_from_mac_menu; then
-        $is_submenu && menu_output+="|"
-        menu_output+="$key"
-        $is_submenu || menu_output+=$'\n'
+      if launched_from_mac_menu_cached; then
+        # OSX menu output
+        if [[ "$is_submenu" ]]; then
+          menu_output+="|$key"
+        else
+          menu_output+="$key"$'\n'
+        fi
       else
-        #$is_submenu || menu_output+=$'\n'
-        [[ -n "${mdm_menu_items["$key-handler"]}" ]] && {
-          if $is_submenu; then
-            menu_output+="   $key  $(warning "${mdm_menu_items["$key-handler"]}")"$'\n'
-          else
-            menu_output+="$key  $(warning "${mdm_menu_items["$key-handler"]}")"$'\n'
-          fi
+        # CLI output
+        tmp_output=""
+        [[ "$is_submenu" ]] && tmp_output="   " # indent
+        highlight_func="msg"
+        highlight_text="${mdm_menu_items["$key-link"]}"
+        [[ "${mdm_menu_items["$key-handler"]}" ]] && {
+          highlight_func="warning"
+          highlight_text="${mdm_menu_items["$key-handler"]}"
         }
-        #[[ -n "${mdm_menu_items["$key-link"]}" ]] && menu_output+="$key  $(msg "${mdm_menu_items["$key-link"]}")"
+        menu_output+="$tmp_output$key $($highlight_func "$highlight_text")"$'\n'
       fi
     fi
   done
@@ -1174,7 +1231,7 @@ init_mdm_logging() {
 
 init_mac_quit_detection() {
   # quit detection is only relevant to the mac gui app (not mac testing or cmd line usage), so return if not launched from mac menu
-  launched_from_mac_menu || return 0
+  launched_from_mac_menu_cached || return 0
 
   local quit_detection_file="$apps_mdm_dir/.$PPID-still_running"
   # if quit_detection_file does not exist, this is either the 1st start or it was removed when quit
@@ -1212,7 +1269,7 @@ download_mdm_config() {
 }
 
 self_install() {
-  local brew_pkgs_for_mac=("bash" "coreutils") brew_pkgs_for_all_platforms=("mkcert" "nss")
+  local brew_pkgs_for_mac=("bash" "coreutils" "jq") brew_pkgs_for_all_platforms=("mkcert" "nss")
   is_interactive_terminal && printf '\e[8;50;140t' # resize terminal
 
   # on linux, some services require a min virtual memory map count and may need to be raised
@@ -1267,11 +1324,11 @@ Once all requirements are installed and validated, this script will not need to 
       msg_w_newlines "
     Press ANY key to continue to the Docker Desktop For Mac download page. Then download and install that app.
 
-    https://hub.docker.com/editions/community/docker-ce-desktop-mac/
+    $docker_install_link
   "
       ! is_CI && read -n 1 -s -r -p ""
       # open docker for mac installation page
-      open "https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
+      open "$docker_install_link"
     }
 
     msg_w_newlines "CLI dependencies successfully installed. Once you download and install Docker Desktop for Mac, this script should not run again."
@@ -1298,11 +1355,6 @@ lib_sourced_for_specific_bundled_app && {
   init_app_specific_vars
   [[ "$debug" ]] && init_mdm_logging
   ! is_detached && is_mac && ! is_CI && init_mac_quit_detection
-  # if docker is up, then cache this output to parse when adding and filtering additional available menu options
-  is_docker_ready && formatted_cached_docker_ps_output="$(
-    docker ps -a -f "label=com.docker.compose.service" --format "{{.Names}} {{.Status}}" | \
-      perl -pe 's/ (Up|Exited) .*/ $1/'
-  )"
 }
 
 : # need to return true or will exit when sourced with "-e" and last test = false

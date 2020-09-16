@@ -42,7 +42,7 @@ get_job_statuses() {
       fi
     else
       prefix="DISABLED|⏳ "
-      duration=" $(convert_secs_to_hms "$(( $("$date_cmd" +"%s") - "$job_start" ))")"
+      duration=" $(convert_secs_to_hms "$(( $(date +"%s") - "$job_start" ))")"
     fi
     echo "$prefix $job_msg $duration"
   done
@@ -58,11 +58,12 @@ install_additional_tools() {
       curl -sLS https://accounts.magento.cloud/cli/installer | php
     }
 
-    ! is_docker_bash_completion_installed && is_mac && {
+    ! is_docker_bash_completion_installed_on_mac && is_mac && {
       msg_w_newlines "Installing shell completion support for Docker for Mac ..."
       etc=/Applications/Docker.app/Contents/Resources/etc
-      ln -s "$etc/docker.bash-completion" "$(brew --prefix)/etc/bash_completion.d/docker"
-      ln -s "$etc/docker-compose.bash-completion" "$(brew --prefix)/etc/bash_completion.d/docker-compose"
+      [[ -d /usr/local/etc ]] || error "Expected destination for bash completion does not exist"
+      ln -s "$etc/docker.bash-completion" "/usr/local/etc/bash_completion.d/docker"
+      ln -s "$etc/docker-compose.bash-completion" "/usr/local/etc/bash_completion.d/docker-compose"
     }
 
     is_mac && ! is_platypus_installed && {
@@ -169,7 +170,7 @@ install_app() {
     echo "$finished_msg"
   } >> "$handler_log_file" 2>&1 &
   background_install_pid="$!"
-  if launched_from_mac_menu; then
+  if launched_from_mac_menu_cached; then
     show_mdm_logs
   else
     # https://superuser.com/a/449307/10719
@@ -254,12 +255,14 @@ toggle_mkcert_CA_install() {
     if is_mkcert_CA_installed; then
       warning_w_newlines "Removing your local certificate authority. Your password is required to make these changes."
       mkcert -uninstall
+      rm "$mkcert_installed_flag_file"
       ! is_mkcert_CA_installed && msg_w_newlines "Successfully removed." || msg_w_newlines "Please try again."
     else
       warning_w_newlines "Please be careful when installing a local certificate authority and only continue if you understand the risks.
 This will require your password.
       "
       mkcert -install
+      touch "$mkcert_installed_flag_file"
       is_mkcert_CA_installed && msg_w_newlines "Successfully installed." || msg_w_newlines "Please try again."
     fi
   }
@@ -422,7 +425,7 @@ switch_to_developer_mode() {
 start_mdm_shell() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local services_status
-    if is_magento_app_installed; then
+    if is_magento_app_installed_cached; then
       services_status="$(docker-compose ps)"
     else
       services_status="$(warning_w_newlines "Magento app not installed yet.")"
@@ -467,12 +470,16 @@ start_tmate_session() {
 If you continue, anyone with your unique url will be able to access to your system."
       confirm_or_exit
     fi
-    tmate_socket="/tmp/tmate.$("$date_cmd" "+%s")"
+    tmate_socket="/tmp/tmate.$(date "+%s")"
     [[ "$(pgrep tmate)" ]] && { 
       pkill tmate # kill any existing session
       sleep 3
     }
-    tmate -a "$auth_keys_file" -S "$tmate_socket" new-session -d
+    if [[ "$mdm_tmate_authorized_keys_url" ]]; then
+      tmate -a "$auth_keys_file" -S "$tmate_socket" new-session -d
+    else
+      tmate -S "$tmate_socket" new-session -d
+    fi
     tmate -S "$tmate_socket" wait tmate-ready
     ssh_url="$(tmate -S "$tmate_socket" display -p '#{tmate_ssh}')"
     msg_w_newlines "Provide this url to your remote collaborator. Access will end when they close their session or after a period of inactivity."

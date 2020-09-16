@@ -37,8 +37,9 @@ prepare_certs_and_keys() {
 # the config output assumes the letsencrypt convention of TLS cert paths
 # and mounting the $mdm_path/certs to /etc/letsencrypt
 write_nginx_config_for_host_at_port() {
-  local hostname="$1" web_port="$2" cert_dir
-  [[ ! $hostname || ! $web_port ]] && error "Missing config option for nginx."
+  local hostname="$1" port="$2" cert_dir
+  [[ "$hostname" ]] || error "Empty hostname when writing nginx config."
+  [[ "$port" ]] || error "Empty port when writing nginx config."
   does_cert_and_key_exist_for_domain "$hostname" ||
     error "Missing necessary certificate or private key for $hostname."
   cat << EOF
@@ -49,7 +50,7 @@ write_nginx_config_for_host_at_port() {
       ssl_certificate /etc/letsencrypt/$hostname/fullchain1.pem;
       ssl_certificate_key /etc/letsencrypt/$hostname/privkey1.pem;
       location / {
-        proxy_pass http://$host_docker_internal:$web_port;
+        proxy_pass http://$host_docker_internal:$port;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-Proto \$scheme;
         # TODO should this be in pmetpublic/magento-cloud-docker-nginx instead?
@@ -63,11 +64,14 @@ EOF
 
 # find each magento app by interating over docker's networks
 write_nginx_configs() {
-  local network hostname web_port
+  local network hostname varnish_port
   for network in $(find_bridged_docker_networks); do
-    web_port="$(find_varnish_port_by_network "$network")"
+    network_has_running_web_service "$network" || continue # with multiple apps, some may be down and the proxy should not process
+    varnish_port="$(find_varnish_port_by_network "$network")"
+    [[ "$varnish_port" ]] || error "Could not find varnish port for related running web service."
     hostname="$(find_web_service_hostname_by_network "$network")"
-    [[ -n "$hostname" ]] && write_nginx_config_for_host_at_port "$hostname" "$web_port" > "$tmp_nginx_conf_dir/$hostname.conf"
+    [[ "$hostname" ]] || error "Could not determine hostname for running web service"
+    write_nginx_config_for_host_at_port "$hostname" "$varnish_port" > "$tmp_nginx_conf_dir/$hostname.conf"
   done
 
   # plus 2 pwa demo hostnames
