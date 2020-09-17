@@ -46,7 +46,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-        MDM_OVERRIDE_CONFIG: [""]
+        MDM_OVERRIDE_CONFIG: [true,""]
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
