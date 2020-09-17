@@ -199,13 +199,13 @@ determined it's not currently appropiate. Many items only become available after
 ### Configuration of MDM
 |Feature|Config Param|
 |-|---|
-| Certs |`mdm_domain`|
+| Public Certs |`mdm_domain`|
 | |`mdm_domain_fullchain_gh_url`|
 | |`mdm_domain_privkey_gh_url`|
 | | |
 | Remote Support/Access |`mdm_tmate_authorized_keys_url`|
 | | |
-| Remote Web Access|`mdm_tunnel_domain`|
+| Public Web Access|`mdm_tunnel_domain`|
 | |`mdm_tunnel_ssh_url`|
 | |`mdm_tunnel_pk_url`|
 
