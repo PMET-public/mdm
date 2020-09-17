@@ -490,7 +490,7 @@ If you continue, anyone with your unique url will be able to access to your syst
 stop_tmate_session() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     if pkill tmate; then
-      msg_w_newlines "Succcessfully stopped 1 or more remote system access sessions."
+      msg_w_newlines "Successfully stopped 1 or more remote system access sessions."
     else
       msg_w_newlines "No active remote access sessions."
     fi
@@ -499,11 +499,15 @@ stop_tmate_session() {
 
 start_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    if pgrep -f "ssh.*$mdm_tunnel_ssh_url" > /dev/null; then
-      msg_w_newlines "Remote web access is already running. If the url is unresponsive, use the menu to stop remote connection and try again."
-      return 1
-    fi
     local remote_port local_port tmp_file hostname
+    is_web_tunnel_configured || error "1 or more ssh tunnel vars not configured"
+    hostname="$(get_hostname_for_this_app)"
+    if [[ "$hostname" =~ $mdm_tunnel_domain ]] && pgrep -f "ssh.*$mdm_tunnel_ssh_url" > /dev/null; then
+      msg "Remote web access is already enabled via "
+      warning "https://$hostname"
+      msg ". If the url is unresponsive, use the menu to stop remote connection and try again."
+      return 0
+    fi
     remote_port="$(( $RANDOM + 20000 ))" # RANDOM is between 0-32767 (2^16 / 2 - 1)
     local_port="$(docker ps -a --filter "name=varnish" --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME" --format "{{.Ports}}" | \
       tr ',' '\n' | \
@@ -520,8 +524,9 @@ start_remote_web_access() {
       -i "$tmp_file" \
       -NR "$remote_port":127.0.0.1:"$local_port" \
       "$mdm_tunnel_ssh_url"
-    update_hostname "$remote_port.$mdm_tunnel_domain"
-    msg_w_newlines "Successfully opened public url https://$hostname/."
+    hostname="$remote_port.$mdm_tunnel_domain"
+    update_hostname "$hostname"
+    msg_w_newlines "Successfully opened public url https://$hostname"
     rm "$tmp_file"
   }
 }
@@ -529,9 +534,11 @@ start_remote_web_access() {
 stop_remote_web_access() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local hostname
-    is_web_tunnel_configured || return 0
+    is_web_tunnel_configured || error "1 or more ssh tunnel vars not configured"
     stop_ssh_tunnel
-    update_hostname "$(get_prev_hostname_for_this_app)"
+    hostname="$(get_prev_hostname_for_this_app)"
+    update_hostname "$hostname"
+    msg_w_newlines "Successfully reverted to local url https://$hostname"
   }
 }
 

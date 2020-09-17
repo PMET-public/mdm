@@ -115,7 +115,7 @@ is_tmate_installed() {
 }
 
 is_web_tunnel_configured() {
-  [[ "$mdm_tunnel_ssh_url" ]]
+  [[ "$mdm_tunnel_ssh_url" && "$mdm_tunnel_domain" && "$mdm_tunnel_pk_url" ]]
 }
 
 are_additional_tools_installed() {
@@ -595,7 +595,10 @@ set_hostname_for_this_app() {
 
 stop_ssh_tunnel() {
   is_web_tunnel_configured || return 0
-  if pkill -f "ssh.*$mdm_tunnel_ssh_url"; then
+  local hostname
+  hostname="$(get_hostname_for_this_app)"
+  port="${hostname/.*}"
+  if pkill -f "ssh.*$port:.*$mdm_tunnel_ssh_url"; then
     msg_w_newlines "Succcessfully stopped 1 or more remote web sessions."
   else
     msg_w_newlines "No active remote web sessions."
