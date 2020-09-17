@@ -67,7 +67,7 @@ render_platypus_status_menu
 handle_mdm_args
 ensure_mdm_log_files_exist
 run_bundled_app_as_script
-init_app_specific_vars
+init_specific_app
 init_mdm_logging
 init_mac_quit_detection
 download_mdm_config

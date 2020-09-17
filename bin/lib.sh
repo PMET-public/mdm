@@ -1203,7 +1203,7 @@ run_bundled_app_as_script() {
   fi
 }
 
-init_app_specific_vars() {
+init_specific_app() {
   # export vars that may be used in a non-child terminal script so when lib is sourced, vars are defined
   export_pwa_hostnames
   export_compose_project_name
@@ -1355,7 +1355,7 @@ self_uninstall() {
 }
 
 lib_sourced_for_specific_bundled_app && {
-  init_app_specific_vars
+  init_specific_app
   [[ "$debug" ]] && init_mdm_logging
   ! is_detached && is_mac && ! is_CI && init_mac_quit_detection
 }
