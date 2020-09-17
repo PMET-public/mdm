@@ -76,8 +76,10 @@ setup() {
 
 @test 'start_remote_web_access' {
   is_web_tunnel_configured || skip
-  output="$("./$app_link_name" start_remote_web_access 3>&-)"
-  run echo "$output"
+  output=$(mktemp)
+  # in CI envs on bash 4.4, this syntax worked when others failed
+  "./$app_link_name" start_remote_web_access > "$output" 2>&1 3>&-
+  run cat "$output"
   assert_success
   assert_output -e "success"
 }
