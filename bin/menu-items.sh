@@ -101,7 +101,7 @@ is_update_available && {
   }
 
   is_magento_app_running_cached && is_network_state_ok && {
-    key="🚀 Open Magento app in browser"
+    key="🚀 Open https://$(get_hostname_for_this_app)"
     description=""
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=open_app
