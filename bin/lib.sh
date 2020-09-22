@@ -61,7 +61,7 @@ dockerize_log_file="$mdm_path/dockerize.log"
 docker_settings_file="$HOME/Library/Group Containers/group.com.docker/settings.json"
 advanced_mode_flag_file="$mdm_path/advanced-mode-on"
 mkcert_installed_flag_file="$mdm_path/.mkcert-installed"
-rel_app_config_file="app/.mdm_app_config"
+rel_app_config_file="app/.docker/config.env"
 mdm_ver_file="$mdm_path/latest-sem-ver"
 magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 

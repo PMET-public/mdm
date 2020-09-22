@@ -211,8 +211,6 @@ cp -a "$tmp_app_dir" "$app_dir"
 new_compose_project_name="$app_hostname"
 new_compose_project_name+="-$(head /dev/urandom | LC_ALL=C tr -dc '[:lower:]' | head -c 4)"
 new_compose_project_name="$(adjust_compose_project_name_for_docker_compose_version "$new_compose_project_name")"
-printf "APP_HOSTNAME=%s\nPREV_APP_HOSTNAME=%s\nCOMPOSE_PROJECT_NAME=%s" \
-  "$app_hostname" "$app_hostname" "$new_compose_project_name" > "$app_dir/.mdm_app_config"
 
 # if cloning existing env, download the media dir minus the cache
 # this will cause significant redundancy of images until can be deduped
@@ -291,6 +289,8 @@ docker start -a "$cid"
 # get generated files from container
 docker cp "$cid:/app/docker-compose.yml" "$app_dir"
 docker cp "$cid:/app/.docker" "$app_dir"
+printf "APP_HOSTNAME=%s\nPREV_APP_HOSTNAME=%s\nCOMPOSE_PROJECT_NAME=%s" \
+  "$app_hostname" "$app_hostname" "$new_compose_project_name" >> "$app_dir/.docker/config.env"
 
 # get generated composer cache from container
 docker cp "$cid:/app/.composer" .composer
