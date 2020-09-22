@@ -662,7 +662,7 @@ find_bridged_docker_networks() {
 }
 
 network_has_running_web_service() {
-  [[ "$(docker ps -a --filter "network=$1" \
+  [[ "$(docker ps --filter "network=$1" \
     --filter "label=com.docker.compose.service=web" --format "{{.Ports}}")" =~ \-\>80 ]]
 }
 
