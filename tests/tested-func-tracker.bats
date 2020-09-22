@@ -49,7 +49,7 @@ get_pwa_prev_hostname
 export_pwa_hostnames
 find_bridged_docker_networks
 find_varnish_port_by_network
-find_web_service_hostname_by_network
+find_app_hostname_by_network
 find_mdm_hostnames
 find_hostnames_not_resolving_to_local
 has_valid_wildcard_domain
