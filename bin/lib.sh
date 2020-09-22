@@ -672,9 +672,9 @@ find_varnish_port_by_network() {
     sed 's/.*://;s/-.*//'
 }
 
-find_app_hostname_by_network() {
+find_running_app_hostname_by_network() {
   local cid resources_dir
-  cid="$(docker ps -a --filter "network=$1" --filter "label=com.docker.compose.service=fpm" --format "{{.ID}}")"
+  cid="$(docker ps --filter "network=$1" --filter "label=com.docker.compose.service=fpm" --format "{{.ID}}")"
   [[ "$cid" ]] || return 0
   docker exec "$cid" bash -c 'php bin/magento config:show "web/secure/base_url"' | perl -pe 's#^.*//(.*)/#$1#'
 }
@@ -684,7 +684,7 @@ find_mdm_hostnames() {
   hostnames=("$(get_pwa_hostname)" "$(get_pwa_prev_hostname)")
   networks="$(find_bridged_docker_networks)"
   for network in $networks; do
-    hostname="$(find_app_hostname_by_network "$network")"
+    hostname="$(find_running_app_hostname_by_network "$network")"
     [[ -n "$hostname" ]] && hostnames+=("$hostname")
   done
   echo "${hostnames[*]}"

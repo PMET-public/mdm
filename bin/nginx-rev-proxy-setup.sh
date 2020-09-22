@@ -69,7 +69,7 @@ write_nginx_configs() {
     network_has_running_web_service "$network" || continue # with multiple apps, some may be down and the proxy should not process
     varnish_port="$(find_varnish_port_by_network "$network")"
     [[ "$varnish_port" ]] || error "Could not find varnish port for related running web service."
-    hostname="$(find_app_hostname_by_network "$network")"
+    hostname="$(find_running_app_hostname_by_network "$network")"
     [[ "$hostname" ]] || error "Could not determine hostname for running web service"
     write_nginx_config_for_host_at_port "$hostname" "$varnish_port" > "$tmp_nginx_conf_dir/$hostname.conf"
   done
