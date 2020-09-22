@@ -182,7 +182,7 @@
         "-b", "pmet-2.4.0-demo",
         "-n", "demo",
         "-a", "${env:HOME}/.composer/auth.json",
-        "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
+        "-i", "${env:HOME}/.mdm/current/icons/demo.icns"
       ]
     },
     {
@@ -199,7 +199,7 @@
         "-b", "pmet-2.4.0-b2b",
         "-n", "b2b",
         "-a", "${env:HOME}/.composer/auth.json",
-        "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
+        "-i", "${env:HOME}/.mdm/current/icons/b2b.icns"
       ]
     },
     {

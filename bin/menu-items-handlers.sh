@@ -614,7 +614,7 @@ dockerize_app() {
       "$lib_dir/dockerize" -p "$project" -e "$branch" -m -i "$HOME/.mdm/current/icons/magento.icns"
     elif is_valid_github_web_url "$url"; then
       branch="$(get_branch_from_github_web_url "$url")"
-      "$lib_dir/dockerize" -g "$url" -b "$branch" -i "$HOME/.mdm/current/icons/magenot.icns"
+      "$lib_dir/dockerize" -g "$url" -b "$branch" -i "$HOME/.mdm/current/icons/magento.icns"
     else
       error "Url does not appear to be a valid GitHub url (ex. https://github.com...) or a valid Magento Cloud url from your MC projects page."
     fi
