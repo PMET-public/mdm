@@ -15,6 +15,7 @@
     - ["What is the default admin username and password?"](#what-is-the-default-admin-username-and-password)
     - ["How do I setup and where do I place my auth.json file?"](#how-do-i-setup-and-where-do-i-place-my-authjson-file)
     - ["What's auth.json used for?"](#whats-authjson-used-for)
+    - ["What does this error mean?"](#what-does-this-error-mean)
 - [MDM Developers](#mdm-developers)
   - [Configuration](#configuration)
     - [Configuration of MDM](#configuration-of-mdm)
@@ -213,7 +214,11 @@ Follow the instructions [here](https://devdocs.magento.com/guides/v2.4/install-g
 
 ### "What's auth.json used for?"
 
-You may have downloaded or received a pre-bundled app with all the required modules, but if you need/want to run `composer update` to get future updates, you will need an `auth.json` file. Also the GitHub token in the `auth.json` file is used to configure/download additional features of MDM (e.g. valid wildcard TLS certificates, web tunneling, etc.)
+You may have downloaded or received a pre-bundled app with all the required modules, but if you need/want to run `composer update` to get future updates OR you want to create your own app, you will need an `auth.json` file. Also the GitHub token in the `auth.json` file is used to configure/download additional features of MDM (e.g. valid wildcard TLS certificates, web tunneling, etc.)
+
+### "What does this error mean?"
+
+Please check to see if your [issue](https://github.com/PMET-public/mdm/issues?q=is%3Aissue) has already been reported and possibly solved. If not, please open a new one.
 
 # MDM Developers
 
