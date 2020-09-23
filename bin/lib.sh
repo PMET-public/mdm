@@ -1315,7 +1315,7 @@ Once all requirements are installed and validated, this script will not need to 
 
     # do not install docker (which is docker toolbox) via homebrew; use docker for mac instead
     # upgrade mac's bash, use coreutils for consistency across *NIX
-    ! brew list "${brew_pkgs_for_mac[@]}" > /dev/null && {
+    ! brew list "${brew_pkgs_for_mac[@]}" > /dev/null 2>&1 && {
       brew install "${brew_pkgs_for_mac[@]}"
     }
     brew upgrade "${brew_pkgs_for_mac[@]}"
