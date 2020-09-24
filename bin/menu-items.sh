@@ -101,9 +101,8 @@ is_update_available && {
   }
 
   is_magento_app_running_cached && is_network_state_ok && {
-    hostname_for_this_app="$(get_hostname_for_this_app)"
-    key="🚀 Open https://$hostname_for_this_app"
-    description=""
+    key="🚀 Open https://$(get_hostname_for_this_app)"
+    description="Opens your browser to the app's base url. The menu will render the base url instead of the function call. You'll actually see something like: '🚀 Open https://mysite.com'"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=open_app
   }
