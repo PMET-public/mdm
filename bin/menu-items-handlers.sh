@@ -133,7 +133,7 @@ install_app() {
     tar -cf - --exclude .docker --exclude .composer.tar.gz --exclude media.tar.gz . | \
       docker cp - "${COMPOSE_PROJECT_NAME}_build_1":/app
     # extract tars created for distribution via sync service e.g. dropbox, onedrive
-    extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
+    [[ -f .composer.tar.gz ]] && extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
     docker-compose run build cloud-build
