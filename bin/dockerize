@@ -272,73 +272,74 @@ if [[ "$skip_composer_cache" ]]; then
   rm -rf vendor "$mcd_only_tmp_dir" # clean up
 
 else
-# goals of the following composer operations:
-# 1. create a compressed tar file of the composer cache needed to install the app so
-#   a. smaller, more manageable distributable
-#   b. fast install during build
-#   c. no credentials needed in build container
-# 2. use prestissimo to speed up the creation of the cache
-# 3. do not run the composer.json install scripts (also to speed up the composer cache creation)
-# 4. use modified version of magento-cloud-docker to create modified docker-compose files
-# 5. restore original composer.json and composer.lock to ensure originals are used for deployment in containers
-cd "$tmp_app_dir" || exit 1
-[[ ! -z "$auth_json_path" ]] && # if auth.json provided, use it
-  cp "$auth_json_path" "$tmp_app_dir"
-[[ ! -f "auth.json" && ! $COMPOSER_AUTH ]] && 
-  warning_w_newlines "No auth.json OR COMPOSER_AUTH env var file detected! 
-Composer may be rate-limited and/or be unable to download required packages. 
-Waiting 30 secs before continuing or cancel (ctrl - c) and resolve this issue.
-  " &&
-  sleep 30
-# backup for later restore
-cp composer.json composer.json.bak
-cp composer.lock composer.lock.bak
-# install with original composer.lock (but with composer.json scripts skipped if they exist) 
-# so exact versions needed for build in cache
-python -c "import sys, json; data = json.load(sys.stdin); data.pop('scripts', 0); print(json.dumps(data))" \
-  < composer.json.bak > composer.json
 
-# get php version of app to run composer operations inside a version specific container
-app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml)
+  # goals of the following composer operations:
+  # 1. create a compressed tar file of the composer cache needed to install the app so
+  #   a. smaller, more manageable distributable
+  #   b. fast install during build
+  #   c. no credentials needed in build container
+  # 2. use prestissimo to speed up the creation of the cache
+  # 3. do not run the composer.json install scripts (also to speed up the composer cache creation)
+  # 4. use modified version of magento-cloud-docker to create modified docker-compose files
+  # 5. restore original composer.json and composer.lock to ensure originals are used for deployment in containers
+  cd "$tmp_app_dir" || exit 1
+  [[ ! -z "$auth_json_path" ]] && # if auth.json provided, use it
+    cp "$auth_json_path" "$tmp_app_dir"
+  [[ ! -f "auth.json" && ! "$COMPOSER_AUTH" && ! "$skip_composer_cache" ]] &&
+    warning_w_newlines "No auth.json OR COMPOSER_AUTH env var file detected!
+  Composer may be rate-limited and/or be unable to download required packages.
+  Waiting 30 secs before continuing or cancel (ctrl - c) and resolve this issue.
+    " && sleep 30
 
-# if using ssh, set ssh options
-[[ "$USE_SSH_AUTH_SOCK_FOR_DOCKER" && "$SSH_AUTH_SOCK" ]] && {
-  is_mac && SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
-  # home dir of container will /app
-  ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
-    --mount type=bind,src=$HOME/.ssh/known_hosts,target=/app/.ssh/known_hosts"
-}
+  # install with original composer.lock (but with composer.json scripts skipped if they exist) 
+  # so exact versions needed for build in cache
+  python -c "import sys, json; data = json.load(sys.stdin); data.pop('scripts', 0); print(json.dumps(data))" \
+    < composer.json.bak > composer.json
 
-composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
-docker pull "$composer_image"
-cid="$(docker create $ssh_auth_opts \
-  -e COMPOSER_AUTH -e COMPOSER_HOME=/app/.composer -e app_hostname="$app_hostname" -e OVERRIDE_MCD_IMAGE_VERSION \
-  "$composer_image" /tmp/script)"
-docker cp . "$cid:/app/"
-docker cp "$lib_dir/install-composer-deps-and-build-docker-compose.sh" "$cid:/tmp/script"
-docker start -a "$cid"
+  # get php version of app to run composer operations inside a version specific container
+  app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml)
 
-# get generated files from container
-docker cp "$cid:/app/docker-compose.yml" "$app_dir"
-docker cp "$cid:/app/.docker" "$app_dir"
-printf "APP_HOSTNAME=%s\nPREV_APP_HOSTNAME=%s\nCOMPOSE_PROJECT_NAME=%s" \
-  "$app_hostname" "$app_hostname" "$new_compose_project_name" >> "$app_dir/.docker/config.env"
+  # if using ssh, set ssh options
+  [[ "$USE_SSH_AUTH_SOCK_FOR_DOCKER" && "$SSH_AUTH_SOCK" ]] && {
+    is_mac && SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
+    # home dir of container will /app
+    ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
+      --mount type=bind,src=$HOME/.ssh/known_hosts,target=/app/.ssh/known_hosts"
+  }
 
-# get generated composer cache from container
-docker cp "$cid:/app/.composer" .composer
-# special case: assuming some existing installed packages already have catalog imagery from modules in pub/media, we can delete that media
-# this can significantly reduce composer archive size
-is_existing_cloud_env && {
-  find .composer -path "*/catalog/product/*.jpg" -delete || :
-}
-tar -zcf "$app_dir/.composer.tar.gz" .composer
+  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
+  docker pull "$composer_image"
+  cid="$(docker create $ssh_auth_opts \
+    -e COMPOSER_AUTH -e COMPOSER_HOME=/app/.composer -e app_hostname="$app_hostname" -e OVERRIDE_MCD_IMAGE_VERSION \
+    "$composer_image" /tmp/script)"
+  docker cp . "$cid:/app/"
+  docker cp "$lib_dir/install-composer-deps-and-build-docker-compose.sh" "$cid:/tmp/script"
+  docker start -a "$cid"
 
+  # get generated composer cache from container
+  docker cp "$cid:/app/.composer" .composer
+  # special case: assuming some existing installed packages already have catalog imagery from modules in pub/media, we can delete that media
+  # this can significantly reduce composer archive size
+  is_existing_cloud_env && {
+    find .composer -path "*/catalog/product/*.jpg" -delete || :
+  }
+  tar -zcf "$app_dir/.composer.tar.gz" .composer
+
+  # get generated files from container
+  docker cp "$cid:/app/docker-compose.yml" "$app_dir"
+  docker cp "$cid:/app/.docker" "$app_dir"
 
 fi
 
+# add to some vars to generated config
+printf "APP_HOSTNAME=%s\nPREV_APP_HOSTNAME=%s\nCOMPOSE_PROJECT_NAME=%s" \
+  "$app_hostname" "$app_hostname" "$new_compose_project_name" >> "$app_dir/.docker/config.env"
 
-# remove auth.json from distributable dir if it exists
-rm "$app_dir/auth.json" 2> /dev/null || :
+# OVERRIDE_MCD_IMAGE_VERSION is used to test new images from the pmetpublic/magento-cloud-docker project forked from magento
+[[ "$OVERRIDE_MCD_IMAGE_VERSION" ]] && {
+  echo "Overriding docker-compose.yml image versions ..."
+  perl -i -pe "/image.*pmetpublic\// and s/-[a-f0-9]{7}'/-$OVERRIDE_MCD_IMAGE_VERSION'/" "$app_dir/docker-compose.yml"
+} || :
 
 # use default cloud integration env database configuration, so ece-tools deploy will work the same for docker and cloud
 grep -q DATABASE_CONFIGURATION "$app_dir/.magento.env.yaml" || perl -i -pe "s/^  deploy:\s*$/  deploy:
