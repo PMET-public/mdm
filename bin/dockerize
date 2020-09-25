@@ -100,11 +100,12 @@ Options:
   -i /path/to/file.icns     Optional path to icon for Platyplus OSX app bundle (Apple .icns file preferred)
   -m                        Include complete media cache (larger size and longer time to run but image resizing already done)
   -d                        Detached app - no incl. Magento app - can be used for testing, our demo PWA frontend, etc.
+  -s                        Skip creation of composer cache. End user must have required dependency credentials to install.
 "
 }
 
 # parse options
-while getopts "b:e:g:hdp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
+while getopts "b:e:g:hdp:t:n:a:i:ms" opt || [[ $# -eq 0 ]]; do
   case "$opt" in
     h ) print_usage; exit 0 ;;
     d ) detached=true ;;
@@ -117,6 +118,7 @@ while getopts "b:e:g:hdp:t:n:a:i:m" opt || [[ $# -eq 0 ]]; do
     n ) app_hostname="$OPTARG" ;;
     a ) auth_json_path="$OPTARG" ;;
     i ) app_icon_path="$OPTARG" ;;
+    s ) skip_composer_cache=true ;;
     \? )
       print_usage
       [[ -z "$OPTARG" ]] && error "Missing required option(s)."
@@ -240,6 +242,36 @@ is_existing_cloud_env && {
 
 }
 
+if [[ "$skip_composer_cache" ]]; then
+
+  mcd_only_tmp_dir="$(mktemp -d)"
+  cd "$mcd_only_tmp_dir" || exit
+  # install only mcd
+  echo "{}" > composer.json
+  composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
+  composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
+  # create the dirs in the extra > map section of the composer.json
+  jq -r ".extra.map | map(.[1]) | .[]" vendor/magento/magento-cloud-docker/composer.json |
+    xargs -n 1 dirname |
+    sort -u |
+    xargs -n 1 mkdir -p
+  # copy the files in the extra > map section of the composer.json
+  # if it's a file (-f), then rsync should omit a slash from the src
+  # otherwise the slash is needed to prevent creating a dir inside the dir
+  jq -r ".extra.map | map(join(\" \")) | .[]" vendor/magento/magento-cloud-docker/composer.json |
+    perl -pe 's{(.*) (.*)}
+      {
+        "rsync -a ./vendor/magento/magento-cloud-docker/".
+        ((-f "./vendor/magento/magento-cloud-docker/$1") ? "$1 $2" : "$1/ $2")
+      }e' |
+    bash
+  rm composer.*
+  rsync -a ./ "$app_dir/" # copy everything over
+  cd "$app_dir" || exit
+  ./vendor/bin/ece-docker build:compose --host="$app_hostname" # create the docker files
+  rm -rf vendor "$mcd_only_tmp_dir" # clean up
+
+else
 # goals of the following composer operations:
 # 1. create a compressed tar file of the composer cache needed to install the app so
 #   a. smaller, more manageable distributable
@@ -301,9 +333,9 @@ is_existing_cloud_env && {
 }
 tar -zcf "$app_dir/.composer.tar.gz" .composer
 
-# restore the original composer files for use in the build container later
-mv composer.json.bak composer.json
-mv composer.lock.bak composer.lock
+
+fi
+
 
 # remove auth.json from distributable dir if it exists
 rm "$app_dir/auth.json" 2> /dev/null || :
