@@ -196,8 +196,9 @@ else
     cd ..
   }
 fi
-# remove git dir and auth.json if it exists
-rm -rf "$tmp_app_dir/.git" "$tmp_app_dir/auth.json" 2> /dev/null || :
+
+# remove auth.json if it exists
+rm "$tmp_app_dir/auth.json" 2> /dev/null || :
 
 # create a clean copy (before optional composer install) of repo to hold assets with the EE version appended to the dir name
 # app_dir contents will later be copied to ".app" dir
