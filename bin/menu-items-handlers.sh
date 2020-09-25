@@ -594,7 +594,7 @@ stop_other_apps() {
 
 dockerize_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local url projects project branch
+    local url projects project branch skip_option="-s"
     printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env or a $(warning "cloud compatible") git repo."
     read -r -p ''
     url="$REPLY"
@@ -611,12 +611,27 @@ dockerize_app() {
         msg_w_newlines "Branch could not be determined from: $url. Using 'master' ..."
         branch="master"
       }
-      "$lib_dir/dockerize" -p "$project" -e "$branch" -m -i "$HOME/.mdm/current/icons/magento.icns"
+      msg_w_newlines "Pre-bundle EVERYTHING?
+  Pros:
+    Faster to deploy the 1st time
+    End user will not need credentials to run but will for any update
+  Cons:
+    Much slower to create app
+    Much larger app to distribute
+    End user will need their own valid credentials to install and run
+
+[y|N]?"
+    read -r -p ''
+    [[ $REPLY =~ ^[Yy]$ ]] || {
+      skip_option=""
+    }
+      "$lib_dir/dockerize" -p "$project" -e "$branch" -i "$HOME/.mdm/current/icons/magento.icns" "$skip_option"
     elif is_valid_github_web_url "$url"; then
       branch="$(get_branch_from_github_web_url "$url")"
       "$lib_dir/dockerize" -g "$url" -b "$branch" -i "$HOME/.mdm/current/icons/magento.icns"
     else
-      error "Url does not appear to be a valid GitHub url (ex. https://github.com...) or a valid Magento Cloud url from your MC projects page."
+      error "The url does not appear to be a valid GitHub url (ex. https://github.com...) or a valid Magento Cloud url
+from the Magento Cloud projects page (ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
     fi
   }
 }
