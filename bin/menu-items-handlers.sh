@@ -284,7 +284,7 @@ want to save, do not continue. Export that data before continuing."
   }
 }
 
-reset_docker() {
+wipe_docker_except_images() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local container_ids volume_ids
     warning_w_newlines "This will delete ALL docker containers, volumes, and networks ONLY

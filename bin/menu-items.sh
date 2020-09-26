@@ -599,7 +599,7 @@ is_advanced_mode && {
     key="⚠️  Prune everything EXCEPT images"
     description="This will delete ALL docker containers, volumes, and networks. ONLY Docker images will be preserved to avoid re-downloading images for new installations."
     mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=reset_docker
+    mdm_menu_items["$key-handler"]=wipe_docker_except_images
 
     key="🚨 Wipe Docker (removes ALL Docker artifacts)"
     description="Use this to wipe the Docker virtual machine of all data. Only modified Docker VM settings will be preserved."
