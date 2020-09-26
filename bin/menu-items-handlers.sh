@@ -286,8 +286,11 @@ docker_prune_all_stopped_containers_and_volumes() {
 preserve ONLY RUNNING installations and DELETE everything else. If you have an old app with data that you might
 want to save, do not continue. Export that data before continuing."
     confirm_or_exit
+    msg_w_newlines "Removing containers ..."
     docker container prune -f
+    msg_w_newlines "Removing volumes ..."
     docker volume prune -f
+    msg_w_newlines "Removing networks ..."
     docker network prune -f
   }
 }
@@ -295,13 +298,16 @@ want to save, do not continue. Export that data before continuing."
 wipe_docker_except_images() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local container_ids volume_ids
-    warning_w_newlines "This will delete ALL docker containers, volumes, and networks ONLY
-Docker images will be preserved to avoid re-downloading images for new installations."
+    warning_w_newlines "This will delete ALL docker containers, volumes, and networks!
+ONLY Docker images will be preserved to avoid re-downloading images for new installations."
     confirm_or_exit
     cids="$(docker ps -qa)"
     [[ "$cids" ]] && docker stop $(docker ps -qa)
+    msg_w_newlines "Removing containers ..."
     docker container prune -f
+    msg_w_newlines "Removing volumes ..."
     docker volume prune -f
+    msg_w_newlines "Removing networks ..."
     docker network prune -f
   }
 }
@@ -312,8 +318,11 @@ wipe_docker() {
     confirm_or_exit
     cids="$(docker ps -qa)"
     [[ "$cids" ]] && docker stop $(docker ps -qa)
+    msg_w_newlines "Removing containers, images, and volumes ..."
     docker system prune -a -f --volumes
+    msg_w_newlines "Removing networks ..."
     docker network prune -f
+    msg_w_newlines "Removing MDM config dir"
     rm -rf "$launched_apps_dir"
   }
 }
