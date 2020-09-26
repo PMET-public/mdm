@@ -180,7 +180,7 @@ You must provide either:
   fi
 }
 
-app_hostname+="$app_hostname-$(head /dev/urandom | LC_ALL=C tr -dc '[:lower:]' | head -c 4)"
+app_hostname="$app_hostname-$(head /dev/urandom | LC_ALL=C tr -dc '[:lower:]' | head -c 4)"
 app_hostname="$(adjust_compose_project_name_for_docker_compose_version "$app_hostname")"
 
 is_valid_hostname "$app_hostname" ||
