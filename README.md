@@ -16,6 +16,7 @@
     - ["How do I setup and where do I place my auth.json file?"](#how-do-i-setup-and-where-do-i-place-my-authjson-file)
     - ["What's auth.json used for?"](#whats-authjson-used-for)
     - ["What does this error mean?"](#what-does-this-error-mean)
+    - ["How do I upgrade WITHOUT preserving old installations? (i.e. start over)"](#how-do-i-upgrade-without-preserving-old-installations-ie-start-over)
 - [MDM Developers](#mdm-developers)
   - [Configuration](#configuration)
     - [Configuration of MDM](#configuration-of-mdm)
@@ -213,6 +214,8 @@ The values are inherited from the Magento Cloud Docker project [here](https://gi
 
 Follow the instructions [here](https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth) with 1 clarification: place your `auth.json` file in your `~/.composer/` so the full, explicit path will be something like `/Users/yourusername/.composer/auth.json` on OSX or `/home/yourusername/.composer/auth.json` on Linux systems.
 
+Note for OSX users: You will not see the `.composer` dir in your user (Home) dir in `Finder` unless you press **⌘ (command) + shift + . (dot)**. Also be careful that the editor used to create your `auth.json` file does not insert special characters (e.g. curly quotes for double quotes). MDM will attempt to validate the format of `auth.json` and report if it detects such errors.
+
 ### "What's auth.json used for?"
 
 You may have downloaded or received a pre-bundled app with all the required modules, but if you need/want to run `composer update` to get future updates OR you want to create your own app, you will need an `auth.json` file. Also the GitHub token in the `auth.json` file is used to configure/download additional features of MDM (e.g. valid wildcard TLS certificates, web tunneling, etc.)
@@ -220,6 +223,10 @@ You may have downloaded or received a pre-bundled app with all the required modu
 ### "What does this error mean?"
 
 Whichever error you encounter, please check (i.e. search) to see if your [issue](https://github.com/PMET-public/mdm/issues?q=is%3Aissue) has already been reported and possibly solved. If not, please open a new one.
+
+### "How do I upgrade WITHOUT preserving old installations? (i.e. start over)"
+
+In a terminal, run `rm -rf ~/.mdm` and the follow any instructions from the MDM menu. Then ensure advanced mode is toggled on to see the maintenance menu. From the maintenance menu, prune everything except images. The Docker VM is now cleaned, and you can also remove any old MDM apps from the host computer.
 
 ---
 
