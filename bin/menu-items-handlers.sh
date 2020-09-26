@@ -141,6 +141,7 @@ install_app() {
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
     # this command causes indexer to be set in app/etc/env.php but without the expected values for host/username
     docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
+
     # TODO remove this hack that fixes this bug https://github.com/magento/magento2/issues/2852
     docker-compose run --rm deploy perl -i -pe \
       "s/'model' => 'mysql4',/
@@ -149,6 +150,11 @@ install_app() {
       'dbname' => 'main',
       'password' => '',
       'model' => 'mysql4',/" /app/app/etc/env.php
+
+    # TODO find alt way to resolve permissions issue between mcd images assumptions and
+    # 3rd party ext assumptions user and group have read perm and remove read from other
+    docker-compose run --rm deploy chmod -R o+rx /app/pub/media
+
     docker-compose run --rm deploy magento-command indexer:reindex
     docker-compose run --rm deploy magento-command cache:clean config_webservice
     services="$(get_docker_compose_runtime_services)"
@@ -157,6 +163,7 @@ install_app() {
     # map the magento app hostname to docker host's ip 
     # add it to the container's /etc/hosts file before running post deploy hook
     # so curl https://magento-app-hostname/ (the base url) properly resolves for cache warm-up
+
     # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
     cid="$(docker-compose run -d deploy bash -c "
       sleep 10 # need time to copy over root CA
@@ -165,6 +172,7 @@ install_app() {
       /app/bin/magento cache:enable
       cloud-post-deploy
     ")"
+
     docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid":/usr/local/share/ca-certificates/rootCA.crt
     open_app
     echo "$finished_msg"
