@@ -14,37 +14,11 @@ setup() {
   is_docker_compatible || skip
 }
 
-# ensure at least one magento image to remove
-@test '[docker] find_magento_docker_image_ids - normal function (not a menu item)' {
-  {
-    docker network create mymdmtestnetwork || : # create a network
-    docker run --network=mymdmtestnetwork pmetpublic/nginx-with-pagespeed bash # create a container with a magento imate
-    docker run --network=mymdmtestnetwork --name=mytestalpinecontainer alpine # create a container with a non-magento image
-  }  > /dev/null
-  run find_magento_docker_image_ids
-  assert_success
-  assert_output -e '^[0-9a-f ]+$'
-}
 
 @test '[docker] find_non_default_networks - normal function (not a menu item)' {
   run find_non_default_networks
   assert_success
   assert_output -p 'mymdmtestnetwork'
-}
-
-@test '[docker] rm_magento_docker_images' {
-  is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
-  yes | "$lib_dir/launcher" rm_magento_docker_images
-  run find_magento_docker_image_ids
-  assert_success
-  assert_output ''
-}
-
-@test '[docker] rm_magento_docker_images - 2nd time' {
-  yes | "$lib_dir/launcher" rm_magento_docker_images
-  run find_magento_docker_image_ids
-  assert_success
-  assert_output ''
 }
 
 @test '[docker] alpine container still exists' {

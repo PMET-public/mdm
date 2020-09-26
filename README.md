@@ -72,7 +72,7 @@ determined it's not currently appropiate. Many items only become available after
 |🔄 Update MDM|   |There is a new version of MDM available. Under *Maintenance*, there is an option to revert if needed.|
 |🔼 Install & open Magento app|   |   |
 |⚠️🔼 Can't install - ports in use.|   |Some local service other than docker is using port 80 or 443.|
-|🚀 Open https://$hostname_for_this_app|   |   |
+|🚀 Open https://$(get_hostname_for_this_app)|   |Opens your browser to the app's base url. The menu will render the base url instead of the function call. You'll actually see something like: '🚀 Open https://mysite.com'|
 |🛑 Stop Magento app|   |If not actively being using, stopping the app will free memory.|
 |▶️ Restart Magento app|   |   |
 |⚠️▶️ Can't restart app - ports in use.|   |   |
@@ -183,9 +183,10 @@ determined it's not currently appropiate. Many items only become available after
 |⚠️  🔓 Permit spoofing ANY domain is ON\|OFF!|   |Create TLS certificates that are valid *locally* for any domain. Do not share your local CA!|
 |🔄 Reload reverse proxy|   |   |
 |🧹 Remove hosts added to /etc/hosts|   |   |
-|⚠️  Remove Magento Docker images |   |breaks stopped apps|
-|⚠️  Reset Docker (keeps only images)|   |   |
-|🚨 Wipe Docker (removes everything!!!)|   |   |
+|🧹 Prune all unused docker images|   |Removes old or currently unused Docker images. If no apps are currently installed, Docker will re-download the required images during installation.|
+|⚠️  Prune all non-running containers and volumes|   |Deletes ANY installation that is not ACTIVELY RUNNING. This will remove any installation that you can not currently browse.|
+|⚠️  Prune everything EXCEPT images|   |This will delete ALL docker containers, volumes, and networks. ONLY Docker images will be preserved to avoid re-downloading images for new installations.|
+|🚨 Wipe Docker (removes ALL Docker artifacts)|   |Use this to wipe the Docker virtual machine of all data. Only modified Docker VM settings will be preserved.|
 |<nobr>                  </nobr>|<nobr>   </nobr>|   |
 <!--- # end maintenance submenu --->
 
@@ -218,7 +219,9 @@ You may have downloaded or received a pre-bundled app with all the required modu
 
 ### "What does this error mean?"
 
-Please check to see if your [issue](https://github.com/PMET-public/mdm/issues?q=is%3Aissue) has already been reported and possibly solved. If not, please open a new one.
+Whichever error you encounter, please check (i.e. search) to see if your [issue](https://github.com/PMET-public/mdm/issues?q=is%3Aissue) has already been reported and possibly solved. If not, please open a new one.
+
+---
 
 # MDM Developers
 

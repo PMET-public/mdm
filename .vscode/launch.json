@@ -90,9 +90,7 @@
       "env": {
         "debug": true,
         //"vsc_debugger_arg": "install_additional_tools",
-        //"vsc_debugger_arg": "rm_magento_docker_images",
         //"vsc_debugger_arg": "start_pwa_with_remote",
-        //"vsc_debugger_arg": "rm_magento_docker_images",
         //"vsc_debugger_arg": "install_app",
         //"vsc_debugger_arg": "start_remote_web_access",
         //"vsc_debugger_arg": "open_app",

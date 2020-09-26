@@ -586,18 +586,23 @@ is_advanced_mode && {
     mdm_menu_items["$key-handler"]=rm_added_hostnames_from_hosts_file
 
     # can this be removed now that docker pull is being used each time?
-    key="⚠️  Remove Magento Docker images "
-    description="breaks stopped apps"
+    key="🧹 Prune all unused docker images"
+    description="Removes old or currently unused Docker images. If no apps are currently installed, Docker will re-download the required images during installation."
     mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=rm_magento_docker_images
+    mdm_menu_items["$key-handler"]=docker_prune_all_images
 
-    key="⚠️  Reset Docker (keeps only images)"
-    description=""
+    key="⚠️  Prune all non-running containers and volumes"
+    description="Deletes ANY installation that is not ACTIVELY RUNNING. This will remove any installation that you can not currently browse."
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-handler"]=docker_prune_all_stopped_containers_and_volumes
+
+    key="⚠️  Prune everything EXCEPT images"
+    description="This will delete ALL docker containers, volumes, and networks. ONLY Docker images will be preserved to avoid re-downloading images for new installations."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=reset_docker
 
-    key="🚨 Wipe Docker (removes everything!!!)"
-    description=""
+    key="🚨 Wipe Docker (removes ALL Docker artifacts)"
+    description="Use this to wipe the Docker virtual machine of all data. Only modified Docker VM settings will be preserved."
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=wipe_docker
 

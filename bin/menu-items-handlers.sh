@@ -268,39 +268,32 @@ This will require your password.
   }
 }
 
-rm_magento_docker_images() {
+docker_prune_all_images() {
+    docker image prune -a -f
+}
+
+docker_prune_all_stopped_containers_and_volumes() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    warning_w_newlines "This will delete all Magento images to force the download of the latest versions. 
-If a Magento app is stopped, it will NOT be preserved."
+    warning_w_newlines "This will delete all non-running containers and their associated volumes. Use this to 
+preserve ONLY RUNNING installations and DELETE everything else. If you have an old app with data that you might
+want to save, do not continue. Export that data before continuing."
     confirm_or_exit
-    image_ids=$(find_magento_docker_image_ids)
-    [[ $image_ids ]] && {
-      docker rmi -f $image_ids
-    }
-    msg_w_newlines "Magento docker images successfully removed."
+    docker container prune -f
+    docker volume prune -f
+    docker network prune -f
   }
 }
 
 reset_docker() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local container_ids volume_ids
-    warning_w_newlines "This will delete all docker containers, volumes, and networks.
-  Docker images will be preserved to avoid re-downloading ALL images."
+    warning_w_newlines "This will delete ALL docker containers, volumes, and networks ONLY
+  Docker images will be preserved to avoid re-downloading images for new installations."
     confirm_or_exit
-    # remove containers
-    container_ids="$(docker ps -qa)"
-    [[ "$container_ids" ]] && {
-      docker stop $container_ids
-      docker rm -fv $container_ids
-    }
-    # remove volumes
-    volume_ids="$(docker volume ls -q)"
-    [[ "$volume_ids" ]] && {
-      docker volume rm -f $volume_ids
-    }
-    # remove networks
-    docker network prune -f || :
-    msg_w_newlines "Docker reset successfully."
+    docker stop $(docker ps -qa);
+    docker container prune -f
+    docker volume prune -f
+    docker network prune -f
   }
 }
 
@@ -308,11 +301,10 @@ wipe_docker() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     warning_w_newlines "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
     confirm_or_exit
-    reset_docker
-    docker rmi -f $(docker images -qa) || :
-    # also clean up envs artifacts
-    rm -rf "$mdm_path/envs/*" || :
-    msg_w_newlines "Docker wiped successfully."
+    docker stop $(docker ps -qa);
+    docker system prune -a -f --volumes
+    docker network prune -f
+    rm -rf "$launched_apps_dir"
   }
 }
 
