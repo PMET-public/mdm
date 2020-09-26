@@ -141,7 +141,7 @@ done
 }
 
 [[ "${#app_hostname}" -gt 12 ]] && {
-  warning_w_newlines "App name will be truncated to 12 characters."
+  warning_w_newlines "App name will be truncated."
   app_hostname="${app_hostname:0:12}"
 }
 
@@ -168,7 +168,7 @@ You must provide either:
 [[ ! -f "$app_icon_path" ]] && error "App icon not found: $app_icon_path"
 
 # if an app_hostname is provided, use it. otherwise, determine one based on other input.
-[[ $app_hostname ]] || {
+[[ "$app_hostname" ]] || {
   if is_existing_cloud_env; then
     "$magento_cloud_cmd" -q || error "The magento-cloud CLI was not found. To install, run
     curl -svLS https://accounts.magento.cloud/cli/installer | php"
@@ -178,9 +178,13 @@ You must provide either:
     git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/$1/')
     app_hostname="$git_repo-$branch$tag"
   fi
-  is_valid_hostname "$app_hostname" ||
-    error "Could not create valid hostname from user inputs. Please specify one with the '-n' option."
 }
+
+app_hostname+="$app_hostname-$(head /dev/urandom | LC_ALL=C tr -dc '[:lower:]' | head -c 4)"
+app_hostname="$(adjust_compose_project_name_for_docker_compose_version "$app_hostname")"
+
+is_valid_hostname "$app_hostname" ||
+    error "Could not create valid hostname from user inputs. Please specify one with the '-n' option."
 
 # clone and then remove unwanted files from the git repo
 tmp_app_dir="$HOME/Downloads/$app_hostname-tmp"
@@ -211,10 +215,6 @@ ee_version=$(
 app_dir="${tmp_app_dir%-tmp}-$ee_version"
 rm -rf "$app_dir" || : # remove any existing app dir of the same name (a previously aborted or incomplete dockerization)
 cp -a "$tmp_app_dir" "$app_dir"
-
-new_compose_project_name="$app_hostname"
-new_compose_project_name+="-$(head /dev/urandom | LC_ALL=C tr -dc '[:lower:]' | head -c 4)"
-new_compose_project_name="$(adjust_compose_project_name_for_docker_compose_version "$new_compose_project_name")"
 
 is_existing_cloud_env && {
 
@@ -334,7 +334,7 @@ fi
 
 # add to some vars to generated config
 printf "APP_HOSTNAME=%s\nPREV_APP_HOSTNAME=%s\nCOMPOSE_PROJECT_NAME=%s" \
-  "$app_hostname" "$app_hostname" "$new_compose_project_name" >> "$app_dir/.docker/config.env"
+  "$app_hostname" "$app_hostname" "$app_hostname" >> "$app_dir/.docker/config.env"
 
 # OVERRIDE_MCD_IMAGE_VERSION is used to test new images from the pmetpublic/magento-cloud-docker project forked from magento
 [[ "$OVERRIDE_MCD_IMAGE_VERSION" ]] && {
