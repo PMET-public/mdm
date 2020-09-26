@@ -288,9 +288,10 @@ reset_docker() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local container_ids volume_ids
     warning_w_newlines "This will delete ALL docker containers, volumes, and networks ONLY
-  Docker images will be preserved to avoid re-downloading images for new installations."
+Docker images will be preserved to avoid re-downloading images for new installations."
     confirm_or_exit
-    docker stop $(docker ps -qa);
+    cids="$(docker ps -qa)"
+    [[ "$cids" ]] && docker stop $(docker ps -qa)
     docker container prune -f
     docker volume prune -f
     docker network prune -f
@@ -301,7 +302,8 @@ wipe_docker() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     warning_w_newlines "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
     confirm_or_exit
-    docker stop $(docker ps -qa);
+    cids="$(docker ps -qa)"
+    [[ "$cids" ]] && docker stop $(docker ps -qa)
     docker system prune -a -f --volumes
     docker network prune -f
     rm -rf "$launched_apps_dir"
