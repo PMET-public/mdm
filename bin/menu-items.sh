@@ -130,14 +130,6 @@ is_update_available && {
   }
 
   # is_advanced_mode && ! is_magento_app_running_cached && {
-  #   key="TODO Sync Magento app to remote env"
-  #   description=""
-  #   mdm_menu_items_keys+=("$key")
-  #   mdm_menu_items["$key-handler"]=sync_app_to_remote
-  #   mdm_menu_items["$key-disabled"]=true
-  # }
-
-  # is_advanced_mode && ! is_magento_app_running_cached && {
   #   key="TODO Clone to new Magento app"
   #   description=""
   #   mdm_menu_items_keys+=("$key")
@@ -161,10 +153,18 @@ is_docker_compatible && are_other_magento_apps_running && {
 }
 
 is_docker_compatible && has_valid_composer_credentials_cached && {
-  key="📦 Create a new Magento app"
+  key="📦 Create new MDM app"
   description="Asks for a Magento Cloud project to recreate locally"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=dockerize_app
+}
+
+is_magento_app_installed_cached && is_docker_compatible && {
+  key="☁️→💻 Sync this app to cloud env"
+  description=""
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=send_app_to_remote
+  #mdm_menu_items["$key-disabled"]=true
 }
 
 is_magento_app_installed_cached && is_docker_compatible && {
@@ -184,7 +184,7 @@ is_magento_app_installed_cached && is_docker_compatible && {
   ###
 
   is_magento_app_installed_cached && {
-    key="Magento commands"
+    key="💻 Magento commands"
     description=""
     mdm_menu_items_keys+=("$key")
 
@@ -293,7 +293,7 @@ if is_network_state_ok; then
   #
   ###
 
-  key="PWA"
+  key="📱 PWA"
   description=""
   mdm_menu_items_keys+=("$key")
 
@@ -348,7 +348,7 @@ fi
 #
 ###
 
-key="Help / Support"
+key="🚑 Help / Support"
 description=""
 mdm_menu_items_keys+=("$key")
 
@@ -373,7 +373,7 @@ is_tmate_installed && {
 
 is_magento_app_running_cached && is_web_tunnel_configured && {
   key="🔓 Grant remote web access"
-  description="If configured, creates a public url able to access this Magenot app."
+  description="If configured, creates a public url able to access this Magento app."
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=start_remote_web_access
 
@@ -412,7 +412,7 @@ mdm_menu_items_keys+=("end submenu")
 #
 ###
 
-key="Useful resources"
+key="🎗 Useful resources"
 description=""
 mdm_menu_items_keys+=("$key")
 
@@ -482,7 +482,7 @@ mdm_menu_items_keys+=("end submenu")
 
 is_advanced_mode && {
 
-  key="Logs"
+  key="📝 Logs"
   description="*Advanced*"
   mdm_menu_items_keys+=("$key")
 
@@ -526,7 +526,7 @@ is_advanced_mode && {
 
 is_advanced_mode && {
 
-  key="Maintenance"
+  key="🛠 Maintenance"
   description="*Advanced*"
   mdm_menu_items_keys+=("$key")
 
