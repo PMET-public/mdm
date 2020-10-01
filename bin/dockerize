@@ -304,9 +304,8 @@ else
   # if using ssh, set ssh options
   [[ "$USE_SSH_AUTH_SOCK_FOR_DOCKER" && "$SSH_AUTH_SOCK" ]] && {
     is_mac && SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
-    # home dir of container will /app
     ssh_auth_opts="--mount type=bind,src=$SSH_AUTH_SOCK,target=$SSH_AUTH_SOCK -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
-      --mount type=bind,src=$HOME/.ssh/known_hosts,target=/app/.ssh/known_hosts"
+      --mount type=bind,src=$HOME/.ssh/known_hosts,target=/root/.ssh/known_hosts"
   }
 
   composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
