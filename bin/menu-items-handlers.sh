@@ -137,7 +137,10 @@ install_app() {
     [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
     docker-compose run build cloud-build
+
+    # TODO need way to output install log b/c may appear frozen for mins to hours
     docker-compose run deploy cloud-deploy
+    
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
     # this command causes indexer to be set in app/etc/env.php but without the expected values for host/username
     docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
@@ -221,10 +224,6 @@ restart_app() {
     open_app
   } >> "$handler_log_file" 2>&1 &
   track_job_status_and_wait_for_exit $! "Starting Magento ..."
-}
-
-sync_app_to_remote() {
-  :
 }
 
 force_check_mdm_ver() {
@@ -643,6 +642,73 @@ dockerize_app() {
     else
       error "The url does not appear to be a valid GitHub url (ex. https://github.com...) or a valid Magento Cloud url
 from the Magento Cloud projects page (ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
+    fi
+  }
+}
+
+send_app_to_remote() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local url projects project branch media_tmp_dir backup_sql_path sql_tmp_file remote_base_url
+    printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env from your Magento Cloud projects page 
+(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
+    read -r -p ''
+    url="$REPLY"
+    #url="https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test"
+    if is_valid_mc_url "$url"; then
+      projects="$("$magento_cloud_cmd" projects --pipe --no 2> /dev/null)"
+      [[ "$projects" ]] || {
+        msg_w_newlines "You do not appear to be logged into your magento cloud account."
+        "$magento_cloud_cmd" login
+      }
+      project="$(get_project_from_mc_url "$url")"
+      branch="$(get_branch_from_mc_url "$url")"
+      [[ "$project" ]] || error "Project could not be determined from: $url"
+      [[ "$branch" ]] || {
+        msg_w_newlines "Branch could not be determined from: $url. Using 'master' ..."
+        branch="master"
+      }
+
+      msg_w_newlines "Copying media to cloud ..."
+      media_tmp_dir="$(mktemp -d)"
+      docker cp "${COMPOSE_PROJECT_NAME}_fpm_1":/app/pub/media "$media_tmp_dir"
+      "$magento_cloud_cmd" mount:upload -y -p "$project" -e "$branch" --source "$media_tmp_dir/media" -m pub/media
+      rm -rf "$media_tmp_dir"
+
+      msg_w_newlines "Copying DB to cloud ..."
+      docker rm mdm_tmp_db_dump > /dev/null 2>&1 || :
+      backup_sql_path="$(
+        docker-compose run --name mdm_tmp_db_dump deploy bash -c "
+          ./bin/magento config:set -q system/backup/functionality_enabled 1 && 
+          ./bin/magento setup:backup --db | sed -n 's/.*path: //p' | tr -d '\n'
+        "
+      )"
+      sql_tmp_file="$(mktemp)"
+      docker cp mdm_tmp_db_dump:"$backup_sql_path" "$sql_tmp_file"
+      remote_base_url="$(
+        "$magento_cloud_cmd" ssh -p "$project" -e "$branch" "bin/magento config:show web/secure/base_url" |
+        perl -pe 's/\s+$//'
+      )"
+      "$magento_cloud_cmd" sql -p "$project" -e "$branch" < "$sql_tmp_file"
+      rm "$sql_tmp_file"
+      docker rm mdm_tmp_db_dump > /dev/null 2>&1
+
+      msg_w_newlines "Resetting urls to $remote_base_url and flushing the cache ..."
+      "$magento_cloud_cmd" ssh -p "$project" -e "$branch" "
+        bin/magento app:config:import
+        bin/magento config:set web/secure/base_url $remote_base_url
+        bin/magento config:set web/unsecure/base_url $remote_base_url
+        bin/magento cache:flush
+      "
+      # check for git changes?
+      # warnings to user? under what conditions?
+      # does media-gallery:sync need to run
+      # reload env if necessary
+      # db encrypt key differences?
+      # git operations
+
+    else
+      error "The url does not appear to be a valid Magento Cloud url from the Magento Cloud projects page 
+(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
     fi
   }
 }

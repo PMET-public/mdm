@@ -167,6 +167,14 @@ is_docker_compatible && has_valid_composer_credentials_cached && {
   mdm_menu_items["$key-handler"]=dockerize_app
 }
 
+is_magento_app_installed_cached && is_docker_compatible && {
+  key="💻→☁️ Sync this app to a cloud env"
+  description=""
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=send_app_to_remote
+  #mdm_menu_items["$key-disabled"]=true
+}
+
 ! is_detached && {
 
   ###
