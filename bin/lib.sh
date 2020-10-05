@@ -98,6 +98,12 @@ is_magento_cloud_cli_installed() {
   [[ -f "$magento_cloud_cmd" ]]
 }
 
+is_magento_cloud_cli_logged_in() {
+  local status
+  "$magento_cloud_cmd" || status=$?
+  [[ "$status" -eq 0 ]]
+}
+
 is_docker_bash_completion_installed_on_mac() {
   [[ -f "/usr/local/etc/bash_completion.d/docker" ]]
 }
@@ -435,6 +441,20 @@ has_valid_composer_credentials_cached() {
   return "${mdm_store["composer_credentials_are_valid"]}"
 }
 
+# has_magento_cloud_token() {
+#   [[ "$MAGENTO_CLOUD_CLI_TOKEN" ]]
+# }
+
+# is_ssh_agent_running() {
+#   [[ "$SSH_AUTH_SOCK" =~ ^/ ]]
+# }
+
+# has_magento_cloud_ssh_key() {
+#   local status key_list
+#   key_list="$("$magento-cloud_cmd" ssh-key:list --no-header --format csv || return 1)"
+#   [[ "$key_list" =~ ",/" ]]
+# }
+
 ###
 #
 # end test functions
@@ -632,6 +652,29 @@ update_hostname() {
     fi
     open_app
   fi
+}
+
+get_magento_cmds_to_update_hostname_to() {
+  local hostname="$1"
+  echo "
+    bin/magento app:config:import
+    bin/magento config:set web/unsecure/base_url https://$hostname/
+    bin/magento config:set web/secure/base_url https://$hostname/
+    bin/magento cache:flush
+  "
+}
+
+get_project_and_env_from_mc_url() {
+  local url="$1" project env
+  project="$(get_project_from_mc_url "$url")"
+  [[ "$project" ]] || error "$url not recognized as a valid Magento Cloud url from the Magento Cloud projects page
+(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
+  env="$(get_env_from_mc_url "$url")"
+  [[ "$env" ]] || {
+    warning_w_newlines "Environment could not be determined from $url. Using 'master' ..."
+    env="master"
+  }
+  echo "$project $env"
 }
 
 get_pwa_hostname() {
