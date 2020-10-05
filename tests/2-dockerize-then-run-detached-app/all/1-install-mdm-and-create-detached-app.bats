@@ -14,6 +14,7 @@ setup() {
 }
 
 @test 'launcher with initial output' {
+  is_CI || skip # skip on dev
   output="$($lib_dir/launcher)"
   run "$lib_dir/launcher" "$output"
   assert_success
@@ -29,6 +30,7 @@ setup() {
   assert_output -p "installed"
 }
 
+# unlike other MDM apps, the detached app is a singleton
 @test 'create detached app' {
   run "$lib_dir/dockerize" -d
   assert_success

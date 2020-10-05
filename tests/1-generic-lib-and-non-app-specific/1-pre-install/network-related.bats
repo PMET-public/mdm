@@ -24,8 +24,8 @@ setup() {
   assert_output "xy4itwbmg2khb"
 }
 
-@test 'get_branch_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
-  run get_branch_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
+@test 'get_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
+  run get_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
   assert_success
   assert_output ""
 }
@@ -41,10 +41,27 @@ setup() {
   assert_output "xy4itwbmg2khb"
 }
 
-@test 'get_branch_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
-  run get_branch_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
+@test 'get_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
+  run get_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
   assert_success
   assert_output "master"
+}
+
+@test 'get_project_and_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
+  run get_project_and_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
+  assert_success
+  assert_output "xy4itwbmg2khb master"
+}
+
+@test 'get_project_and_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
+  run get_project_and_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
+  assert_success
+  assert_output "xy4itwbmg2khb master"
+}
+
+@test 'get_project_and_env_from_mc_url "https://demo.magento.cloud/projects"' {
+  run get_project_and_env_from_mc_url "https://demo.magento.cloud/projects"
+  assert_failure
 }
 
 @test 'is_valid_mc_url "https://master-7rqtwti-xy4itwbmg2khb.demo.magentosite.cloud/"' {
