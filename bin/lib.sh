@@ -551,7 +551,7 @@ get_project_from_mc_url() {
   echo "$url" | perl -ne '/.*?\/projects\/([^\/]+)/ and print $1'
 }
 
-get_branch_from_mc_url() {
+get_env_from_mc_url() {
   local url="$1"
   echo "$url" | perl -ne '/.*?\/environments\/([^\/]+)/ and print $1'
 }
@@ -631,11 +631,7 @@ update_hostname() {
   prev_hostname="$(get_prev_hostname_for_this_app)"
   if [[ "$cur_hostname" != "$new_hostname" ]]; then
     set_hostname_for_this_app "$new_hostname"
-    run_as_bash_cmds_in_app "
-      /app/bin/magento config:set web/unsecure/base_url https://$new_hostname/
-      /app/bin/magento config:set web/secure/base_url https://$new_hostname/
-      /app/bin/magento cache:flush
-    "
+    run_as_bash_cmds_in_app "$(get_magento_cmds_to_update_hostname_to $new_hostname)"
     warm_cache > /dev/null 2>&1 &
     if is_web_tunnel_configured; then
       # reload the proxy if the new hostname is not a tunnel domain b/c it will be a public url
