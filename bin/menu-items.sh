@@ -160,18 +160,18 @@ is_docker_compatible && has_valid_composer_credentials_cached && {
 }
 
 is_magento_app_installed_cached && is_docker_compatible && {
-  key="☁️→💻 Sync this app to cloud env"
+  key="☁️→💻 Sync a cloud env to this app"
   description=""
   mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-handler"]=send_app_to_remote
+  mdm_menu_items["$key-handler"]=sync_app_to_remote
   #mdm_menu_items["$key-disabled"]=true
 }
 
 is_magento_app_installed_cached && is_docker_compatible && {
-  key="💻→☁️ Sync this app to a cloud env"
+  key="💻→☁️ Sync this app to cloud env"
   description=""
   mdm_menu_items_keys+=("$key")
-  mdm_menu_items["$key-handler"]=send_app_to_remote
+  mdm_menu_items["$key-handler"]=sync_remote_to_app
   #mdm_menu_items["$key-disabled"]=true
 }
 
