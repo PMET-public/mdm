@@ -512,10 +512,7 @@ start_pwa_with_remote() {
 }
 
 start_pwa() {
-  local magento_url pwa_path cloud_mode
-  magento_url="$1"
-  pwa_path="$2"
-  cloud_mode="$3"
+  local magento_url="$1" pwa_path="$2" cloud_mode="$3" index="1"
   {
     export MAGENTO_URL="$magento_url" \
       COMPOSE_PROJECT_NAME="detached-mdm" \
@@ -525,7 +522,6 @@ start_pwa() {
     docker-compose rm -sfv storystore-pwa storystore-pwa-prev
     docker-compose up -d storystore-pwa storystore-pwa-prev
     ! is_nginx_rev_proxy_running && reload_rev_proxy
-    local index=1
     until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://$(get_pwa_hostname)/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
     open "https://$(get_pwa_hostname)/$pwa_path"
   } >> "$handler_log_file" 2>&1 &
@@ -724,11 +720,12 @@ want to save, do not continue. Export that data before continuing."
 
 wipe_docker_except_images() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local container_ids volume_ids
+    local cids
     warning_w_newlines "This will delete ALL docker containers, volumes, and networks!
 ONLY Docker images will be preserved to avoid re-downloading images for new installations."
     confirm_or_exit
     cids="$(docker ps -qa)"
+    # shellcheck disable=SC2046
     [[ "$cids" ]] && docker stop $(docker ps -qa)
     msg_w_newlines "Removing containers ..."
     docker container prune -f
@@ -744,6 +741,7 @@ wipe_docker() {
     warning_w_newlines "This will delete ALL local docker artifacts - containers, images, volumes, and networks!"
     confirm_or_exit
     cids="$(docker ps -qa)"
+    # shellcheck disable=SC2046
     [[ "$cids" ]] && docker stop $(docker ps -qa)
     msg_w_newlines "Removing containers, images, and volumes ..."
     docker system prune -a -f --volumes

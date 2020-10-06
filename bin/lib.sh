@@ -409,7 +409,7 @@ is_mkcert_CA_installed() {
 }
 
 is_string_valid_composer_credentials() {
-  local str="$1" status=0 md5 md5_file
+  local str="$1" status="0" md5 md5_file
   md5="$(echo "$1" | md5sum | sed 's/ .*//')"
   md5_file="$mdm_path/.md5-of-passed-composer-cred-${md5}"
   # for max menu rendering speed, check for md5 of prev passed credentials
@@ -518,11 +518,11 @@ show_success_msg_plus_duration() {
 
 
 reverse_array() {
-    declare -n input_array="$1" output_array="$2"
-    local index
-    for index in "${input_array[@]}"; do
-        output_array=("$index" "${output_array[@]}")
-    done
+  declare -n input_array="$1" output_array="$2"
+  local index
+  for index in "${input_array[@]}"; do
+    output_array=("$index" "${output_array[@]}")
+  done
 }
 
 confirm_or_exit() {
@@ -870,7 +870,7 @@ get_wildcard_cert_and_key_for_mdm_domain() {
 }
 
 mkcert_for_domain() {
-  local cert_dir="$certs_dir/$1" domain="$1"
+  local domain="$1" cert_dir="$certs_dir/$1" 
   is_valid_hostname "$domain" || error "Invalid name '$domain'"
   mkdir -p "$cert_dir"
   mkcert -cert-file "$cert_dir/fullchain1.pem" -key-file "$cert_dir/privkey1.pem" "$domain"
@@ -1177,7 +1177,7 @@ render_platypus_status_menu() {
 }
 
 handle_mdm_args() {
-  local key value
+  local key value len
   # check what type of menu item was selected
 
   # a handler?
@@ -1209,7 +1209,7 @@ handle_mdm_args() {
       # the first parameter of the initial call is last
       # in this case, the sourced bin/mdm is first and the last element is the directly called handler
       # so remove the first and last and reverse the middle (whew!)
-      local len=$(( ${#BASH_ARGV[*]} - 2 )) remaining_args
+      len=$(( ${#BASH_ARGV[*]} - 2 )) remaining_args
       reverse_array BASH_ARGV remaining_args
       "$mdm_first_arg" "${remaining_args[@]:1:$len}"
       exit

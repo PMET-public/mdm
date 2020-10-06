@@ -28,7 +28,7 @@ prepare_cert_and_key_for_hostname() {
 }
 
 prepare_certs_and_keys() {
-  local hostname hostnames="$*"
+  local hostnames="$*" hostname
   for hostname in $hostnames; do
     prepare_cert_and_key_for_hostname "$hostname"
   done
