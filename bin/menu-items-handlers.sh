@@ -651,25 +651,23 @@ sync_app_to_remote() {
     msg_w_newlines "Copying app media to cloud ..."
     media_tmp_dir="$(mktemp -d)"
     docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media" "$media_tmp_dir"
-    "$magento_cloud_cmd" mount:upload -y -p "$project" -e "$env" -m pub/media --source "$media_tmp_dir/media"
+    "$magento_cloud_cmd" mount:upload -y -p "$project" -e "$env" -m pub/media --source "$media_tmp_dir/media" 2>&1 |
+      filter_cloud_mount_transfer_output
     rm -rf "$media_tmp_dir"
 
+    hostname="$("$magento_cloud_cmd" ssh -p "$project" -e "$env" "bin/magento config:show web/secure/base_url" |
+      perl -pe 's/^https?:\/\///;s/\s+$//')"
+
     msg_w_newlines "Copying app DB to cloud ..."
-    cid="$(docker-compose create deploy bash -c "
+    backup_sql_path="$(docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "
       ./bin/magento config:set -q system/backup/functionality_enabled 1 && 
       ./bin/magento setup:backup --db | sed -n 's/.*path: //p' | tr -d '\n'
     ")"
-    backup_sql_path="$(docker start -a $cid)"
     sql_tmp_file="$(mktemp)"
-    docker cp "$cid:$backup_sql_path" "$sql_tmp_file"
+    docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:$backup_sql_path" "$sql_tmp_file"
     "$magento_cloud_cmd" sql -p "$project" -e "$env" < "$sql_tmp_file"
     rm "$sql_tmp_file"
-    docker rm "$cid" > /dev/null 2>&1
 
-    hostname="$(
-      "$magento_cloud_cmd" ssh -p "$project" -e "$env" "bin/magento config:show web/secure/base_url" |
-        perl -pe 's/^https?:\/\///;s/\s+$//'
-    )"
     msg_w_newlines "Resetting urls to https://$hostname and flushing the cache ..."
     "$magento_cloud_cmd" ssh -p "$project" -e "$env" "$(get_magento_cmds_to_update_hostname_to $hostname)"
 
@@ -695,15 +693,17 @@ sync_remote_to_app() {
     media_tmp_dir="$(mktemp -d)"
     # copy from container to tmp dir for easy rsync comparison
     docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media" "$media_tmp_dir"
-    "$magento_cloud_cmd" mount:download -y -p "$project" -e "$env" -m pub/media --target "$media_tmp_dir/media"
-    docker cp "$media_tmp_dir" "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media"
+    "$magento_cloud_cmd" mount:download -y -p "$project" -e "$env" -m pub/media --target "$media_tmp_dir/media" 2>&1 |
+      filter_cloud_mount_transfer_output
+    docker cp "$media_tmp_dir/media/." "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media/"
     rm -rf "$media_tmp_dir"
 
     msg_w_newlines "Copying cloud DB to app ..."
     sql_tmp_file="$(mktemp)"
-    "$magento_cloud_cmd" db:dump -p "$pid" -e "$env" -f "$sql_tmp_file"
-    docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}_fpm_1:/app/var/backups/restore_from_cloud.sql"
-    docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bin/magento setup:rollback -n -d restore_from_cloud.sql
+    "$magento_cloud_cmd" db:dump -y -p "$project" -e "$env" -f "$sql_tmp_file"
+    # magento requires specific naming for it's backups to restore from (e.g. 1601987083_db.sql b/c why??)
+    docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}_fpm_1:/app/var/backups/${start}_db.sql"
+    docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bin/magento setup:rollback -n -d "${start}_db.sql"
     rm "$sql_tmp_file"
 
     hostname="$(get_hostname_for_this_app)"
