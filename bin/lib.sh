@@ -100,7 +100,7 @@ is_magento_cloud_cli_installed() {
 
 is_magento_cloud_cli_logged_in() {
   local status
-  "$magento_cloud_cmd" || status=$?
+  "$magento_cloud_cmd" > /dev/null 2>&1 || status=$?
   [[ "$status" -eq 0 ]]
 }
 
