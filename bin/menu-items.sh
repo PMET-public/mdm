@@ -277,7 +277,7 @@ is_magento_app_running_cached && is_docker_compatible && {
   ###
 
   ! is_advanced_mode && {
-    key="📝 Show MDM logs"
+    key="📝 Open MDM logging"
     description="*Advanced* Watch the MDM output in realtime. Combine with MDM debugging under *Maintenance*"
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=show_mdm_logs
@@ -491,7 +491,7 @@ is_advanced_mode && {
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=show_errors_from_mdm_logs
 
-  key="Show entire MDM log"
+  key="Follow MDM logs"
   description=""
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=show_mdm_logs
