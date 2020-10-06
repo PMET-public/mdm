@@ -42,7 +42,7 @@ get_job_statuses() {
       fi
     else
       prefix="DISABLED|⏳ "
-      duration=" $(convert_secs_to_hms "$(( $(date +"%s") - "$job_start" ))")"
+      duration=" $(convert_secs_to_hms "$(seconds_since "$job_start")")"
     fi
     echo "$prefix $job_msg $duration"
   done
