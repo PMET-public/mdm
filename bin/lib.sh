@@ -270,10 +270,10 @@ is_network_state_ok() {
 }
 
 are_other_magento_apps_running() {
-  echo "${mdm_store["formatted_docker_ps_output"]}" | \
-    grep "_db_1 " | \
-    grep -v "^${COMPOSE_PROJECT_NAME}_db_1 " | \
-    grep -q -v ' Exited$'
+  echo "${mdm_store["formatted_docker_ps_output"]}" |
+    grep "_db_1 " |
+    grep -v "^${COMPOSE_PROJECT_NAME}_db_1 " |
+    grep -q -v '_db_1 Exited'
   return $?
 }
 
