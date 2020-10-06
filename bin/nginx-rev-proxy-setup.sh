@@ -20,7 +20,7 @@ prepare_cert_and_key_for_hostname() {
   # if applicable, try to fetch a valid cert and return
   if [[ "$hostname" =~ \.$mdm_domain$ ]]; then
     get_wildcard_cert_and_key_for_mdm_domain &&
-      cp_wildcard_mdm_domain_cert_and_key_for_subdomain $hostname &&
+      cp_wildcard_mdm_domain_cert_and_key_for_subdomain "$hostname" &&
       return 0
   fi
 
@@ -85,7 +85,7 @@ tmp_nginx_conf_dir="$(mktemp -d)"
 hostnames="$(find_mdm_hostnames)"
 hostnames_not_resolving_to_local="$(find_hostnames_not_resolving_to_local "$hostnames")"
 # do not add tunneled hosts
-hosts_to_add="$(echo $hostnames_not_resolving_to_local | perl -pe "s/\s?\d+\.$mdm_tunnel_domain//g")"
+hosts_to_add="$(echo "$hostnames_not_resolving_to_local" | perl -pe "s/\s?\d+\.$mdm_tunnel_domain//g")"
 [[ "$hosts_to_add" ]] && add_hostnames_to_hosts_file "$hosts_to_add"
 prepare_certs_and_keys "$hostnames"
 write_nginx_configs "$hostnames"
@@ -96,7 +96,7 @@ docker_nginx_image="pmetpublic/nginx-with-pagespeed:1.0"
 docker pull "$docker_nginx_image"
 
 # create new nginx container with latest config
-cid=$(docker create --label mdm-nginx-rev-proxy -v "$mdm_path/certs":/etc/letsencrypt -p 443:443 -p 80:80 "$docker_nginx_image")
+cid=$(docker create --label mdm-nginx-rev-proxy -v "$mdm_path/certs:/etc/letsencrypt" -p 443:443 -p 80:80 "$docker_nginx_image")
 docker cp "$tmp_nginx_conf_dir/." "$cid:/etc/nginx/conf.d"
 rm -rf "$tmp_nginx_conf_dir"
 

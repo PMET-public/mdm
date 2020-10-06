@@ -4,7 +4,7 @@ set -e
 #set -x
 
 lib_dir="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-name="$(basename ${BASH_SOURCE[0]})"
+name="$(basename "${BASH_SOURCE[0]}")"
 
 perl -ne '
   /^[^#]*key=/ and not /\bOFF\b/ and print;

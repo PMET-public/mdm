@@ -274,7 +274,7 @@ are_other_magento_apps_running() {
     grep "_db_1 " |
     grep -v "^${COMPOSE_PROJECT_NAME}_db_1 " |
     grep -q -v '_db_1 Exited'
-  return $?
+  return "$?"
 }
 
 invoked_mdm_without_args() {
@@ -362,9 +362,9 @@ is_valid_git_url() {
   [[ "$1" =~ http.*\.git ]] || [[ "$1" =~ git.*\.git ]]
 }
 
-is_existing_cloud_env() {
-  [[ "$env_is_existing_cloud" ]]
-}
+# is_existing_cloud_env() {
+#   [[ "$env_is_existing_cloud" ]]
+# }
 
 is_valid_github_web_url() {
   local url="$1"
@@ -409,7 +409,7 @@ is_mkcert_CA_installed() {
 }
 
 is_string_valid_composer_credentials() {
-  local str="$1" status="0" md5 md5_file
+  local str="$1" status=0 md5 md5_file
   md5="$(echo "$1" | md5sum | sed 's/ .*//')"
   md5_file="$mdm_path/.md5-of-passed-composer-cred-${md5}"
   # for max menu rendering speed, check for md5 of prev passed credentials
@@ -432,7 +432,7 @@ has_valid_composer_credentials_cached() {
     return "${mdm_store["composer_credentials_are_valid"]}"
   # check the user's file
   [[ -f "$HOME/.composer/auth.json" ]] && 
-    COMPOSER_AUTH="$(<$HOME/.composer/auth.json)" && 
+    COMPOSER_AUTH="$(<"$HOME/.composer/auth.json")" && 
     is_string_valid_composer_credentials "$COMPOSER_AUTH" &&
     mdm_store["composer_credentials_are_valid"]=0 &&
     export COMPOSER_AUTH &&
@@ -503,8 +503,8 @@ convert_secs_to_hms() {
   h="$(($1/3600))"
   m="$((($1%3600)/60))"
   s="$(($1%60))"
-  [[ "$h" != "0" ]]  && printf "%dh %dm %ds" "$h" "$m" "$s" && return 0
-  [[ "$m" != "0" ]]  && printf "%dm %ds" "$m" "$s" && return 0
+  [[ "$h" != 0 ]]  && printf "%dh %dm %ds" "$h" "$m" "$s" && return 0
+  [[ "$m" != 0 ]]  && printf "%dm %ds" "$m" "$s" && return 0
   printf "%ds" "$s" && return 0
 }
 
@@ -683,10 +683,10 @@ get_pwa_prev_hostname() {
   [[ "$mdm_domain" ]] && echo "pwa-prev.$mdm_domain" || echo "pwa-prev"
 }
 
-get_MAGENTO_CLOUD_vars_as_json() {
-  perl -MMIME::Base64 -ne '/(MAGENTO_CLOUD_.*?)=(.*)/ and print "\"$1\":".decode_base64($2).",\n"' \
-    "$app_resources_dir/app/.docker/config.env" | perl -0777 -pe 's/^/{/;s/.$/}/;'
-}
+# get_MAGENTO_CLOUD_vars_as_json() {
+#   perl -MMIME::Base64 -ne '/(MAGENTO_CLOUD_.*?)=(.*)/ and print "\"$1\":".decode_base64($2).",\n"' \
+#     "$apps_resources_dir/app/.docker/config.env" | perl -0777 -pe 's/^/{/;s/.$/}/;'
+# }
 
 set_MAGENTO_CLOUD_vars_json_to_env() {
   jq -r 'to_entries|map("\(.key)=\(.value|tostring|@base64)")|.[]'
@@ -722,21 +722,21 @@ find_running_app_hostname_by_network() {
 
 find_mdm_hostnames() {
   local hostnames hostname networks network
-  hostnames=("$(get_pwa_hostname)" "$(get_pwa_prev_hostname)")
+  hostnames="$(get_pwa_hostname) $(get_pwa_prev_hostname)"
   networks="$(find_bridged_docker_networks)"
   for network in $networks; do
     hostname="$(find_running_app_hostname_by_network "$network")"
-    [[ -n "$hostname" ]] && hostnames+=("$hostname")
+    [[ -n "$hostname" ]] && hostnames+=" $hostname"
   done
-  echo "${hostnames[*]}"
+  echo "$hostnames"
 }
 
 find_hostnames_not_resolving_to_local() {
-  local hostname hostnames="$*" hostnames_not_resolving_to_local=()
+  local hostname hostnames="$*" hostnames_not_resolving_to_local=""
   for hostname in $hostnames; do
-    ! is_hostname_resolving_to_local "$hostname" && hostnames_not_resolving_to_local+=("$hostname")
+    ! is_hostname_resolving_to_local "$hostname" && hostnames_not_resolving_to_local+=" $hostname"
   done
-  echo "${hostnames_not_resolving_to_local[*]}"
+  echo "$hostnames_not_resolving_to_local"
 }
 
 backup_hosts() {
@@ -1221,7 +1221,7 @@ handle_mdm_args() {
 }
 
 ensure_mdm_log_files_exist() {
-  [[ -f ""$menu_log_file"" ]] && return 0
+  [[ -f "$menu_log_file" ]] && return 0
   mkdir -p "$mdm_path"
   touch "$menu_log_file" "$handler_log_file" "$dockerize_log_file"
 }

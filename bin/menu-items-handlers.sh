@@ -21,7 +21,7 @@ clear_job_statuses() {
   pushd "$apps_mdm_jobs_dir" > /dev/null || return 1
   for job_file in $(find * -type f -not -name "*.cleared"); do
     read -r job_start job_pid job_end job_exit_code job_ui_state <<<"$(echo "$job_file" | tr '.' ' ')"
-    [[ "$job_exit_code" != "0" ]] && unseen_error_msgs="true"
+    [[ "$job_exit_code" != 0 ]] && unseen_error_msgs="true"
     mv "$job_file" "${job_file/%seen/cleared}"
   done
   is_advanced_mode && [[ "$unseen_error_msgs" ]] && {
@@ -38,12 +38,13 @@ get_job_statuses() {
   local job_file job_msg job_start job_pid job_end job_exit_code job_ui_state
   pushd "$apps_mdm_jobs_dir" > /dev/null || return 1
   for job_file in $(find * -type f -not -name "*.cleared"); do
+    # shellcheck disable=SC2034
     read -r job_start job_pid job_end job_exit_code job_ui_state <<<"$(echo "$job_file" | tr '.' ' ')"
     job_msg="$(<"$job_file")"
     [[ "$job_ui_state" = "done" ]] && mv "$job_file" "${job_file/%done/seen}"
     if [[ "$job_ui_state" = "done" || "$job_ui_state" = "seen" ]]; then
       duration=" ⌚️$(convert_secs_to_hms "$(( "$job_end" - "$job_start" ))")"
-      if [[ "$job_exit_code" = "0" ]]; then
+      if [[ "$job_exit_code" = 0 ]]; then
         prefix="✅ Success."
       else
         prefix="❗Error!"
@@ -127,15 +128,15 @@ install_app() {
     # create containers but do not start
     docker-compose up --no-start
     # copy db files to db container & start it up
-    docker cp .docker/mysql/docker-entrypoint-initdb.d "${COMPOSE_PROJECT_NAME}_db_1":/
+    docker cp .docker/mysql/docker-entrypoint-initdb.d "${COMPOSE_PROJECT_NAME}_db_1:/"
     docker-compose up -d db
     # copy over most files in local app dir to build container
     tar -cf - --exclude .docker --exclude .composer.tar.gz --exclude media.tar.gz . | \
-      docker cp - "${COMPOSE_PROJECT_NAME}_build_1":/app
+      docker cp - "${COMPOSE_PROJECT_NAME}_build_1:/app"
     # extract tars created for distribution via sync service e.g. dropbox, onedrive
     [[ -f .composer.tar.gz ]] && extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
     [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
-    [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1":/app/app/
+    [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1:/app/app/"
     docker-compose run build cloud-build
 
     # TODO need way to output install log b/c may appear frozen for mins to hours
@@ -161,6 +162,7 @@ install_app() {
     docker-compose run --rm deploy magento-command indexer:reindex
     docker-compose run --rm deploy magento-command cache:clean config_webservice
     services="$(get_docker_compose_runtime_services)"
+    # shellcheck disable=SC2086
     docker-compose up -d $services
     reload_rev_proxy
     # map the magento app hostname to docker host's ip 
@@ -176,7 +178,7 @@ install_app() {
       cloud-post-deploy
     ")"
 
-    docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid":/usr/local/share/ca-certificates/rootCA.crt
+    docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid:/usr/local/share/ca-certificates/rootCA.crt"
     open_app
     echo "$finished_msg"
   } >> "$handler_log_file" 2>&1 &
@@ -217,6 +219,7 @@ restart_app() {
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     services="$(get_docker_compose_runtime_services)"
+    # shellcheck disable=SC2086
     docker-compose start $services
     reload_rev_proxy
     # TODO another BUG where a cache has to be cleaned with a restart AND after a time delay. RACE CONDITION?!
@@ -322,7 +325,7 @@ sync_remote_to_app() {
 
     hostname="$(get_hostname_for_this_app)"
     msg_w_newlines "Resetting urls to https://$hostname and flushing the cache ..."
-    docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "$(get_magento_cmds_to_update_hostname_to $hostname)"
+    docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "$(get_magento_cmds_to_update_hostname_to "$hostname")"
 
     show_success_msg_plus_duration "$start"
 
@@ -371,7 +374,7 @@ sync_app_to_remote() {
     rm "$sql_tmp_file"
 
     msg_w_newlines "Resetting urls to https://$hostname and flushing the cache ..."
-    "$magento_cloud_cmd" ssh -p "$project" -e "$env" "$(get_magento_cmds_to_update_hostname_to $hostname)"
+    "$magento_cloud_cmd" ssh -p "$project" -e "$env" "$(get_magento_cmds_to_update_hostname_to "$hostname")"
 
     show_success_msg_plus_duration "$start"
 
@@ -512,17 +515,16 @@ start_pwa_with_remote() {
 }
 
 start_pwa() {
-  local magento_url="$1" pwa_path="$2" cloud_mode="$3" index="1"
+  local magento_url="$1" pwa_path="$2" cloud_mode="$3" index=1
   {
-    export MAGENTO_URL="$magento_url" \
-      COMPOSE_PROJECT_NAME="detached-mdm" \
-      COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml" \
-      CLOUD_MODE="$cloud_mode"
+    # shellcheck disable=SC2030
+    export MAGENTO_URL="$magento_url" COMPOSE_PROJECT_NAME="detached-mdm" CLOUD_MODE="$cloud_mode" \
+      COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml"
     docker-compose pull
     docker-compose rm -sfv storystore-pwa storystore-pwa-prev
     docker-compose up -d storystore-pwa storystore-pwa-prev
     ! is_nginx_rev_proxy_running && reload_rev_proxy
-    until [[ 200 = $(curl -w '%{http_code}' -so /dev/null https://$(get_pwa_hostname)/settings) || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
+    until [[ 200 = $(curl -w '%{http_code}' -so /dev/null "https://$(get_pwa_hostname)/settings") || $index -gt 10 ]]; do sleep 0.5; ((index++)); done
     open "https://$(get_pwa_hostname)/$pwa_path"
   } >> "$handler_log_file" 2>&1 &
   track_job_status_and_wait_for_exit $! "(Re)starting PWA"
@@ -589,6 +591,7 @@ start_remote_web_access() {
       return 0
     fi
     remote_port="$(( $RANDOM + 20000 ))" # RANDOM is between 0-32767 (2^16 / 2 - 1)
+    # shellcheck disable=SC2031
     local_port="$(docker ps -a --filter "name=varnish" --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME" --format "{{.Ports}}" | \
       tr ',' '\n' | \
       perl -ne "s/.*:(?=\d{5})// and s/-.*// and print"
@@ -602,7 +605,7 @@ start_remote_web_access() {
       -o ExitOnForwardFailure=yes \
       -o StrictHostKeyChecking=no \
       -i "$tmp_file" \
-      -NR "$remote_port":127.0.0.1:"$local_port" \
+      -NR "$remote_port:127.0.0.1:$local_port" \
       "$mdm_tunnel_ssh_url"
     hostname="$remote_port.$mdm_tunnel_domain"
     update_hostname "$hostname"
