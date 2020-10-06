@@ -1115,8 +1115,13 @@ get_docker_compose_runtime_services() {
     perl -pe 's/\b(build|deploy|generic|tls)\b\s*//g;s/^\s*//;s/\s*$//' # remove non runtime services
 }
 
+# mount:upload|download lists ALL files; just list the top level dirs and MB xferred
+filter_cloud_mount_transfer_output() {
+  perl -ne 'BEGIN{ $| = 1; } /^[^\s]/ and print;/\s+[^\/]+\/$/ and print;/^\s+(total|sent) / and print'
+}
+
+
 # if come across entry with no handler or link, entering submenu
-# 
 render_platypus_status_menu() {
   local index key key_length menu_output is_submenu highlight_func highlight_text tmp_output
   key_length=${#mdm_menu_items_keys[@]}

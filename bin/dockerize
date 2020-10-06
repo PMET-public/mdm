@@ -237,8 +237,8 @@ is_existing_cloud_env && {
   else
     media_cache_option="--exclude=cache"
   fi
-  "$magento_cloud_cmd" mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" $media_cache_option 2>&1 |
-    perl -ne 'BEGIN{ $| = 1; } /^[^\s]/ and print;/\s+[^\/]+\/$/ and print;/^\s+(total|sent) / and print'
+  "$magento_cloud_cmd" mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" \
+    $media_cache_option 2>&1 | filter_cloud_mount_transfer_output
   tar -C "$tmp_app_dir" -zcf "$app_dir/media.tar.gz" "pub/media"
 
 }
