@@ -602,7 +602,7 @@ stop_other_apps() {
 
 dockerize_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local url projects project env branch skip_option="-s"
+    local url project env branch skip_option="-s"
     printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env or a $(warning "cloud compatible") git repo."
     read -r -p ''
     url="$REPLY"
@@ -636,14 +636,14 @@ from the Magento Cloud projects page (ex. https://<region>.magento.cloud/project
 
 sync_app_to_remote() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local url projects project env media_tmp_dir cid backup_sql_path sql_tmp_file hostname
+    local url start project env media_tmp_dir backup_sql_path sql_tmp_file hostname
     printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env from your Magento Cloud projects page 
 (ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
     read -r -p ''
     url="$REPLY"
-    #url="https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test"
     is_valid_mc_url "$url" || error "The url does not appear to be a valid Magento Cloud url from the Magento Cloud projects page 
 (ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
+    start="$(date +"%s")"
     is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
     read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
 
@@ -672,23 +672,19 @@ sync_app_to_remote() {
     msg_w_newlines "Resetting urls to https://$hostname and flushing the cache ..."
     "$magento_cloud_cmd" ssh -p "$project" -e "$env" "$(get_magento_cmds_to_update_hostname_to $hostname)"
 
-    # check for git changes?
-    # warnings to user? under what conditions?
-    # does media-gallery:sync need to run
-    # reload env if necessary
-    # db encrypt key differences?
-    # git operations
+    show_success_msg_plus_duration "$start"
 
   }
 }
 
 sync_remote_to_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local url projects project env media_tmp_dir cid backup_sql_path sql_tmp_file hostname
+    local url start project env media_tmp_dir backup_sql_path sql_tmp_file hostname
     printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env from your Magento Cloud projects page 
 (ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
     read -r -p ''
     url="$REPLY"
+    start="$(date +"%s")"
     is_valid_mc_url "$url" || error "The url does not appear to be a valid Magento Cloud url from the Magento Cloud projects page 
 (ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
     is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
@@ -713,6 +709,9 @@ sync_remote_to_app() {
     msg_w_newlines "Resetting urls to https://$hostname and flushing the cache ..."
     docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "$(get_magento_cmds_to_update_hostname_to $hostname)"
 
+    show_success_msg_plus_duration "$start"
+
+    # default to env cloned from?
     # check for git changes?
     # warnings to user? under what conditions?
     # does media-gallery:sync need to run
