@@ -1,14 +1,14 @@
 - [Overview](#overview)
 - [MDM End Users](#mdm-end-users)
     - [Top Level Menu Items](#top-level-menu-items)
-    - [Magento commands](#magento-commands)
+    - [💻 Magento commands](#-magento-commands)
     - [Top Level Menu Items](#top-level-menu-items-1)
-    - [PWA](#pwa)
+    - [📱 PWA](#-pwa)
     - [Top Level Menu Items](#top-level-menu-items-2)
-    - [Help / Support](#help--support)
-    - [Useful resources](#useful-resources)
-    - [Logs](#logs)
-    - [Maintenance](#maintenance)
+    - [🚑 Help / Support](#-help--support)
+    - [🎗 Useful resources](#-useful-resources)
+    - [📝 Logs](#-logs)
+    - [🛠 Maintenance](#-maintenance)
     - [Top Level Menu Items](#top-level-menu-items-3)
   - [Frequently Asked Qestions (FAQ)](#frequently-asked-qestions-faq)
     - ["How do I spoof domains?" or "Why is my certificate invalid?"](#how-do-i-spoof-domains-or-why-is-my-certificate-invalid)
@@ -80,13 +80,15 @@ menu item, then MDM has determined it's not currently appropiate. Many items onl
 |⚠️▶️ Can't restart app - ports in use.|   |   |
 |🚨 Uninstall this Magento app|   |If an error occurred during install, this option allows you to try again.|
 |🛑 Stop all other Magento apps|   |While multiple Magento apps can run at the same time, it may consume many resources.|
-|📦 Create a new Magento app|   |Asks for a Magento Cloud project to recreate locally|
+|📦 Create new MDM app|   |Asks for a Magento Cloud project to recreate locally|
+|☁️→💻 Sync FROM cloud env|   |   |
+|💻→☁️ Sync TO cloud env|   |   |
 |<nobr>                  </nobr>|<nobr>   </nobr>|   |
 
 <!--- # start Magento commands submenu --->
-### Magento commands 
+### 💻 Magento commands 
 
-|Magento commands|   |   |
+|💻 Magento commands|   |   |
 |:---|:-:|:--|
 |🛑 App stopped. Many cmds N/A|   |Start Magento to reveal more options|
 |💻 Start shell in app|   |   |
@@ -106,13 +108,13 @@ menu item, then MDM has determined it's not currently appropiate. Many items onl
 
 |Top Level Menu Items|   |   |
 |:---|:-:|:--|
-|📝 Show MDM logs|   |*Advanced* Watch the MDM output in realtime. Combine with MDM debugging under *Maintenance*|
+|📝 Open MDM logging|   |*Advanced* Watch the MDM output in realtime. Combine with MDM debugging under *Maintenance*|
 |<nobr>                  </nobr>|<nobr>   </nobr>|   |
 
 <!--- # start PWA submenu --->
-### PWA 
+### 📱 PWA 
 
-|PWA|   |   |
+|📱 PWA|   |   |
 |:---|:-:|:--|
 |(Re)start PWA using this Magento app|   |The PWA will use the local Magento app as the backend.|
 |🛑 App stopped. Start PWA offline|   |   |
@@ -129,14 +131,14 @@ menu item, then MDM has determined it's not currently appropiate. Many items onl
 |<nobr>                  </nobr>|<nobr>   </nobr>|   |
 
 <!--- # start Help / Support submenu --->
-### Help / Support 
+### 🚑 Help / Support 
 
-|Help / Support|   |   |
+|🚑 Help / Support|   |   |
 |:---|:-:|:--|
 |Magento Org #m2-demo-support |[link](slack://channel?team=T016XBMUQLA&id=C018FCG0HHS)|link to slack channel|
 |💻 Grant remote access to system|   |Only remote users with pre-authorized keys will be able to connect *1* time. If not configured, a warning appears. Choose if you want to continue and provide the secret url to a remote user.|
 |🛑 Stop remote system access|   |   |
-|🔓 Grant remote web access|   |If configured, creates a public url able to access this Magenot app.|
+|🔓 Grant remote web access|   |If configured, creates a public url able to access this Magento app.|
 |🛑 Stop remote web access; revert url|   |   |
 |Magento Community #cloud-docker |[link](slack://channel?team=T4YUW69CM&id=CJ6F3F8NS)|link to slack channel|
 |Offical Cloud Support |[link](https://support.magento.com/hc/en-us/requests)|   |
@@ -145,9 +147,9 @@ menu item, then MDM has determined it's not currently appropiate. Many items onl
 
 
 <!--- # start Useful resources submenu --->
-### Useful resources 
+### 🎗 Useful resources 
 
-|Useful resources|   |   |
+|🎗 Useful resources|   |   |
 |:---|:-:|:--|
 |MDM @ GitHub |[link](https://github.com/pmet-public/mdm)|This project|
 |Docker Folder (OneDrive) |[link](https://adobe.sharepoint.com/sites/SITeam/Shared%20Documents/adobe-internal/docker)|   |
@@ -162,21 +164,21 @@ menu item, then MDM has determined it's not currently appropiate. Many items onl
 
 
 <!--- # start logs submenu --->
-### Logs 
+### 📝 Logs 
 
-|Logs|   |*Advanced*|
+|📝 Logs|   |*Advanced*|
 |:---|:-:|:--|
 |Show errors from MDM log|   |Show just the recorded errors|
-|Show entire MDM log|   |   |
+|Follow MDM logs|   |   |
 |Show Magento app logs|   |   |
 |<nobr>                  </nobr>|<nobr>   </nobr>|   |
 <!--- # end logs submenu --->
 
 
 <!--- # start maintenance submenu --->
-### Maintenance 
+### 🛠 Maintenance 
 
-|Maintenance|   |*Advanced*|
+|🛠 Maintenance|   |*Advanced*|
 |:---|:-:|:--|
 |🐞 PHP Xdebug is ON\|OFF for this app|   |Turn on|off php debugging|
 |🐞 MDM debugging is ON\|OFF for this app|   |Turn on|off debugging of MDM - much more info written to the logs|
