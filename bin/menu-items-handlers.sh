@@ -5,6 +5,14 @@
 #   2. requires user interaction (including long term monitoring of output), run in terminal
 #   3. should be completed in the background, run as child process and set non-blocking status
 
+start_docker() {
+  {
+    msg_w_timestamp "${FUNCNAME[0]}"
+    restart_docker_and_wait
+  } >> "$handler_log_file" 2>&1 &
+  track_job_status_and_wait_for_exit $! "Starting Docker VM ..."
+}
+
 # jobs will either be ongoing (no file extention), done (.done), seen but not cleared (.seen), or .cleared (.cleared)
 # when user selects a job status msg, clear all seen
 # if one of the cleared was an error, pop up a terminal with what that error was
@@ -104,14 +112,6 @@ optimize_docker() {
     restart_docker_and_wait
   } >> "$handler_log_file" 2>&1 &
   track_job_status_and_wait_for_exit $! "Optimizing Docker VM ..."
-}
-
-start_docker() {
-  {
-    msg_w_timestamp "${FUNCNAME[0]}"
-    restart_docker_and_wait
-  } >> "$handler_log_file" 2>&1 &
-  track_job_status_and_wait_for_exit $! "Starting Docker VM ..."
 }
 
 update_mdm() {
@@ -290,47 +290,6 @@ from the Magento Cloud projects page (ex. https://<region>.magento.cloud/project
   }
 }
 
-sync_app_to_remote() {
-  run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local url start project env media_tmp_dir backup_sql_path sql_tmp_file hostname
-    printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env from your Magento Cloud projects page 
-(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
-    read -r -p ''
-    url="$REPLY"
-    is_valid_mc_url "$url" || error "The url does not appear to be a valid Magento Cloud url from the Magento Cloud projects page 
-(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
-    start="$(date +"%s")"
-    is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
-    read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
-
-    msg_w_newlines "Copying app media to cloud ..."
-    media_tmp_dir="$(mktemp -d)"
-    docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media" "$media_tmp_dir"
-    "$magento_cloud_cmd" mount:upload -y -p "$project" -e "$env" -m pub/media --source "$media_tmp_dir/media" 2>&1 |
-      filter_cloud_mount_transfer_output
-    rm -rf "$media_tmp_dir"
-
-    hostname="$("$magento_cloud_cmd" ssh -p "$project" -e "$env" "bin/magento config:show web/secure/base_url" |
-      perl -pe 's/^https?:\/\///;s/\s+$//')"
-
-    msg_w_newlines "Copying app DB to cloud ..."
-    backup_sql_path="$(docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "
-      bin/magento config:set -q system/backup/functionality_enabled 1 && 
-      bin/magento setup:backup --db | sed -n 's/.*path: //p' | tr -d '\n'
-    ")"
-    sql_tmp_file="$(mktemp)"
-    docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:$backup_sql_path" "$sql_tmp_file"
-    "$magento_cloud_cmd" sql -p "$project" -e "$env" < "$sql_tmp_file"
-    rm "$sql_tmp_file"
-
-    msg_w_newlines "Resetting urls to https://$hostname and flushing the cache ..."
-    "$magento_cloud_cmd" ssh -p "$project" -e "$env" "$(get_magento_cmds_to_update_hostname_to $hostname)"
-
-    show_success_msg_plus_duration "$start"
-
-  }
-}
-
 sync_remote_to_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local url start project env media_tmp_dir backup_sql_path sql_tmp_file hostname
@@ -374,6 +333,47 @@ sync_remote_to_app() {
     # reload env if necessary
     # db encrypt key differences?
     # git operations
+
+  }
+}
+
+sync_app_to_remote() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local url start project env media_tmp_dir backup_sql_path sql_tmp_file hostname
+    printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env from your Magento Cloud projects page 
+(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
+    read -r -p ''
+    url="$REPLY"
+    is_valid_mc_url "$url" || error "The url does not appear to be a valid Magento Cloud url from the Magento Cloud projects page 
+(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
+    start="$(date +"%s")"
+    is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
+    read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
+
+    msg_w_newlines "Copying app media to cloud ..."
+    media_tmp_dir="$(mktemp -d)"
+    docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media" "$media_tmp_dir"
+    "$magento_cloud_cmd" mount:upload -y -p "$project" -e "$env" -m pub/media --source "$media_tmp_dir/media" 2>&1 |
+      filter_cloud_mount_transfer_output
+    rm -rf "$media_tmp_dir"
+
+    hostname="$("$magento_cloud_cmd" ssh -p "$project" -e "$env" "bin/magento config:show web/secure/base_url" |
+      perl -pe 's/^https?:\/\///;s/\s+$//')"
+
+    msg_w_newlines "Copying app DB to cloud ..."
+    backup_sql_path="$(docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "
+      bin/magento config:set -q system/backup/functionality_enabled 1 && 
+      bin/magento setup:backup --db | sed -n 's/.*path: //p' | tr -d '\n'
+    ")"
+    sql_tmp_file="$(mktemp)"
+    docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:$backup_sql_path" "$sql_tmp_file"
+    "$magento_cloud_cmd" sql -p "$project" -e "$env" < "$sql_tmp_file"
+    rm "$sql_tmp_file"
+
+    msg_w_newlines "Resetting urls to https://$hostname and flushing the cache ..."
+    "$magento_cloud_cmd" ssh -p "$project" -e "$env" "$(get_magento_cmds_to_update_hostname_to $hostname)"
+
+    show_success_msg_plus_duration "$start"
 
   }
 }
@@ -451,6 +451,10 @@ warm_cache() {
   }
 }
 
+resize_images() {
+  run_as_bash_cmds_in_app "bin/magento catalog:images:resize"
+}
+
 change_base_url() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local hostname
@@ -462,10 +466,6 @@ change_base_url() {
     update_hostname "$hostname"
     msg_w_newlines "Successfully set url to https://$hostname/."
   }
-}
-
-resize_images() {
-  run_as_bash_cmds_in_app "bin/magento catalog:images:resize"
 }
 
 switch_to_production_mode() {
