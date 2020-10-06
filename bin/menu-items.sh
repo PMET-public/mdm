@@ -580,12 +580,15 @@ is_advanced_mode && {
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=reload_rev_proxy
 
-    key="🧹 Remove hosts added to /etc/hosts"
-    description=""
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=rm_added_hostnames_from_hosts_file
+  }
 
-    # can this be removed now that docker pull is being used each time?
+  key="🧹 Remove hosts added to /etc/hosts"
+  description=""
+  mdm_menu_items_keys+=("$key")
+  mdm_menu_items["$key-handler"]=rm_added_hostnames_from_hosts_file
+
+  is_docker_compatible && {
+
     key="🧹 Prune all unused docker images"
     description="Removes old or currently unused Docker images. If no apps are currently installed, Docker will re-download the required images during installation."
     mdm_menu_items_keys+=("$key")
