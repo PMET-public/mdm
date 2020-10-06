@@ -34,6 +34,7 @@ setup() {
 }
 
 @test 'rm_added_hostnames_from_hosts_file' {
+  is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
   "$lib_dir/launcher" rm_added_hostnames_from_hosts_file
   run grep -q "$hosts_file_line_marker" /etc/hosts
   assert_failure
