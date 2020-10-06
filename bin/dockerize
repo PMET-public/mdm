@@ -109,7 +109,7 @@ while getopts "b:e:g:hdp:t:n:a:i:ms" opt || [[ $# -eq 0 ]]; do
   case "$opt" in
     h ) print_usage; exit 0 ;;
     d ) detached=true ;;
-    p ) pid="$OPTARG" ;;
+    p ) project="$OPTARG" ;;
     e ) env="$OPTARG" ;;
     g ) git_url="$OPTARG" ;;
     b ) branch="$OPTARG" ;;
@@ -147,15 +147,15 @@ done
 
 # additional error checking
 {
-  { # pid and env are not empty but other related opts are
-    [[ ! -z "$pid" ]] && [[ ! -z "$env" ]] && [[ -z "$git_url" ]] && [[ -z "$branch" ]] && [[ -z "$tag" ]] && \
+  { # project and env are not empty but other related opts are
+    [[ ! -z "$project" ]] && [[ ! -z "$env" ]] && [[ -z "$git_url" ]] && [[ -z "$branch" ]] && [[ -z "$tag" ]] && \
       env_is_existing_cloud=true
   } ||
   { # git url and branch are not empty but other related opts are
-    [[ ! -z "$git_url" ]] && [[ ! -z "$branch" ]] && [[ -z "$tag" ]] && [[ -z "$pid" ]] && [[ -z "$env" ]]
+    [[ ! -z "$git_url" ]] && [[ ! -z "$branch" ]] && [[ -z "$tag" ]] && [[ -z "$project" ]] && [[ -z "$env" ]]
   } ||
   { # git url and tag are not empty but other related opts are
-    [[ ! -z "$git_url" ]] && [[ ! -z "$tag" ]] && [[ -z "$branch" ]] && [[ -z "$pid" ]] && [[ -z "$env" ]]
+    [[ ! -z "$git_url" ]] && [[ ! -z "$tag" ]] && [[ -z "$branch" ]] && [[ -z "$project" ]] && [[ -z "$env" ]]
   }
 } ||
   error "
@@ -172,7 +172,7 @@ You must provide either:
   if is_existing_cloud_env; then
     "$magento_cloud_cmd" -q || error "The magento-cloud CLI was not found. To install, run
     curl -svLS https://accounts.magento.cloud/cli/installer | php"
-    app_hostname="$pid-$env"
+    app_hostname="$project-$env"
   else
     is_valid_git_url "$git_url" || error "Please check your git url."
     git_repo=$(echo "$git_url" | perl -pe 's/.*\/(.*)\.git/$1/')
@@ -190,7 +190,7 @@ is_valid_hostname "$app_hostname" ||
 tmp_app_dir="$HOME/Downloads/$app_hostname-tmp"
 rm -rf "$tmp_app_dir" || :
 if is_existing_cloud_env; then
-  "$magento_cloud_cmd" get -e "$env" --depth=0 "$pid" "$tmp_app_dir"
+  "$magento_cloud_cmd" get -e "$env" --depth=0 "$project" "$tmp_app_dir"
 else
   git clone "$git_url" --branch "$branch$tag" --depth 1 "$tmp_app_dir" || {
     # if error, try branch/tag as commit
@@ -220,11 +220,11 @@ is_existing_cloud_env && {
 
   # extract current env DB into the expected dir
   mkdir -p "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
-  "$magento_cloud_cmd" db:dump -p "$pid" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d" 2> /dev/null
+  "$magento_cloud_cmd" db:dump -p "$project" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d" 2> /dev/null
 
   # extract only the encryption key from the env's app/etc/env.php
   mkdir -p "$app_dir/app/etc"
-  "$magento_cloud_cmd" ssh -p "$pid" -e "$env" "
+  "$magento_cloud_cmd" ssh -p "$project" -e "$env" "
     php -r '\$a = require_once(\"app/etc/env.php\");
     echo \"<?php return array ( \\\"crypt\\\"  => \";
     var_export(\$a[\"crypt\"]); echo \");\";'
@@ -233,11 +233,11 @@ is_existing_cloud_env && {
   # get the env's media cache if specified
   mkdir -p "$tmp_app_dir/pub/media"
   if [[ "$media_cache" ]]; then
-    "$magento_cloud_cmd" ssh -y -p "$pid" -e "$env" "/app/bin/magento catalog:images:resize"
+    "$magento_cloud_cmd" ssh -y -p "$project" -e "$env" "/app/bin/magento catalog:images:resize"
   else
     media_cache_option="--exclude=cache"
   fi
-  "$magento_cloud_cmd" mount:download -y -p "$pid" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" \
+  "$magento_cloud_cmd" mount:download -y -p "$project" -e "$env" -m pub/media --target "$tmp_app_dir/pub/media" \
     $media_cache_option 2>&1 | filter_cloud_mount_transfer_output
   tar -C "$tmp_app_dir" -zcf "$app_dir/media.tar.gz" "pub/media"
 
