@@ -251,7 +251,7 @@ stop_other_apps() {
     compose_project_names="$(docker ps -a -f "label=com.docker.compose.service=db" --format="{{ .Names  }}" |
       perl -pe 's/_db_1$//')"
     for name in $compose_project_names; do
-      [[ $name == "$COMPOSE_PROJECT_NAME" ]] && continue
+      [[ "$name" == "$COMPOSE_PROJECT_NAME" ]] && continue
       # shellcheck disable=SC2046
       docker stop $(docker ps -q -f "name=^${name}_")
     done
@@ -279,7 +279,7 @@ dockerize_app() {
 
 [y|N]?"
       read -r -p ''
-      [[ $REPLY =~ ^[Yy]$ ]] || {
+      [[ "$REPLY" =~ ^[Yy]$ ]] || {
         skip_option=""
       }
       "$lib_dir/dockerize" -p "$project" -e "$env" -i "$HOME/.mdm/current/icons/magento.icns" "$skip_option"

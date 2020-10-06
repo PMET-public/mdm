@@ -2,7 +2,7 @@
 set -e
 
 # don't trap errors while using VSC debugger
-[[ $VSCODE_PID ]] || {
+[[ "$VSCODE_PID" ]] || {
   set -E # If set, the ERR trap is inherited by shell functions.
   trap 'error "Command $BASH_COMMAND failed with exit code $? on line $LINENO of $BASH_SOURCE."' ERR
 }
@@ -22,7 +22,7 @@ for (( index=0; index < bs_len; ((index++)) )); do
   [[ "${BASH_SOURCE[$index]}" =~ /lib.sh$ ]] && {
     lib_dir="$(dirname "${BASH_SOURCE[$index]}")"
     # if lib_dir is relative, determine & use absolute path
-    [[ $lib_dir =~ ^\./ ]] && lib_dir="$PWD/${lib_dir#./}"
+    [[ "$lib_dir" =~ ^\./ ]] && lib_dir="$PWD/${lib_dir#./}"
     break
   }
 done
@@ -67,7 +67,7 @@ magento_cloud_cmd="$HOME/.magento-cloud/bin/magento-cloud"
 
 docker_install_link="https://hub.docker.com/editions/community/docker-ce-desktop-mac/"
 repo_url="https://github.com/PMET-public/mdm"
-mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ $mdm_version =~ ^[0-9.]*$ ]] || mdm_version="0.0.0-dev"
+mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ "$mdm_version" =~ ^[0-9.]*$ ]] || mdm_version="0.0.0-dev"
 
 # a mnemonic for storing certain calculated vals. however b/c this lib needs bash 3 compatibility initially,
 # no functionality requiring the mdm_store can be run until after initialization logic
@@ -532,7 +532,7 @@ ARE YOU SURE?! (y/n)
 
 "
   read -r -p ''
-  [[ $REPLY =~ ^[Yy]$ ]] || {
+  [[ "$REPLY" =~ ^[Yy]$ ]] || {
     msg_w_newlines "Exiting unchanged." && exit
   }
 }
@@ -921,7 +921,7 @@ sudo_run_bash_cmds() {
 # also, if this is not a mac, don't open a new "Terminal" and just run the calling function directly
 # TODO make this cross platform compatible by opening the corresponing terminal application
 run_this_menu_item_handler_in_new_terminal_if_applicable() {
-  [[ $MDM_DIRECT_HANDLER_CALL ]] && return 1
+  [[ "$MDM_DIRECT_HANDLER_CALL" ]] && return 1
   ! is_mac && return 1
   local caller script funcs="${FUNCNAME[*]}"
   # extract the calling function from the list of function names ordinarily it's immediately after
@@ -1127,7 +1127,7 @@ render_platypus_status_menu() {
   # based on Platypus menu syntax, submenu headers are not seletctable so no handler or link entry (unlike actual submenu items)
   for (( index=0; index < key_length; index++ )); do
     key="${mdm_menu_items_keys[$index]}"
-    if [[ $key = "end submenu" ]]; then
+    if [[ "$key" = "end submenu" ]]; then
       [[ "$is_submenu" ]] && {
         is_submenu=""
         launched_from_mac_menu_cached && menu_output+=$'\n'
@@ -1147,7 +1147,7 @@ render_platypus_status_menu() {
       is_submenu=true
       continue
     }
-    [[ ${mdm_menu_items["$key-disabled"]} ]] && menu_output+="DISABLED|"
+    [[ "${mdm_menu_items["$key-disabled"]}" ]] && menu_output+="DISABLED|"
     # status menu at top of menu case - needs newline
     if [[ "$key" =~ ^DISABLED && "$key" =~ ---$ ]]; then
       menu_output+="$key"$'\n'
@@ -1177,7 +1177,7 @@ render_platypus_status_menu() {
 }
 
 handle_mdm_args() {
-  local key value len
+  local key value len remaining_args=()
   # check what type of menu item was selected
 
   # a handler?
@@ -1203,13 +1203,13 @@ handle_mdm_args() {
   # (e.g. it's not appropiate to launch a new interactive OSX terminal)
   for value in "${mdm_menu_items[@]}"; do
     [[ "$mdm_first_arg" = "$value" ]] && {
-      export MDM_DIRECT_HANDLER_CALL=true
+      export MDM_DIRECT_HANDLER_CALL="true"
       # BASH_ARGV has all parameters in the current bash execution call stack
       # the final parameter of the last subroutine call is first in the queue
       # the first parameter of the initial call is last
       # in this case, the sourced bin/mdm is first and the last element is the directly called handler
       # so remove the first and last and reverse the middle (whew!)
-      len=$(( ${#BASH_ARGV[*]} - 2 )) remaining_args
+      len=$(( ${#BASH_ARGV[*]} - 2 ))
       reverse_array BASH_ARGV remaining_args
       "$mdm_first_arg" "${remaining_args[@]:1:$len}"
       exit
@@ -1227,7 +1227,7 @@ ensure_mdm_log_files_exist() {
 }
 
 run_bundled_app_as_script() {
-  [[ $apps_resources_dir ]] || error "App's resources dir not set"
+  [[ "$apps_resources_dir" ]] || error "App's resources dir not set"
   local script_arg="$1"
   # invoke in the same way platypus would
   if is_mac; then
@@ -1311,7 +1311,7 @@ self_install() {
 
   # on linux, some services require a min virtual memory map count and may need to be raised
   # https://devdocs.magento.com/cloud/docker/docker-containers-service.html#troubleshooting
-  ! is_mac && [[ $(sysctl vm.max_map_count | perl -pe 's/.*=\s*//') -lt 262144 ]] && {
+  ! is_mac && [[ "$(sysctl vm.max_map_count | perl -pe 's/.*=\s*//')" -lt 262144 ]] && {
     sudo sysctl -w vm.max_map_count=262144 > /dev/null 2>&1
   }
 
