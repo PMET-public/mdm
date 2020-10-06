@@ -34,7 +34,7 @@ setup() {
 }
 
 @test 'rm_added_hostnames_from_hosts_file' {
-  rm_added_hostnames_from_hosts_file
+  "$lib_dir/launcher" rm_added_hostnames_from_hosts_file
   run grep -q "$hosts_file_line_marker" /etc/hosts
   assert_failure
   assert_output ''
