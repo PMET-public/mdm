@@ -27,6 +27,7 @@ setup() {
 }
 
 @test 'dockerize_app of installed cloud env' {
+  skip
   run "./$app_link_name" dockerize_app << RESPONSES
 https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
 n
@@ -36,6 +37,7 @@ RESPONSES
 }
 
 @test 'install_app of dockerized cloud env' {
+  skip
   mdm_app_dir="$(get_most_recent_mdm_app)"
   run "$mdm_app_dir/Contents/Resources/script" install_app
   assert_success
@@ -43,6 +45,7 @@ RESPONSES
 }
 
 @test 'sync_app_to_remote' {
+  skip
   "./$app_link_name" sync_app_to_remote << RESPONSES
 https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
 n
@@ -53,6 +56,7 @@ RESPONSES
 }
 
 @test 'sync_remote_to_app' {
+  skip
   "./$app_link_name" sync_remote_to_app << RESPONSES
 https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
 n
