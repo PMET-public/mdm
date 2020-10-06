@@ -671,10 +671,7 @@ get_project_and_env_from_mc_url() {
   [[ "$project" ]] || error "$url not recognized as a valid Magento Cloud url from the Magento Cloud projects page
 (ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
   env="$(get_env_from_mc_url "$url")"
-  [[ "$env" ]] || {
-    warning_w_newlines "Environment could not be determined from $url. Using 'master' ..."
-    env="master"
-  }
+  [[ "$env" ]] || env="master"
   echo "$project $env"
 }
 
