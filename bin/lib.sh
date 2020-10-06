@@ -512,6 +512,11 @@ seconds_since() {
   echo "$(( $(date +"%s") - $1 ))"
 }
 
+show_success_msg_plus_duration() {
+  msg_w_newlines "Completely successfully in ⌚️$(convert_secs_to_hms "$(seconds_since "$1")")"
+}
+
+
 reverse_array() {
     declare -n input_array="$1" output_array="$2"
     local index
