@@ -66,20 +66,20 @@ setup() {
 # have to use an indirect method to get the app's url
 
 @test 'web/unsecure/base_url should be secure' {
-  run "./$app_link_name" start_shell_in_app 'php bin/magento config:show "web/unsecure/base_url"'
+  run "./$app_link_name" start_shell_in_app 'bin/magento config:show "web/unsecure/base_url"'
   assert_success
   assert_output -p 'https://'
 }
 
 @test 'web/secure/base_url should be secure' {
-  run "./$app_link_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"'
+  run "./$app_link_name" start_shell_in_app 'bin/magento config:show "web/secure/base_url"'
   assert_success
   assert_output -p 'https://'
 }
 
 @test 'check search result page for images' {
   "./$app_link_name" start_shell_in_app 'grep -q catalog-sample-data composer.json' || skip
-  base_url="$("./$app_link_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
+  base_url="$("./$app_link_name" start_shell_in_app 'bin/magento config:show "web/secure/base_url"')"
   run curl "$base_url/catalogsearch/result/?q=accessory"
   assert_success
   assert_output -e 'img.*src.*catalog\/product\/cache'
@@ -87,7 +87,7 @@ setup() {
 
 @test 'find and check the first category page in the nav for images' {
   "./$app_link_name" start_shell_in_app 'grep -q catalog-sample-data composer.json' || skip
-  base_url="$("./$app_link_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"')"
+  base_url="$("./$app_link_name" start_shell_in_app 'bin/magento config:show "web/secure/base_url"')"
   category_url="$(curl "$base_url" |
     perl -ne 's/.*?class.*?nav-[12]-1.*?href=.([^ ]+.html).*/$1/ and print')"
   run curl "$category_url"
@@ -96,14 +96,14 @@ setup() {
 }
 
 @test 'create admin user' {
-  run "./$app_link_name" start_shell_in_app 'php bin/magento admin:user:create --admin-user "admin" \
+  run "./$app_link_name" start_shell_in_app 'bin/magento admin:user:create --admin-user "admin" \
     --admin-password "pass4mdmCI" --admin-email admin@example.com --admin-firstname admin --admin-lastname admin'
   assert_success
   assert_output -e 'created.*admin'
 }
 
 @test 'check admin login user:pass == admin:pass4mdmCI' {
-  base_url="$("./$app_link_name" start_shell_in_app 'php bin/magento config:show "web/secure/base_url"' | perl -ne 's/\/\s*$// and print')"
+  base_url="$("./$app_link_name" start_shell_in_app 'bin/magento config:show "web/secure/base_url"' | perl -ne 's/\/\s*$// and print')"
   rm /tmp/myc 2> /dev/null || :
   admin_output="$(wget --save-cookies /tmp/myc --quiet --no-check-certificate -O - "$base_url/admin/")"
   form_url="$(echo "$admin_output" | perl -ne '/.*BASE_URL[\s='\''"]+([^'\''"]+).*/ and print $1')"

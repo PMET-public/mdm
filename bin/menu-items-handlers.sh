@@ -172,7 +172,7 @@ install_app() {
       sleep 10 # need time to copy over root CA
       update-ca-certificates
       echo '$(print_containers_hosts_file_entry)' >> /etc/hosts
-      /app/bin/magento cache:enable
+      bin/magento cache:enable
       cloud-post-deploy
     ")"
 
@@ -361,27 +361,27 @@ run_as_bash_cmds_in_app() {
 }
 
 reindex() {
-  run_as_bash_cmds_in_app "/app/bin/magento indexer:reindex"
+  run_as_bash_cmds_in_app "bin/magento indexer:reindex"
 }
 
 run_cron() {
-  run_as_bash_cmds_in_app "/app/bin/magento cron:run"
+  run_as_bash_cmds_in_app "bin/magento cron:run"
 }
 
 enable_all_except_cms_cache() {
-  run_as_bash_cmds_in_app "/app/bin/magento cache:enable; /app/bin/magento cache:disable layout block_html full_page"
+  run_as_bash_cmds_in_app "bin/magento cache:enable; bin/magento cache:disable layout block_html full_page"
 }
 
 enable_all_caches() {
-  run_as_bash_cmds_in_app "/app/bin/magento cache:enable"
+  run_as_bash_cmds_in_app "bin/magento cache:enable"
 }
 
 disable_all_caches() {
-  run_as_bash_cmds_in_app "/app/bin/magento cache:disable"
+  run_as_bash_cmds_in_app "bin/magento cache:disable"
 }
 
 flush_cache() {
-  run_as_bash_cmds_in_app "/app/bin/magento cache:flush"
+  run_as_bash_cmds_in_app "bin/magento cache:flush"
 }
 
 # compare to chrome extenstion function (keep the funcs synced)
@@ -421,15 +421,15 @@ change_base_url() {
 }
 
 resize_images() {
-  run_as_bash_cmds_in_app "/app/bin/magento catalog:images:resize"
+  run_as_bash_cmds_in_app "bin/magento catalog:images:resize"
 }
 
 switch_to_production_mode() {
-  run_as_bash_cmds_in_app "/app/bin/magento deploy:mode:set production"
+  run_as_bash_cmds_in_app "bin/magento deploy:mode:set production"
 }
 
 switch_to_developer_mode() {
-  run_as_bash_cmds_in_app "/app/bin/magento deploy:mode:set developer"
+  run_as_bash_cmds_in_app "bin/magento deploy:mode:set developer"
 }
 
 start_mdm_shell() {
@@ -660,8 +660,8 @@ sync_app_to_remote() {
 
     msg_w_newlines "Copying app DB to cloud ..."
     backup_sql_path="$(docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "
-      ./bin/magento config:set -q system/backup/functionality_enabled 1 && 
-      ./bin/magento setup:backup --db | sed -n 's/.*path: //p' | tr -d '\n'
+      bin/magento config:set -q system/backup/functionality_enabled 1 && 
+      bin/magento setup:backup --db | sed -n 's/.*path: //p' | tr -d '\n'
     ")"
     sql_tmp_file="$(mktemp)"
     docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:$backup_sql_path" "$sql_tmp_file"

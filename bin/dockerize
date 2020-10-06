@@ -233,7 +233,7 @@ is_existing_cloud_env && {
   # get the env's media cache if specified
   mkdir -p "$tmp_app_dir/pub/media"
   if [[ "$media_cache" ]]; then
-    "$magento_cloud_cmd" ssh -y -p "$project" -e "$env" "/app/bin/magento catalog:images:resize"
+    "$magento_cloud_cmd" ssh -y -p "$project" -e "$env" "bin/magento catalog:images:resize"
   else
     media_cache_option="--exclude=cache"
   fi
