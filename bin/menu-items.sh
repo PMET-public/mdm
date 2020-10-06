@@ -129,14 +129,6 @@ is_update_available && {
     fi
   }
 
-  # is_advanced_mode && ! is_magento_app_running_cached && {
-  #   key="TODO Clone to new Magento app"
-  #   description=""
-  #   mdm_menu_items_keys+=("$key")
-  #   mdm_menu_items["$key-handler"]=clone_app
-  #   mdm_menu_items["$key-disabled"]=true
-  # }
-
   is_magento_app_installed_cached && {
     key="🚨 Uninstall this Magento app"
     description="If an error occurred during install, this option allows you to try again."

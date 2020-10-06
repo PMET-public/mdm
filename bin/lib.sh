@@ -766,11 +766,6 @@ add_hostnames_to_hosts_file() {
   " || error "$error_msg"
 }
 
-rm_added_hostnames_from_hosts_file() {
-  backup_hosts
-  sudo_run_bash_cmds "perl -i -ne \"print unless /$hosts_file_line_marker/\" /etc/hosts"
-}
-
 # for certificate functions, a wildcard domain parameter should be passed as "*.example.com" or ".example.com"
 # if a domain name consisting of 2 parts is the full, desired hostname, then it should only 
 # contain those 2 parts e.g. example.com
