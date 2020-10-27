@@ -105,7 +105,7 @@ is_magento_cloud_cli_logged_in() {
 }
 
 is_docker_bash_completion_installed_on_mac() {
-  [[ -f "/usr/local/etc/bash_completion.d/docker" ]]
+  [[ -h "/usr/local/etc/bash_completion.d/docker" ]]
 }
 
 is_platypus_installed() {
