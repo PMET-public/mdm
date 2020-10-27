@@ -523,7 +523,7 @@ start_pwa() {
   {
     # shellcheck disable=SC2030
     export MAGENTO_URL="$magento_url" COMPOSE_PROJECT_NAME="$detached_project_name" CLOUD_MODE="$cloud_mode" \
-      COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml"
+      COMPOSE_FILE="$lib_dir/../docker-files/pwa-docker-compose.yml"
     docker-compose pull
     docker-compose rm -sfv storystore-pwa storystore-pwa-prev
     docker-compose up -d storystore-pwa storystore-pwa-prev

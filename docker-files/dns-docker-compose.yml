@@ -1,0 +1,12 @@
+version: '3.0'
+services:
+  certbot-dns:
+    image: pmetpublic/certbot-dns
+    volumes:
+      - "./certbot-dns/.dns-config.ini:/.dns-config.ini"
+      - "${dest_dir:-.}:/etc/letsencrypt/archive"
+    command: "
+      --dns-digitalocean \
+      --dns-digitalocean-credentials /.dns-config.ini \
+      --dns-digitalocean-propagation-seconds 30 \
+      -d '${domain:-*.test.com}' "
