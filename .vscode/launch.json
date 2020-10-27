@@ -14,7 +14,21 @@
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "Run the detached app's launcher with no menu selection",
+      "name": "Run launcher from workspace with no menu selection",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/bin/launcher",
+      "env": {
+        "debug": true,
+        "vsc_debugger_arg": "n/a",
+        "MDM_REPO_DIR": "${workspaceFolder}"
+      },
+      "args": []
+    },
+    // emulates the simplest case - a user clicking on the status menu icon
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Run MDM-lite's launcher with no menu selection",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/launcher",
       "env": {
@@ -22,7 +36,7 @@
         "vsc_debugger_arg": "n/a",
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir":
-          "${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"
+          "${env:HOME}/Downloads/MDM-lite.app/Contents/Resources"
       },
       "args": []
     },
@@ -160,7 +174,7 @@
       },
       "args": [
         "-g", "git@github.com:pmet-public/magento-cloud.git",
-        "-b", "pmet-2.4.0-ref",
+        "-b", "pmet-2.4.1-ref",
         "-n", "ref",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
@@ -194,7 +208,7 @@
       },
       "args": [
         "-g", "git@github.com:pmet-public/magento-cloud.git",
-        "-b", "pmet-2.4.0-b2b",
+        "-b", "pmet-2.4.1-b2b",
         "-n", "b2b",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/b2b.icns"

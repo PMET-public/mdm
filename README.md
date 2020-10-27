@@ -18,9 +18,7 @@
     - ["What does this error mean?"](#what-does-this-error-mean)
     - ["How do I upgrade WITHOUT preserving old installations? (i.e. start over)"](#how-do-i-upgrade-without-preserving-old-installations-ie-start-over)
 - [MDM Developers](#mdm-developers)
-  - [Configuration](#configuration)
-    - [Configuration of MDM](#configuration-of-mdm)
-    - [Configuration of an MDM app](#configuration-of-an-mdm-app)
+  - [Recommended IDE & Extensions](#recommended-ide--extensions)
   - [Development on a Mac](#development-on-a-mac)
     - [1. clone this repo](#1-clone-this-repo)
     - [2. configure additional features](#2-configure-additional-features)
@@ -29,6 +27,9 @@
   - [Development on Linux](#development-on-linux)
     - [1. add the default user to the docker group](#1-add-the-default-user-to-the-docker-group)
     - [2. clone this repo](#2-clone-this-repo)
+  - [Application Configuration For Development](#application-configuration-for-development)
+    - [Configuration of MDM](#configuration-of-mdm)
+    - [Configuration of an MDM app](#configuration-of-an-mdm-app)
 
 # Overview
 
@@ -235,24 +236,17 @@ In a terminal, run `rm -rf ~/.mdm` and the follow any instructions from the MDM 
 
 # MDM Developers
 
-## Configuration
+## Recommended IDE & Extensions
 
-### Configuration of MDM
-|Feature|Config Param|
-|-|---|
-| Public Certs |`mdm_domain`|
-| |`mdm_domain_fullchain_gh_url`|
-| |`mdm_domain_privkey_gh_url`|
-| | |
-| Remote Support/Access |`mdm_tmate_authorized_keys_url`|
-| | |
-| Public Web Access|`mdm_tunnel_domain`|
-| |`mdm_tunnel_ssh_url`|
-| |`mdm_tunnel_pk_url`|
+IDE: [VSC](https://code.visualstudio.com/download)
 
-### Configuration of an MDM app
+IDE Extensions:
+1. [Bash Debug](https://github.com/rogalmic/vscode-bash-debug)
+1. [BASH IDE](https://github.com/bash-lsp/bash-language-server)
+1. [Bats](https://github.com/jetmartin/bats)
+1. [shellcheck](https://github.com/timonwong/vscode-shellcheck)
 
-
+The included `.vscode/launch.json` has some useful debug scenarios pre-configured that you can use to step through.
 
 
 ## Development on a Mac
@@ -304,3 +298,19 @@ $ sudo shutdown -r now
 
 ### 2. clone this repo
 
+## Application Configuration For Development
+
+### Configuration of MDM
+|Feature|Config Param|
+|-|---|
+| Public Certs |`mdm_domain`|
+| |`mdm_domain_fullchain_gh_url`|
+| |`mdm_domain_privkey_gh_url`|
+| | |
+| Remote Support/Access |`mdm_tmate_authorized_keys_url`|
+| | |
+| Public Web Access|`mdm_tunnel_domain`|
+| |`mdm_tunnel_ssh_url`|
+| |`mdm_tunnel_pk_url`|
+
+### Configuration of an MDM app
