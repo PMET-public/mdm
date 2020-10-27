@@ -22,7 +22,7 @@ setup() {
     docker network create network_w_running_container
     # create a container that exits immediately
     docker run --network=network_w_exited_container --name=exited_alpine_container alpine
-    # create a running container in the background account for how BATS handles background/child processes
+    # create a running container in the background to account for how BATS handles background/child processes
     docker run --network=network_w_running_container --name=running_alpine_container alpine sleep 600 & 3>&-
     docker pull alpine:edge # download an image to prune
   }  > /dev/null
