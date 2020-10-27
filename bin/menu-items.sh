@@ -322,7 +322,7 @@ if is_network_state_ok; then
   }
 
   # the pwa github repo
-  key="🎗Storystore PWA @ GitHub"
+  key="🎗 Storystore PWA @ GitHub"
   description=""
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-link"]="https://github.com/PMET-public/storystore-pwa/blob/master/README.md"
