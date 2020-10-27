@@ -362,9 +362,9 @@ is_valid_git_url() {
   [[ "$1" =~ http.*\.git ]] || [[ "$1" =~ git.*\.git ]]
 }
 
-# is_existing_cloud_env() {
-#   [[ "$env_is_existing_cloud" ]]
-# }
+is_existing_cloud_env() {
+  [[ "$env_is_existing_cloud" ]]
+}
 
 is_valid_github_web_url() {
   local url="$1"
