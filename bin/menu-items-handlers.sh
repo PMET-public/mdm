@@ -261,10 +261,11 @@ stop_other_apps() {
 
 dockerize_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
-    local url project env branch skip_option="-s"
+    local url start project env branch skip_option="-s"
     printf '\n\n%s\n' "Paste the url for the $(warning "existing Magento Cloud") env or a $(warning "cloud compatible") git repo."
     read -r -p ''
     url="$REPLY"
+    
     if is_valid_mc_url "$url"; then
       is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
       read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
@@ -279,9 +280,8 @@ dockerize_app() {
 
 [y|N]?"
       read -r -p ''
-      [[ "$REPLY" =~ ^[Yy]$ ]] || {
-        skip_option=""
-      }
+      start="$(date +"%s")"
+      [[ "$REPLY" =~ ^[Yy]$ ]] && skip_option=""
       "$lib_dir/dockerize" -p "$project" -e "$env" -i "$HOME/.mdm/current/icons/magento.icns" "$skip_option"
     elif is_valid_github_web_url "$url"; then
       branch="$(get_branch_from_github_web_url "$url")"
@@ -290,6 +290,7 @@ dockerize_app() {
       error "$url does not appear to be a valid GitHub url (ex. https://github.com...) or a valid Magento Cloud url
 from the Magento Cloud projects page (ex. https://<region>.magento.cloud/projects/<project-id>/environments/<env-id>)."
     fi
+    show_success_msg_plus_duration "$start"
   }
 }
 
@@ -398,12 +399,15 @@ start_shell_in_app() {
 # run_this_menu_item_handler_in_new_terminal_if_applicable will have to be modified to pass args
 run_as_bash_cmds_in_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local start
+    start="$(date +"%s")"
     cd "$apps_resources_dir/app" || exit 1
     echo 'Running in Magento app:'
     msg "
       $1
 "
     docker-compose run --rm deploy bash -c "$1" 2> /dev/null
+    show_success_msg_plus_duration "$start"
   }
 }
 
