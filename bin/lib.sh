@@ -43,7 +43,7 @@ recommended_vm_mem_mb=4096
 recommended_vm_swap_mb=4096
 recommended_vm_disk_mb=64000
 bytes_in_mb=1048576
-detached_project_name="detached-mdm"
+detached_project_name="MDM-lite"
 hosts_file_line_marker="# added by MDM"
 host_docker_internal="172.17.0.1"
 
