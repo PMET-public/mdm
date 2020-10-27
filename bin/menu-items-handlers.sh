@@ -514,6 +514,14 @@ start_pwa_with_app() {
   start_pwa "https://$(get_hostname_for_this_app)" "" "false"
 }
 
+start_pwa_with_luma() {
+  start_pwa "https://adminlongliveluma-ee63poq-a6terwtbk67os.demo.magentosite.cloud/" "" "false"
+}
+
+start_pwa_with_freshmarket() {
+  start_pwa "https://grocery-pks6wry-xy4itwbmg2khk.demo.magentosite.cloud/" "" "false"
+}
+
 start_pwa_with_remote() {
   start_pwa "" "settings" "true"
 }

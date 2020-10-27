@@ -293,7 +293,7 @@ if is_network_state_ok; then
 
     ! is_detached && is_pwa_module_installed && {
       if is_magento_app_running_cached; then
-        key="(Re)start PWA using this Magento app"
+        key="📱 This app"
         description="The PWA will use the local Magento app as the backend."
       else
         key="🛑 App stopped. Start PWA offline"
@@ -303,15 +303,26 @@ if is_network_state_ok; then
       mdm_menu_items["$key-handler"]=start_pwa_with_app
     }
 
-    key="(Re)start PWA using a remote backend"
+    key="📱 Luma Sample"
+    description=""
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-handler"]=start_pwa_with_luma
+
+    key="📱 Fresh Market Sample"
+    description=""
+    mdm_menu_items_keys+=("$key")
+    mdm_menu_items["$key-handler"]=start_pwa_with_freshmarket
+
+    key="📲 Choose your own"
     description=""
     mdm_menu_items_keys+=("$key")
     mdm_menu_items["$key-handler"]=start_pwa_with_remote
 
+
   }
 
   # the pwa github repo
-  key="Storystore PWA @ GitHub"
+  key="🎗Storystore PWA @ GitHub"
   description=""
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-link"]="https://github.com/PMET-public/storystore-pwa/blob/master/README.md"
