@@ -30,6 +30,8 @@
   - [Application Configuration For Development](#application-configuration-for-development)
     - [Configuration of MDM](#configuration-of-mdm)
     - [Configuration of an MDM app](#configuration-of-an-mdm-app)
+  - [Running tests](#running-tests)
+  - [Debugging](#debugging)
 
 # Overview
 
@@ -314,3 +316,23 @@ $ sudo shutdown -r now
 | |`mdm_tunnel_pk_url`|
 
 ### Configuration of an MDM app
+
+## Running tests
+
+MDM uses [Bats](https://github.com/bats-core/bats-core) for testing. You'll find all tests in the numbered subdirectories of `tests`.
+
+Example #1: Call all tests in all immediate subdirectories of the specified one and show test timings.
+```
+./tests/libs/bats/bin/bats -T ./tests/1-generic-lib-and-non-app-specific/**/*.bats
+```
+
+Example #2: Call all tests recursively for the specified dir and show test timings.
+```
+./tests/libs/bats/bin/bats -T -r ./tests/2-dockerize-then-run-detached-app
+```
+
+See `.gitub/workflows` for additional example invocations. 
+
+## Debugging
+
+A VSCode launch file (`.vscode/launch.json`) containing many debugging examples is included. Stepping through example debug configurations is a great way to become familiar with the control flow of MDM.
