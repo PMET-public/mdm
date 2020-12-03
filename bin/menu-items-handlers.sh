@@ -269,7 +269,7 @@ dockerize_app() {
     if is_valid_mc_url "$url"; then
       is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
       read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
-      msg_w_newlines "Pre-bundle EVERYTHING?
+      msg_w_newlines "Pre-bundle EVERYTHING? (Defaults to No)
   Pros:
     Faster to deploy the 1st time
     End user will not need credentials to run but will for any update
@@ -278,7 +278,7 @@ dockerize_app() {
     Much larger app to distribute
     End user will need their own valid credentials to install and run
 
-[y|N]?"
+[yes|No]?"
       read -r -p ''
       start="$(date +"%s")"
       [[ "$REPLY" =~ ^[Yy]$ ]] && skip_option=""
