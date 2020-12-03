@@ -49,8 +49,7 @@ create_platypus_app() {
     # mv app into app bundle
     mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
   }
-  # copy config if it exists
-  [[ -f "$mdm_config_file" ]] && cp "$mdm_config_file" "$contents_dir.app/Contents/Resources/"
+  cp_mdm_config
   msg_w_newlines "Successfully created $contents_dir.app"
 }
 
@@ -59,8 +58,7 @@ create_fake_platypus_app() {
   local name="$1" contents_dir="$2"
   mkdir -p "$contents_dir.app/Contents/Resources"
   cp "$lib_dir/launcher" "$contents_dir.app/Contents/Resources/script"
-  # copy config if it exists
-  [[ -f "$mdm_config_file" ]] && cp "$mdm_config_file" "$contents_dir.app/Contents/Resources/"
+  cp_mdm_config
   [[ -d $contents_dir ]] && {
     # mv app into app bundle
     mv "$contents_dir" "$contents_dir.app/Contents/Resources/app"
@@ -185,6 +183,11 @@ app_hostname="$(adjust_compose_project_name_for_docker_compose_version "$app_hos
 
 is_valid_hostname "$app_hostname" ||
     error "Could not create valid hostname from user inputs. Please specify one with the '-n' option."
+
+has_mdm_config ||
+  error "Could not find $mdm_config_file to bundle with the new app.
+  End users, this file should be bundled with the distributed app.
+  Developers, please see the template config file in the project root"
 
 # clone and then remove unwanted files from the git repo
 tmp_app_dir="$HOME/Downloads/$app_hostname-tmp"

@@ -457,6 +457,11 @@ has_valid_composer_credentials_cached() {
 #   [[ "$key_list" =~ ",/" ]]
 # }
 
+
+has_mdm_config() {
+  [[ -f "$mdm_config_file" ]]
+}
+
 ###
 #
 # end test functions
@@ -1305,6 +1310,15 @@ download_mdm_config() {
     # assume a github url as will be recommended but try a normal curl if it fails
     get_github_file_contents "$MDM_CONFIG_URL" > "$mdm_config_file" ||
       curl --fail -sL "$MDM_CONFIG_URL" > "$mdm_config_file"
+}
+
+
+cp_mdm_config() {
+  if has_mdm_config; then
+    cp "$mdm_config_file" "$contents_dir.app/Contents/Resources/"
+  else
+    error "App config file not found."
+  fi
 }
 
 self_install() {
