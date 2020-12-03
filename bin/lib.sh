@@ -53,8 +53,12 @@ certs_dir="$mdm_path/certs"
 hosts_backup_dir="$mdm_path/hosts.bak"
 see_docs_msg="See docs."
 
-mdm_config_filename=".mdm_config.sh"
-mdm_config_file="$mdm_path/$mdm_config_filename"
+# if not already defined by individual app
+if [[ ! "$mdm_config_file" ]] ; then 
+  mdm_config_filename=".mdm_config.sh"
+  mdm_config_file="$mdm_path/$mdm_config_filename"
+fi
+
 menu_log_file="$mdm_path/menu.log"
 handler_log_file="$mdm_path/handler.log"
 dockerize_log_file="$mdm_path/dockerize.log"
@@ -73,10 +77,12 @@ mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ "
 # no functionality requiring the mdm_store can be run until after initialization logic
 declare -A mdm_store  2> /dev/null || :
 
-[[ -f "$mdm_config_file" ]] && {
+if [[ -f "$mdm_config_file" ]]; then
   # shellcheck source=../.mdm_config.sh
   source "$mdm_config_file"
-}
+else 
+  warning "MDM config file $mdm_config_file not found. Missing configuration may cause errors."
+fi
 
 ###
 #
