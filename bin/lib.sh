@@ -77,12 +77,8 @@ mdm_version="${lib_dir#$mdm_path/}" && mdm_version="${mdm_version%/bin}" && [[ "
 # no functionality requiring the mdm_store can be run until after initialization logic
 declare -A mdm_store  2> /dev/null || :
 
-if [[ -f "$mdm_config_file" ]]; then
-  # shellcheck source=../.mdm_config.sh
-  source "$mdm_config_file"
-else 
-  warning "MDM config file $mdm_config_file not found. Missing configuration may cause errors."
-fi
+# shellcheck source=../.mdm_config.sh
+[[ -f "$mdm_config_file" ]] && source "$mdm_config_file"
 
 ###
 #
