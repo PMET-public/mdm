@@ -62,7 +62,7 @@ jobs:
       - name: bats tests for 2nd app
         run: |
           export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.0-ref
-          ./tests/libs/bats/bin/bats -T -r ./tests/3-dockerize-then-run-magento-app/**/*.bats
+          ./tests/libs/bats/bin/bats -T ./tests/3-dockerize-then-run-magento-app/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
@@ -85,7 +85,7 @@ jobs:
           submodules: 'true'
       - name: bats tests
         run: |
-          ./tests/libs/bats/bin/bats -T -r ./tests/1-generic-lib-and-non-app-specific/**/*.bats
+          ./tests/libs/bats/bin/bats -T ./tests/1-generic-lib-and-non-app-specific/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
