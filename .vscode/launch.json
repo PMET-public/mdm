@@ -119,7 +119,7 @@
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "Dockerize detached MDM",
+      "name": "Create MDM-lite.app in Downloads",
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/bin/dockerize",
       "env": {
