@@ -808,15 +808,15 @@ read_cert_for_domain() {
 get_cert_utc_end_date_for_domain() {
   local end_date
   end_date="$(read_cert_for_domain "$1" | perl -ne 's/\s*not after :\s*//i and print')"
-  [[ "$end_date" ]] && "$date_cmd" --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S" ||
-    error "Could not retrieve end date"
+  [[ "$end_date" =~ GMT ]] || error "Could not retrieve valid end date for '$1'. Value was '$end_date'."
+  "$date_cmd" --utc --date="$end_date" +"%Y-%m-%d %H:%M:%S"
 }
 
 is_cert_current_for_domain() {
   local end_date
   end_date="$(get_cert_utc_end_date_for_domain "$1")"
-  [[ "$end_date" && "$("$date_cmd" --utc +"%Y-%m-%d %H:%M:%S")" < "$end_date" ]] ||
-    error "Could not determine if cert is current"
+  [[ "$end_date" =~ [0-9]{4}-[0-9]{2}-[0-9]{2}\ [0-9]{2}:[0-9]{2}:[0-9]{2} ]] || error "Could not retrieve valid end date for '$1'. Value was '$end_date'."
+  [[ "$("$date_cmd" --utc +"%Y-%m-%d %H:%M:%S")" < "$end_date" ]]
 }
 
 is_cert_for_domain_expiring_soon() {
