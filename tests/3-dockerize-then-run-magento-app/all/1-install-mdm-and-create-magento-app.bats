@@ -66,6 +66,7 @@ setup() {
 }
 
 @test 'dockerize app' {
+  cp "$lib_dir/../.mdm_config.tmpl.sh" "$lib_dir/../.mdm_config.sh"
   run "$lib_dir/dockerize" -g "$MAGENTO_CLOUD_REPO" -b "$MAGENTO_CLOUD_REF_TO_TEST" -n "$app_name" -i "$HOME/.mdm/current/icons/ref.icns"
   assert_success
 }
