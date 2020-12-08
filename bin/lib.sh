@@ -955,15 +955,16 @@ run_this_menu_item_handler_in_new_terminal_if_applicable() {
   # (i.e. started by separate MDM apps)
   # particularly watch out for COMPOSE_PROJECT_NAME. may have to evaluate each time. 
   # see export_compose_project_name below
-  echo "#!/usr/bin/env bash -l
-export MDM_REPO_DIR=\"${MDM_REPO_DIR}\"
-export apps_resources_dir=\"$apps_resources_dir\"
+  echo "#!/usr/bin/env bash -l" > "$script"
+  [[ "$MDM_REPO_DIR" ]] && echo "export MDM_REPO_DIR=\"${MDM_REPO_DIR}\"" >> "$script"
+  [[ "$apps_resources_dir" ]] && echo "export apps_resources_dir=\"$apps_resources_dir\"" >> "$script"
+  echo "
 # enable debugging and print env EXCEPT for interactive shell
 # TODO - why is shell prompt not showing while in debug mode
 [[ \"$debug\" && \"$caller\" != \"start_mdm_shell\" ]] && echo \"\$(env | $sort_cmd)\" && set -x
 printf '\e[8;45;180t' # terminal size
 $lib_dir/launcher $caller
-" > "$script"
+" >> "$script"
   chmod u+x "$script"
   open -a Terminal "$script"
   # open -F -n -a Terminal "$script"
