@@ -125,6 +125,16 @@ while getopts "b:e:g:hdp:t:n:a:i:ms" opt || [[ $# -eq 0 ]]; do
   esac
 done
 
+if [[ "$apps_resources_dir" ]]; then # user creating MDM app from MDM menu of existing app
+  mdm_config_dir="$apps_resources_dir"
+elif [[ "$MDM_REPO_DIR" ]]; then # developer creating MDM app for distribution from local repo
+  mdm_config_dir="$MDM_REPO_DIR"
+else 
+  mdm_config_dir="$lib_dir/.."
+fi
+[[ -f "$mdm_config_dir/$mdm_config_filename" ]] ||
+    error "Could not find $mdm_config_dir/$mdm_config_filename to bundle with new app."
+
 [[ "$detached" && "$app_hostname" ]] && 
   error "Name provided for magento app, but detached app also selected. Incompatible selection."
 
@@ -183,14 +193,6 @@ app_hostname="$(adjust_compose_project_name_for_docker_compose_version "$app_hos
 
 is_valid_hostname "$app_hostname" ||
     error "Could not create valid hostname from user inputs. Please specify one with the '-n' option."
-
-if [[ "$apps_resources_dir" ]]; then # user creating MDM app from MDM menu of existing app
-  mdm_config_dir="$apps_resources_dir"
-elif [[ "$MDM_REPO_DIR" ]]; then # developer creating MDM app for distribution from local repo
-  mdm_config_dir="$MDM_REPO_DIR"
-fi
-[[ -f "$mdm_config_dir/$mdm_config_filename" ]] ||
-    error "Could not find $mdm_config_dir/$mdm_config_filename to bundle with new app."
 
 # clone and then remove unwanted files from the git repo
 tmp_app_dir="$HOME/Downloads/$app_hostname-tmp"
