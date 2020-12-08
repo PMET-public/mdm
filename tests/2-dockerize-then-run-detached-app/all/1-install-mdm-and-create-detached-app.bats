@@ -32,6 +32,7 @@ setup() {
 
 # unlike other MDM apps, the detached app is a singleton
 @test 'create detached app' {
+  cp "$lib_dir/../.mdm_config.tmpl.sh" "$lib_dir/../.mdm_config.sh"
   run "$lib_dir/dockerize" -d
   assert_success
   assert_output -e "created.*$detached_project_name"
