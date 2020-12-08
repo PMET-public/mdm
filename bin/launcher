@@ -48,7 +48,7 @@ if [[ -z "$MDM_REPO_DIR" ]]; then # allow repo dir to be set by env var for debu
   fi
 fi
 
-# must be set in launcher and lib.sh b/c each can be used independently
+# although these vars exist in lib.sh, launcher must also have for initial self-installation of distributed app
 mdm_path="$HOME/.mdm"
 mdm_config_filename=".mdm_config.sh"
 mdm_config_file="$mdm_path/$mdm_config_filename"
@@ -73,18 +73,18 @@ else
 
   # some dependency is missing 
 
-  if [[ ${#BASH_ARGV[@]} -eq 0 ]]; then #this script was called without args, so prompt user to install
+  if [[ ${#BASH_ARGV[@]} -eq 0 ]]; then # this script was called without args, so prompt user to install
 
     echo "Install missing requirements on this computer" && exit
 
-  else # just run installer from repo for dev/test OR master for normal installation
+  else # just run self_install from cur repo branch for development/testing OR master for normal installation
 
     installer=$(mktemp)
     if [[ "$MDM_REPO_DIR" ]]; then
       cp "$MDM_REPO_DIR/bin/lib.sh" "$installer"
     else
       curl -sL "https://raw.githubusercontent.com/PMET-public/mdm/master/bin/lib.sh" > "$installer"
-      # when MDM_REPO_DIR exists (dev|CI), config can be acconted for (see self_install)
+      # when MDM_REPO_DIR exists (dev|CI), config can be accounted for (see self_install)
       # but, in an end user's app, copy current app's config to $mdm_path
       mkdir -p "$mdm_path"
       cp "$(dirname "${BASH_SOURCE[0]}")/../$mdm_config_filename" "$mdm_config_file" || :

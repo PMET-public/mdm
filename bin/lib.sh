@@ -1062,7 +1062,7 @@ download_and_link_repo_ref() {
   # if not a link, preserve contents just in case - should only happen to dev that has rsynced to current
   [[ -d "$mdm_path/current" && ! -L "$mdm_path/current" ]] && mv "$mdm_path/current" "$mdm_path/current.$(date "+%s")"
   ln -sfn "$ref_dir" "$mdm_path/current"
-  [[ -d "$mdm_path/current" ]] && rsync -az "$mdm_path/current/certs/" "$mdm_path/certs/" || : # cp over any new certs if the exist
+  [[ -d "$mdm_path/current" ]] && rsync -az "$mdm_path/current/certs/" "$mdm_path/certs/" || : # cp over any new certs that may be distributed with update
 }
 
 # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
@@ -1354,7 +1354,7 @@ self_install() {
   elif [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then # mdm is testing itself
     download_and_link_repo_ref "$GITHUB_SHA"
     [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
-  else # end user, config should already be copied from launcher
+  else # end user case. mdm_config_file should already be copied from launcher
     download_and_link_repo_ref # no param = latest sem ver
   fi
 
