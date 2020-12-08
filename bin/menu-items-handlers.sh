@@ -115,6 +115,54 @@ optimize_docker() {
   track_job_status_and_wait_for_exit $! "Optimizing Docker VM ..."
 }
 
+create_auth_json() {
+  run_this_menu_item_handler_in_new_terminal_if_applicable || {
+    local github_token magento_public_key magento_private_key
+    warning_w_newlines "This script will prompt you for GitHub and Magento account information to create your $HOME/.composer/auth.json file."
+    echo "If you prefer to create the file on your own, follow the instructions here:
+https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token"
+    msg_w_newlines "GitHub Personal Access Token"
+    echo "1. Sign into GitHub https://github.com/
+2. Go to your account Profile > Developer settings > Personal access tokens
+3. Generate a new token with any name and 'repo' scope (no other selections are needed)
+4. Paste the token here
+"
+    github_token="$(prompt_user_for_token)"
+
+    msg_w_newlines "Magento Public Key"
+    echo "1. Sign into the Magento Marketplace https://marketplace.magento.com/
+2. Go to your account profile
+3. Go to your access keys
+4. Copy an existing key or create a new one
+5. Paste your public key here
+"
+    magento_public_key="$(prompt_user_for_token)"
+
+    msg_w_newlines "Magento Private Key"
+    echo "1. From the same place as #5 above, paste your private key here
+"
+    magento_private_key="$(prompt_user_for_token)"
+
+    # back up file if it exists
+    [[ -f "$HOME/.composer/auth.json" ]] && cp "$HOME/.composer/auth.json" "$HOME/.composer/auth.json.$(date +"%s")"
+
+    printf '{
+    "github-oauth": {
+      "github.com": "%s"
+    },
+    "http-basic": {
+        "repo.magento.com": {
+            "username": "%s",
+            "password": "%s"
+        }
+    }
+}' "$github_token" "$magento_public_key" "$magento_private_key" > "$HOME/.composer/auth.json"
+
+    msg_w_newlines "$HOME/.composer/auth.json successfully created."
+  }
+}
+
+
 update_mdm() {
   download_and_link_repo_ref
 }

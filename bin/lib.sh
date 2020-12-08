@@ -546,6 +546,15 @@ ARE YOU SURE?! (y/n)
   }
 }
 
+prompt_user_for_token() {
+  while [[ ! "$REPLY" =~ ^[0-9a-f]+$ ]]; do
+    echo "Numbers [0-9] and letters [a-f] only (ex. $(warning "9662d057e4e52b1b236fa237a232349841e60b44e"))" > /dev/tty
+    read -r -p '> '
+    REPLY="$(trim $REPLY)"
+  done
+  echo "$REPLY"
+}
+
 # look in env and fallback to expected home path
 get_github_token_from_composer_auth() {
   local token

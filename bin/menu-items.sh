@@ -71,7 +71,8 @@ is_docker_compatible && {
       description="Your \`~/.composer/auth.json\` file exists, but the JSON contents aren't parsing correctly OR it doesn't have the required GitHub token & Magento keys. Please verify its contents."
     fi
     mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-link"]="https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
+    #mdm_menu_items["$key-link"]="https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
+    mdm_menu_items["$key-handler"]=create_auth_json
   }
 
 }
