@@ -319,9 +319,16 @@ sync_remote_to_app() {
     msg_w_newlines "Copying cloud DB to app ..."
     sql_tmp_file="$(mktemp)"
     "$magento_cloud_cmd" db:dump -y -p "$project" -e "$env" -f "$sql_tmp_file"
+    # create backup fold in case it does not exist yet
+    docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" mkdir -p /app/var/backups
     # magento requires specific naming for it's backups to restore from (e.g. 1601987083_db.sql b/c why??)
     docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}_fpm_1:/app/var/backups/${start}_db.sql"
-    docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bin/magento setup:rollback -n -d "${start}_db.sql"
+    if ! docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bin/magento setup:rollback -n -d "${start}_db.sql"; then
+      # frustrating!! looks like basic back up and rollback from magento is broken (also auto-deletes backup file??!)
+      warning "Could not rollback via magento CLI. Attempting direct import ..."
+      docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}_db_1:/tmp/${start}_db.sql"
+      docker exec -it "${COMPOSE_PROJECT_NAME}_db_1" bash -c "mysql -u user --password="" main < /tmp/${start}_db.sql"
+    fi
     rm "$sql_tmp_file"
 
     hostname="$(get_hostname_for_this_app)"
