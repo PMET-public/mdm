@@ -119,10 +119,10 @@ menu item, then MDM has determined it's not currently appropiate. Many items onl
 
 |📱 PWA|   |   |
 |:---|:-:|:--|
-|(Re)start PWA using this Magento app|   |The PWA will use the local Magento app as the backend.|
+|📱 This app|   |The PWA will use the local Magento app as the backend.|
 |🛑 App stopped. Start PWA offline|   |   |
-|(Re)start PWA using a remote backend|   |   |
-|Storystore PWA @ GitHub |[link](https://github.com/PMET-public/storystore-pwa/blob/master/README.md)|   |
+|📲 Choose your own|   |   |
+|🎗 Storystore PWA @ GitHub |[link](https://github.com/PMET-public/storystore-pwa/blob/master/README.md)|   |
 |<nobr>                  </nobr>|<nobr>   </nobr>|   |
 <!--- # end PWA submenu --->
 

@@ -304,15 +304,15 @@ if is_network_state_ok; then
       mdm_menu_items["$key-handler"]=start_pwa_with_app
     }
 
-    key="📱 Luma Sample"
-    description=""
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=start_pwa_with_luma
+    # key="📱 Luma Sample"
+    # description=""
+    # mdm_menu_items_keys+=("$key")
+    # mdm_menu_items["$key-handler"]=start_pwa_with_luma
 
-    key="📱 Fresh Market Sample"
-    description=""
-    mdm_menu_items_keys+=("$key")
-    mdm_menu_items["$key-handler"]=start_pwa_with_freshmarket
+    # key="📱 Fresh Market Sample"
+    # description=""
+    # mdm_menu_items_keys+=("$key")
+    # mdm_menu_items["$key-handler"]=start_pwa_with_freshmarket
 
     key="📲 Choose your own"
     description=""
