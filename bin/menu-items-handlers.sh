@@ -129,14 +129,14 @@ create_auth_json() {
 
 "
     echo "If you prefer to create the file on your own, follow the instructions here:
-https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token"
+https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#instgde-prereq-compose-clone-auth"
     msg_w_newlines "GitHub Personal Access Token"
     echo "1. Sign into GitHub https://github.com/
 2. Go to your account Profile > Developer settings > Personal access tokens
 3. Generate a new token with any name and 'repo' scope (no other selections are needed)
 4. Paste the token here
 "
-    github_token="$(prompt_user_for_token)"
+    github_token="$(prompt_user_for_token >&2)"
 
     msg_w_newlines "Magento Public Key"
     echo "1. Sign into the Magento Marketplace https://marketplace.magento.com/
@@ -145,12 +145,12 @@ https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/
 4. Copy an existing key or create a new one
 5. Paste your public key here
 "
-    magento_public_key="$(prompt_user_for_token)"
+    magento_public_key="$(prompt_user_for_token >&2)"
 
     msg_w_newlines "Magento Private Key"
     echo "1. From the same place as #5 above, paste your private key here
 "
-    magento_private_key="$(prompt_user_for_token)"
+    magento_private_key="$(prompt_user_for_token >&2)"
 
     # back up file if it exists
     [[ -f "$HOME/.composer/auth.json" ]] && cp "$HOME/.composer/auth.json" "$HOME/.composer/auth.json.$(date +"%s")"
@@ -320,13 +320,13 @@ dockerize_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local url start project env branch skip_option="-s"
 
-    printf '\n\n%s\n' "Paste the url for your $(warning "existing Magento Cloud") env or a $(warning "cloud compatible") git repo. If it's a Magento Cloud url, it must be from your Magento Cloud projects page to avoid ambiguity from capitilaziation or certain punctuation."
+    printf '\n\n%s\n' "Paste the url for your $(warning "existing Magento Cloud") env or a $(warning "cloud compatible") git repo. If it's a Magento Cloud url, it must be from your Magento Cloud projects page to avoid ambiguity due to capitalaziation or certain punctuation."
     msg_about_url_format="
 Enter a valid Magento Cloud url from your Magento Cloud projects page (ex. $(warning "https://<region>.magento.cloud/projects/<project-id>/environments/<env-id>"))
 or a valid GitHub url (ex. https://github.com...)."
     REPLY=""
     while ! ( is_valid_mc_env_url "$REPLY" || is_valid_github_web_url "$REPLY" ); do
-      echo "$msg_about_url_format" > /dev/tty
+      echo "$msg_about_url_format"
       read -r -p '> '
       REPLY="$(trim $REPLY)"
     done
@@ -367,7 +367,7 @@ sync_remote_to_app() {
 Enter a valid Magento Cloud url from your Magento Cloud projects page (ex. $(warning "https://<region>.magento.cloud/projects/<project-id>/environments/<env-id>"))."
     REPLY=""
     while !  is_valid_mc_env_url "$REPLY"; do
-      echo "$msg_about_url_format" > /dev/tty
+      echo "$msg_about_url_format"
       read -r -p '> '
       REPLY="$(trim $REPLY)"
     done
@@ -428,7 +428,7 @@ sync_app_to_remote() {
 Enter a valid Magento Cloud url from your Magento Cloud projects page (ex. $(warning "https://<region>.magento.cloud/projects/<project-id>/environments/<env-id>"))."
     REPLY=""
     while !  is_valid_mc_env_url "$REPLY"; do
-      echo "$msg_about_url_format" > /dev/tty
+      echo "$msg_about_url_format"
       read -r -p '> '
       REPLY="$(trim $REPLY)"
     done
