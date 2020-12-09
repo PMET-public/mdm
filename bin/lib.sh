@@ -51,7 +51,7 @@ mdm_path="$HOME/.mdm" # must be set in lib.sh and launcher b/c each can be used 
 launched_apps_dir="$mdm_path/launched-apps"
 certs_dir="$mdm_path/certs"
 hosts_backup_dir="$mdm_path/hosts.bak"
-see_docs_msg="See docs."
+see_docs_msg="See docs @ https://github.com/PMET-public/mdm"
 
 # if not already defined by individual app
 if [[ ! "$mdm_config_file" ]] ; then 

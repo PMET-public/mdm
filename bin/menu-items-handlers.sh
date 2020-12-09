@@ -123,7 +123,11 @@ optimize_docker() {
 create_auth_json() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local github_token magento_public_key magento_private_key
-    warning_w_newlines "This script will prompt you for GitHub and Magento account information to create your $HOME/.composer/auth.json file."
+    warning_w_newlines "
+
+>> This script will prompt for your GitHub and Magento account information to create your $HOME/.composer/auth.json file. <<
+
+"
     echo "If you prefer to create the file on your own, follow the instructions here:
 https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token"
     msg_w_newlines "GitHub Personal Access Token"

@@ -78,7 +78,7 @@ is_docker_compatible && {
 }
 
 is_update_available && {
-  key="🔄 Update MDM"
+  key="👉 🔄 Update MDM 👈"
   description="There is a new version of MDM available. Under *Maintenance*, there is an option to revert if needed."
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=update_mdm
