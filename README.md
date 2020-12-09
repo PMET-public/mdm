@@ -76,7 +76,7 @@ menu item, then MDM has determined it's not currently appropiate. Many items onl
 |▶️ Start Docker to continue|   |Docker is not running. Start it.|
 |⚠️ Missing credentials - features limited|   |MDM can not find your `~/.composer/auth.json` file. You won't be able to create new apps from source or use features tied to your GitHub org configuration, but a prepackaged app will work. The link to doc shows how to create it.|
 |⚠️ Credentials found but invalid|   |Your `~/.composer/auth.json` file exists, but the JSON contents aren't parsing correctly OR it doesn't have the required GitHub token & Magento keys. Please verify its contents.|
-|🔄 Update MDM|   |There is a new version of MDM available. Under *Maintenance*, there is an option to revert if needed.|
+|👉 🔄 Update MDM 👈|   |There is a new version of MDM available. Under *Maintenance*, there is an option to revert if needed.|
 |🔼 Install & open Magento app|   |   |
 |⚠️🔼 Can't install - ports in use.|   |Some local service other than docker is using port 80 or 443.|
 |🚀 Open https://$(get_hostname_for_this_app)|   |Opens your browser to the app's base url. The menu will render the base url instead of the function call. You'll actually see something like: '🚀 Open https://mysite.com'|
