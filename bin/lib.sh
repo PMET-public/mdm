@@ -1056,7 +1056,6 @@ download_and_link_repo_ref() {
   mkdir -p "$ref_dir"
   curl -sL -o "$tmp_file" "$repo_url/archive/$ref.tar.gz"
   tar -zxf "$tmp_file" --strip-components 1 -C "$ref_dir"
-  rm "$ref.tar.gz" # cleanup
   # if not a link, preserve contents just in case - should only happen to dev that has rsynced to current
   [[ -d "$mdm_path/current" && ! -L "$mdm_path/current" ]] && mv "$mdm_path/current" "$mdm_path/current.$(date "+%s")"
   ln -sfn "$ref_dir" "$mdm_path/current"
