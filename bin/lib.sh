@@ -1049,12 +1049,13 @@ reload_rev_proxy() {
 }
 
 download_and_link_repo_ref() {
-  local ref ref_dir
+  local ref ref_dir tmp_file
+  tmp_file="$(mktemp)"
   ref="${1:-$(lookup_latest_remote_sem_ver)}" # if unset or empty string, lookup latest sem ver
   ref_dir="$mdm_path/$ref"
   mkdir -p "$ref_dir"
-  curl -sLO "$repo_url/archive/$ref.tar.gz"
-  tar -zxf "$ref.tar.gz" --strip-components 1 -C "$ref_dir"
+  curl -sL -o "$tmp_file" "$repo_url/archive/$ref.tar.gz"
+  tar -zxf "$tmp_file" --strip-components 1 -C "$ref_dir"
   rm "$ref.tar.gz" # cleanup
   # if not a link, preserve contents just in case - should only happen to dev that has rsynced to current
   [[ -d "$mdm_path/current" && ! -L "$mdm_path/current" ]] && mv "$mdm_path/current" "$mdm_path/current.$(date "+%s")"
