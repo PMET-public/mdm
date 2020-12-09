@@ -382,7 +382,7 @@ get_branch_from_github_web_url() {
 
 is_valid_mc_env_url() {
   local url="$1"
-  [[ "$url" =~ https?://.*magento\.cloud/projects/.*/environments/ ]]
+  [[ "$url" =~ https?://.*magento\.cloud/projects/.*/environments/ || "$url" =~ https?://.*magento\.cloud/projects/[^/]+/?$ ]]
 }
 
 is_hostname_resolving_to_local() {
