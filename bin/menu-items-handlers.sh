@@ -77,7 +77,12 @@ install_additional_tools() {
 
     is_mac && ! is_platypus_installed && {
       msg_w_newlines "Installing Platypus ..."
-      brew cask install platypus
+      # check if previouly installed but must not have completed b/c failing is_platypus_installed check
+      if [[ -d /Applications/Platypus.app ]]; then
+        brew reinstall --cask platypus
+      else
+        brew install --cask platypus
+      fi
       gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
       mkdir -p /usr/local/share/platypus
       cp -R /Applications/Platypus.app/Contents/Resources/PlatypusDefault.icns /Applications/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/

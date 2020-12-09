@@ -111,7 +111,7 @@ is_docker_bash_completion_installed_on_mac() {
 }
 
 is_platypus_installed() {
-  [[ -n "$(which platypus)" ]]
+  [[ -x /usr/local/share/platypus/ScriptExec ]]
 }
 
 is_mkcert_installed() {
