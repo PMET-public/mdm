@@ -30,3 +30,13 @@ post_magento_install_setup() {
     } || :
   fi
 }
+
+disable_strict_host_key_checking() {
+  [[ -d "$HOME/.ssh" ]] || mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+  [[ -f "$HOME/.ssh/config" ]] || touch "$HOME/.ssh/config"
+  chmod 400 "$HOME/.ssh/config"
+  echo "Host *
+    StrictHostKeyChecking no
+" >> "$HOME/.ssh/config"
+}

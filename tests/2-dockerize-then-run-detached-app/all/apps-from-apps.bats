@@ -27,6 +27,7 @@ setup() {
 }
 
 @test 'dockerize_app of installed cloud env' {
+  is_CI && disable_strict_host_key_checking
   run "./$app_link_name" dockerize_app << RESPONSES
 https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
 n
