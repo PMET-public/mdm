@@ -13,8 +13,8 @@ setup() {
   shopt -s nocasematch
 }
 
-@test 'is_valid_mc_url https://demo.magento.cloud/projects/xy4itwbmg2khb' {
-  run is_valid_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
+@test 'is_valid_mc_env_url https://demo.magento.cloud/projects/xy4itwbmg2khb' {
+  run is_valid_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
   assert_success
 }
 
@@ -30,8 +30,8 @@ setup() {
   assert_output ""
 }
 
-@test 'is_valid_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
-  run is_valid_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
+@test 'is_valid_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
+  run is_valid_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
   assert_success
 }
 
@@ -64,13 +64,13 @@ setup() {
   assert_failure
 }
 
-@test 'is_valid_mc_url "https://master-7rqtwti-xy4itwbmg2khb.demo.magentosite.cloud/"' {
-  run is_valid_mc_url "https://master-7rqtwti-xy4itwbmg2khb.demo.magentosite.cloud/"
+@test 'is_valid_mc_env_url "https://master-7rqtwti-xy4itwbmg2khb.demo.magentosite.cloud/"' {
+  run is_valid_mc_env_url "https://master-7rqtwti-xy4itwbmg2khb.demo.magentosite.cloud/"
   assert_failure
 }
 
-@test 'is_valid_mc_url "https://google.com/"' {
-  run is_valid_mc_url "https://google.com/"
+@test 'is_valid_mc_env_url "https://google.com/"' {
+  run is_valid_mc_env_url "https://google.com/"
   assert_failure
 }
 

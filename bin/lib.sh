@@ -380,9 +380,9 @@ get_branch_from_github_web_url() {
   echo "$url" | perl -ne '/.*\/(tree|blob|commit)\/([^\/]+)/ and print $2'
 }
 
-is_valid_mc_url() {
+is_valid_mc_env_url() {
   local url="$1"
-  [[ "$url" =~ https?://.*magento\.cloud/ ]]
+  [[ "$url" =~ https?://.*magento\.cloud/projects/.*/environments/ ]]
 }
 
 is_hostname_resolving_to_local() {
