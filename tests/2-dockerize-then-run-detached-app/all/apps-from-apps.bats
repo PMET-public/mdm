@@ -33,14 +33,13 @@ https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
 n
 RESPONSES
   assert_success
-  assert_output "success"
+  assert_output -e "complete.*success"
 }
 
 @test 'install_app of dockerized cloud env' {
   mdm_app_dir="$(get_most_recent_mdm_app)"
   run "$mdm_app_dir/Contents/Resources/script" install_app
   assert_success
-  assert_output "success"
 }
 
 @test 'sync_app_to_remote' {
@@ -50,7 +49,7 @@ n
 RESPONSES
   run echo ""
   assert_success
-  assert_output ""
+
 }
 
 @test 'sync_remote_to_app' {
@@ -60,5 +59,5 @@ n
 RESPONSES
   run echo ""
   assert_success
-  assert_output ""
+
 }
