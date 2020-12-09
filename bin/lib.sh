@@ -1321,7 +1321,7 @@ download_mdm_config() {
 }
 
 self_install() {
-  local brew_pkgs_for_mac=("bash" "coreutils" "jq") brew_pkgs_for_all_platforms=("mkcert" "nss")
+  local brew_pkgs_for_mac=("bash" "coreutils" "jq" "composer") brew_pkgs_for_all_platforms=("mkcert" "nss")
   is_interactive_terminal && printf '\e[8;50;140t' # resize terminal
 
   # on linux, some services require a min virtual memory map count and may need to be raised
