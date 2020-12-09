@@ -1,6 +1,9 @@
 #!/bin/bash
 
-composer global require hirak/prestissimo --no-interaction # parallelize downloads (much faster)
+# composer 1.x does not have much faster parallel downloads
+[[ "$(composer --version)" =~ version\ 1 ]] &&
+  composer global require hirak/prestissimo --no-interaction
+
 composer install --no-suggest --no-ansi --no-interaction --no-progress --prefer-dist
 
 # require (or replace if already required) the official magento cloud docker module with ours
