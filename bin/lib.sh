@@ -517,7 +517,7 @@ seconds_since() {
 }
 
 show_success_msg_plus_duration() {
-  msg_w_newlines "Completely successfully in ⌚️$(convert_secs_to_hms "$(seconds_since "$1")")"
+  msg_w_newlines "Completed successfully in ⌚️$(convert_secs_to_hms "$(seconds_since "$1")")"
 }
 
 
