@@ -29,7 +29,7 @@ setup() {
 @test 'dockerize_app of installed cloud env' {
   is_CI && disable_strict_host_key_checking
   run "./$app_link_name" dockerize_app << RESPONSES
-https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
+$EXISTING_MAGENTO_CLOUD_TEST_ENV
 n
 RESPONSES
   assert_success
@@ -42,9 +42,9 @@ RESPONSES
   assert_success
 }
 
-@test 'sync_app_to_remote' {
-  "./$app_link_name" sync_app_to_remote << RESPONSES
-https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
+@test 'sync_remote_to_app' {
+  "./$app_link_name" sync_remote_to_app << RESPONSES
+$EXISTING_MAGENTO_CLOUD_TEST_ENV
 n
 RESPONSES
   run echo ""
@@ -52,9 +52,12 @@ RESPONSES
 
 }
 
+@test 'sync_app_to_remote' {
 @test 'sync_remote_to_app' {
   "./$app_link_name" sync_remote_to_app << RESPONSES
 https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
+  "./$app_link_name" sync_app_to_remote << RESPONSES
+$EXISTING_MAGENTO_CLOUD_TEST_ENV
 n
 RESPONSES
   run echo ""
