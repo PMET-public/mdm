@@ -53,9 +53,8 @@ RESPONSES
 }
 
 @test 'sync_app_to_remote' {
-@test 'sync_remote_to_app' {
-  "./$app_link_name" sync_remote_to_app << RESPONSES
-https://demo.magento.cloud/projects/vu7rf5gsjcj3w/environments/240-test
+  # skip when MDM_CONFIG_URL is not set, only so parallel matrix runs do not interfere by both syncing to remote simultaneously
+  [[ "$MDM_CONFIG_URL" ]] || skip
   "./$app_link_name" sync_app_to_remote << RESPONSES
 $EXISTING_MAGENTO_CLOUD_TEST_ENV
 n
