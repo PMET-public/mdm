@@ -148,9 +148,9 @@ fi
     error "Provided name must be a valid hostname accepted by web browsers."
 }
 
-[[ "${#app_hostname}" -gt 12 ]] && {
+[[ "${#app_hostname}" -gt 25 ]] && {
   warning_w_newlines "App name will be truncated."
-  app_hostname="${app_hostname:0:12}"
+  app_hostname="${app_hostname:0:20}"
 }
 
 # additional error checking
