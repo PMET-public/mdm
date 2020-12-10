@@ -136,7 +136,7 @@ https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#inst
 3. Generate a new token with any name and 'repo' scope (no other selections are needed)
 4. Paste the token here
 "
-    github_token="$(prompt_user_for_token >&2)"
+    github_token="$(prompt_user_for_token)"
 
     msg_w_newlines "Magento Public Key"
     echo "1. Sign into the Magento Marketplace https://marketplace.magento.com/
@@ -145,12 +145,12 @@ https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#inst
 4. Copy an existing key or create a new one
 5. Paste your public key here
 "
-    magento_public_key="$(prompt_user_for_token >&2)"
+    magento_public_key="$(prompt_user_for_token)"
 
     msg_w_newlines "Magento Private Key"
     echo "1. From the same place as #5 above, paste your private key here
 "
-    magento_private_key="$(prompt_user_for_token >&2)"
+    magento_private_key="$(prompt_user_for_token)"
 
     # back up file if it exists
     [[ -f "$HOME/.composer/auth.json" ]] && cp "$HOME/.composer/auth.json" "$HOME/.composer/auth.json.$(date +"%s")"
