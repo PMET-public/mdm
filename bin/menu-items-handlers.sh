@@ -155,16 +155,19 @@ https://devdocs.magento.com/guides/v2.4/install-gde/prereq/dev_install.html#inst
     # back up file if it exists
     [[ -f "$HOME/.composer/auth.json" ]] && cp "$HOME/.composer/auth.json" "$HOME/.composer/auth.json.$(date +"%s")"
 
+    # ensure composer dir exists
+    mkdir -p "$HOME/.composer"
+
     printf '{
-    "github-oauth": {
-      "github.com": "%s"
-    },
-    "http-basic": {
-        "repo.magento.com": {
-            "username": "%s",
-            "password": "%s"
-        }
+  "github-oauth": {
+    "github.com": "%s"
+  },
+  "http-basic": {
+    "repo.magento.com": {
+      "username": "%s",
+      "password": "%s"
     }
+  }
 }' "$github_token" "$magento_public_key" "$magento_private_key" > "$HOME/.composer/auth.json"
 
     msg_w_newlines "$HOME/.composer/auth.json successfully created."
