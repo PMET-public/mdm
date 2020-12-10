@@ -338,14 +338,13 @@ or a valid GitHub url (ex. https://github.com...)."
     if is_valid_mc_env_url "$url"; then
       is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
       read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
-      msg_w_newlines "Pre-bundle EVERYTHING? (Defaults to No)
+      msg_w_newlines "Pre-bundle all modules? (Defaults to No)
   Pros:
-    Faster to deploy the 1st time
-    End user will not need credentials to run but will for any update
+    Slightly faster to deploy the 1st time
+    End user will not need their own credentials to install (but will for any future update)
   Cons:
-    Much slower to create app
-    Much larger app to distribute
-    End user will need their own valid credentials to install and run
+    Much slower to create initial app
+    Larger app to distribute
 
 [yes|No]?"
       read -r -p ''
