@@ -293,7 +293,7 @@ else
   # 5. restore original composer.json and composer.lock to ensure originals are used for deployment in containers
   cd "$tmp_app_dir" || exit 1
   [[ ! -z "$auth_json_path" ]] && # if auth.json provided, use it
-    cp "$auth_json_path" "$tmp_app_dir"
+    cp "$auth_json_path" "$tmp_app_dir/auth.json"
   [[ ! -f "auth.json" && ! "$COMPOSER_AUTH" && ! "$skip_composer_cache" ]] &&
     warning_w_newlines "No auth.json OR COMPOSER_AUTH env var file detected!
   Composer may be rate-limited and/or be unable to download required packages.
