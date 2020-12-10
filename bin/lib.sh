@@ -1395,6 +1395,9 @@ Once all requirements are installed and validated, this script will not need to 
   }
   brew upgrade "${brew_pkgs_for_all_platforms[@]}"
 
+  # brew will install composer 2; Magento does not support composer 2 yet
+  composer self-update 1.10.19
+
   msg_w_newlines "You may close this terminal."
 }
 
