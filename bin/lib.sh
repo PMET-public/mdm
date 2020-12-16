@@ -386,6 +386,12 @@ is_valid_mc_env_url() {
   [[ "$url" =~ https?://.*magento\.cloud/projects/.*/environments/ || "$url" =~ https?://.*magento\.cloud/projects/[^/]+/?$ ]]
 }
 
+is_valid_mc_site_url() {
+  local url="$1"
+  url="$(normalize_url_without_path_or_credentials "$url")"
+  [[ "$url" =~ https?://.*\.magentosite\.cloud$ ]]
+}
+
 is_hostname_resolving_to_local() {
   local curl_output
   curl_output="$(curl --max-time 0.5 -vI "$1" 2>&1 >/dev/null | grep Trying)"
@@ -575,6 +581,31 @@ get_project_from_mc_env_url() {
 get_env_from_mc_env_url() {
   local url="$1"
   echo "$url" | perl -ne '/.*?\/environments\/([^\/]+)/ and print $1'
+}
+
+# mc site means from the magento cloud site itself
+# mc site domains always follow this pattern
+# https://transformedenvidtoconformtosubdomainrules-randomstring-projectid.region.magentosite.cloud
+
+get_project_from_mc_site_url() {
+  local url="$1"
+  # get the chars after the last dash before the 1st '.'
+  normalize_url_without_path_or_credentials "$url" | perl -ne 's/.*-([^-\.]+)\..*/\1/ and print'
+}
+
+get_active_env_from_mc_env_url() {
+  local url="$1" project envs env env_url
+  project="$(get_project_from_mc_site_url "$url")"
+  url="$(normalize_url_without_path_or_credentials "$url")"
+  envs="$("$magento_cloud_cmd" environments -p "$project" --pipe --no-inactive 2> /dev/null)"
+  for env in $envs; do
+    env_url="$("$magento_cloud_cmd" url -p "$project" -e "$env" --pipe 2> /dev/null | perl -ne 's/^(https.*)\//\1/ and print')"
+    if [[ "$url" == "$env_url" ]]; then
+      echo "$env"
+      return 0
+    fi
+  done
+  return 1
 }
 
 ###

@@ -232,3 +232,29 @@ setup() {
   assert_success
   assert_output "https://master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud"
 }
+
+@test 'is_valid_mc_site_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  run is_valid_mc_site_url "https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/"
+  assert_success
+  assert_output ""
+}
+
+@test 'get_project_from_mc_site_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  run get_project_from_mc_site_url "https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/"
+  assert_success
+  assert_output "bdbasn83n3otg"
+}
+
+@test 'get_active_env_from_mc_env_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  # invalid project
+  run get_active_env_from_mc_env_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/
+  assert_failure
+  assert_output ""
+}
+
+@test 'get_active_env_from_mc_env_url https://user:pass@master-7rqtwti-a6terwtbk67os.demo.magentosite.cloud/admin/' {
+  # valid project
+  run get_active_env_from_mc_env_url "https://user:pass@master-7rqtwti-a6terwtbk67os.demo.magentosite.cloud/"
+  assert_success
+  assert_output "master"
+}
