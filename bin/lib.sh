@@ -905,6 +905,24 @@ cp_wildcard_mdm_domain_cert_and_key_for_subdomain() {
   rsync -az "$certs_dir/.$mdm_domain/" "$certs_dir/$subdomain/"
 }
 
+remove_credentials_from_url() {
+  local url="$1"
+  # remove any username and password
+  echo "$url" | perl -pe 's/\/\/[^\@]+:[^\@]+\@/\/\//'
+}
+
+strip_path_from_url() {
+  local url="$1"
+  # remove the first fwd slash not immediately preceeded by a fwd slash or : and everything after
+  echo "$url" | perl -pe 's/([^:\/])\/.*/\1/'
+}
+
+normalize_url_without_path_or_credentials() {
+  local url="$1"
+  url="$(strip_path_from_url "$url")"
+  remove_credentials_from_url "$url"
+}
+
 ###
 #
 # end network functions

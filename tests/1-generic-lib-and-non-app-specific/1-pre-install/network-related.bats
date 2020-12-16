@@ -214,3 +214,21 @@ setup() {
   assert_success
   assert_symlink_to "$HOME/.mdm/develop" "$HOME/.mdm/current"
 }
+
+@test 'strip_path_from_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  run strip_path_from_url "https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/"
+  assert_success
+  assert_output "https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud"
+}
+
+@test 'remove_credentials_from_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  run remove_credentials_from_url "https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/"
+  assert_success
+  assert_output "https://master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/"
+}
+
+@test 'normalize_url_without_path_or_credentials https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  run normalize_url_without_path_or_credentials https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/
+  assert_success
+  assert_output "https://master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud"
+}
