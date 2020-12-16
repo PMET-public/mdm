@@ -608,6 +608,14 @@ get_active_env_from_mc_env_url() {
   return 1
 }
 
+ensure_user_logged_into_mc_cli() {
+  msg_w_newlines "Checking if logged into the Magento Cloud CLI ..."
+  if ! is_magento_cloud_cli_logged_in; then
+    warning_w_newlines "Not logged in. Attempting login ..."
+    "$magento_cloud_cmd" login
+  fi
+}
+
 ###
 #
 # end util functions
