@@ -323,22 +323,37 @@ dockerize_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local url start project env branch skip_option="-s"
 
-    printf '\n\n%s\n' "Paste the url for your $(warning "existing Magento Cloud") env or a $(warning "cloud compatible") git repo. If it's a Magento Cloud url, it must be from your Magento Cloud projects page to avoid ambiguity due to capitalaziation or certain punctuation."
+    printf '\n\n%s\n' "Paste the url for your $(warning "existing Magento Cloud") env or a $(warning "cloud compatible") git repo."
     msg_about_url_format="
-Enter a valid Magento Cloud url from your Magento Cloud projects page (ex. $(warning "https://<region>.magento.cloud/projects/<project-id>/environments/<env-id>"))
-or a valid GitHub url (ex. https://github.com...)."
+Enter a valid Magento Cloud url or a valid GitHub url (ex. https://github.com...)."
     REPLY=""
-    while ! ( is_valid_mc_env_url "$REPLY" || is_valid_github_web_url "$REPLY" ); do
+    while ! ( is_valid_mc_env_url "$REPLY" || is_valid_github_web_url "$REPLY" || is_valid_mc_site_url "$REPLY"); do
       echo "$msg_about_url_format"
       read -r -p '> '
       REPLY="$(trim $REPLY)"
     done
     url="$REPLY"
-    
-    if is_valid_mc_env_url "$url"; then
-      is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
+
+    if is_valid_github_web_url "$url"; then
+      branch="$(get_branch_from_github_web_url "$url")"
+      "$lib_dir/dockerize" -g "$url" -b "$branch" -i "$HOME/.mdm/current/icons/magento.icns"
+      show_success_msg_plus_duration "$start"
+    fi
+
+    ensure_user_logged_into_mc_cli
+
+    if is_valid_mc_site_url "$url"; then
+      project="$(get_project_from_mc_site_url "$url")"
+      env="$(get_active_env_from_mc_env_url "$url")"
+    elif is_valid_mc_env_url "$url"; then
       read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
-      msg_w_newlines "Pre-bundle all modules? (Defaults to No)
+    fi
+
+    if [[ ! "$project" || ! "$env" ]]; then
+      error "Project or env could not be determined from url: $url"
+    fi
+
+    msg_w_newlines "Pre-bundle all modules? (Defaults to No)
   Pros:
     Slightly faster to deploy the 1st time
     End user will not need their own credentials to install (but will for any future update)
@@ -347,15 +362,12 @@ or a valid GitHub url (ex. https://github.com...)."
     Larger app to distribute
 
 [yes|No]?"
-      read -r -p ''
-      start="$(date +"%s")"
-      [[ "$REPLY" =~ ^[Yy]$ ]] && skip_option=""
-      "$lib_dir/dockerize" -p "$project" -e "$env" -i "$HOME/.mdm/current/icons/magento.icns" "$skip_option"
-    elif is_valid_github_web_url "$url"; then
-      branch="$(get_branch_from_github_web_url "$url")"
-      "$lib_dir/dockerize" -g "$url" -b "$branch" -i "$HOME/.mdm/current/icons/magento.icns"
-    fi
+    read -r -p ''
+    start="$(date +"%s")"
+    [[ "$REPLY" =~ ^[Yy]$ ]] && skip_option=""
+    "$lib_dir/dockerize" -p "$project" -e "$env" -i "$HOME/.mdm/current/icons/magento.icns" "$skip_option"
     show_success_msg_plus_duration "$start"
+
   }
 }
 
@@ -363,12 +375,11 @@ sync_remote_to_app() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local url start project env media_tmp_dir backup_sql_path sql_tmp_file hostname
 
-    printf '\n\n%s\n' "☁️→💻 Paste the url for the $(warning "existing Magento Cloud") env from your Magento Cloud projects page 
-(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
+    printf '\n\n%s\n' "☁️→💻 Paste the url for your $(warning "existing Magento Cloud") env."
     msg_about_url_format="
-Enter a valid Magento Cloud url from your Magento Cloud projects page (ex. $(warning "https://<region>.magento.cloud/projects/<project-id>/environments/<env-id>"))."
+Enter a valid Magento Cloud url"
     REPLY=""
-    while !  is_valid_mc_env_url "$REPLY"; do
+    while ! ( is_valid_mc_env_url "$REPLY" || is_valid_mc_site_url "$REPLY"); do
       echo "$msg_about_url_format"
       read -r -p '> '
       REPLY="$(trim $REPLY)"
@@ -376,8 +387,13 @@ Enter a valid Magento Cloud url from your Magento Cloud projects page (ex. $(war
     url="$REPLY"
 
     start="$(date +"%s")"
-    is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
-    read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
+    ensure_user_logged_into_mc_cli
+    if is_valid_mc_site_url "$url"; then
+      project="$(get_project_from_mc_site_url "$url")"
+      env="$(get_active_env_from_mc_env_url "$url")"
+    elif is_valid_mc_env_url "$url"; then
+      read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
+    fi
 
     msg_w_newlines "Copying cloud media to app ..."
     media_tmp_dir="$(mktemp -d)"
@@ -424,12 +440,11 @@ sync_app_to_remote() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local url start project env media_tmp_dir backup_sql_path sql_tmp_file hostname
     
-    printf '\n\n%s\n' "💻→☁️ Paste the url for the $(warning "existing Magento Cloud") env from your Magento Cloud projects page 
-(ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
+    printf '\n\n%s\n' "☁️→💻 Paste the url for your $(warning "existing Magento Cloud") env."
     msg_about_url_format="
-Enter a valid Magento Cloud url from your Magento Cloud projects page (ex. $(warning "https://<region>.magento.cloud/projects/<project-id>/environments/<env-id>"))."
+Enter a valid Magento Cloud url."
     REPLY=""
-    while !  is_valid_mc_env_url "$REPLY"; do
+    while ! ( is_valid_mc_env_url "$REPLY" || is_valid_mc_site_url "$REPLY"); do
       echo "$msg_about_url_format"
       read -r -p '> '
       REPLY="$(trim $REPLY)"
@@ -437,8 +452,13 @@ Enter a valid Magento Cloud url from your Magento Cloud projects page (ex. $(war
     url="$REPLY"
     
     start="$(date +"%s")"
-    is_magento_cloud_cli_logged_in || "$magento_cloud_cmd" login
-    read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
+    ensure_user_logged_into_mc_cli
+    if is_valid_mc_site_url "$url"; then
+      project="$(get_project_from_mc_site_url "$url")"
+      env="$(get_active_env_from_mc_env_url "$url")"
+    elif is_valid_mc_env_url "$url"; then
+      read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
+    fi
 
     msg_w_newlines "Copying app media to cloud ..."
     media_tmp_dir="$(mktemp -d)"
