@@ -229,7 +229,7 @@ is_existing_cloud_env && {
   # extract current env DB into the expected dir
   mkdir -p "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
   # by giving the db dump a filename prefixed with "zz-", ensure it runs/imports after any other files in the dir
-  "$magento_cloud_cmd" db:dump -p "$project" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d" -f zz-main-dump.sql 2> /dev/null
+  "$magento_cloud_cmd" db:dump -p "$project" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d" -f zz-$project-$env-dump.sql 2> /dev/null
 
   # extract only the encryption key from the env's app/etc/env.php
   mkdir -p "$app_dir/app/etc"
