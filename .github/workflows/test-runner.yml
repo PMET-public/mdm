@@ -29,6 +29,9 @@ jobs:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
       MAGENTO_CLOUD_CLI_TOKEN: ${{ secrets.MAGENTO_CLOUD_CLI_TOKEN }}
     steps:
+      - if: matrix.os == "ubuntu-latest"
+        run: |
+          sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
           if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
       - uses: actions/checkout@v2
@@ -52,6 +55,9 @@ jobs:
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
+      - if: matrix.os == "ubuntu-latest"
+        run: |
+          sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
           if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
       - uses: actions/checkout@v2
@@ -80,6 +86,9 @@ jobs:
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
+      - if: matrix.os == "ubuntu-latest"
+        run: |
+          sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
           if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
       - uses: actions/checkout@v2
