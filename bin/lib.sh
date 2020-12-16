@@ -566,12 +566,13 @@ get_github_token_from_composer_auth() {
   return 1
 }
 
-get_project_from_mc_url() {
+# mc env means from the magento cloud projects page
+get_project_from_mc_env_url() {
   local url="$1"
   echo "$url" | perl -ne '/.*?\/projects\/([^\/]+)/ and print $1'
 }
 
-get_env_from_mc_url() {
+get_env_from_mc_env_url() {
   local url="$1"
   echo "$url" | perl -ne '/.*?\/environments\/([^\/]+)/ and print $1'
 }
@@ -682,10 +683,10 @@ get_magento_cmds_to_update_hostname_to() {
 
 get_project_and_env_from_mc_url() {
   local url="$1" project env
-  project="$(get_project_from_mc_url "$url")"
+  project="$(get_project_from_mc_env_url "$url")"
   [[ "$project" ]] || error "$url not recognized as a valid Magento Cloud url from the Magento Cloud projects page
 (ex. https://<region>.magento.cloud/projects/<projectid>/environments/<envid>)."
-  env="$(get_env_from_mc_url "$url")"
+  env="$(get_env_from_mc_env_url "$url")"
   [[ "$env" ]] || env="master"
   echo "$project $env"
 }

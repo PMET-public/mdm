@@ -18,14 +18,14 @@ setup() {
   assert_success
 }
 
-@test 'get_project_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
-  run get_project_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
+@test 'get_project_from_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
+  run get_project_from_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
   assert_success
   assert_output "xy4itwbmg2khb"
 }
 
-@test 'get_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
-  run get_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
+@test 'get_env_from_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"' {
+  run get_env_from_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb"
   assert_success
   assert_output ""
 }
@@ -35,14 +35,14 @@ setup() {
   assert_success
 }
 
-@test 'get_project_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
-  run get_project_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
+@test 'get_project_from_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
+  run get_project_from_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
   assert_success
   assert_output "xy4itwbmg2khb"
 }
 
-@test 'get_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
-  run get_env_from_mc_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
+@test 'get_env_from_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"' {
+  run get_env_from_mc_env_url "https://demo.magento.cloud/projects/xy4itwbmg2khb/environments/master"
   assert_success
   assert_output "master"
 }
