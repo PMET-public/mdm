@@ -382,6 +382,7 @@ get_branch_from_github_web_url() {
 
 is_valid_mc_env_url() {
   local url="$1"
+  # 2nd case accounts for master env (not always present)
   [[ "$url" =~ https?://.*magento\.cloud/projects/.*/environments/ || "$url" =~ https?://.*magento\.cloud/projects/[^/]+/?$ ]]
 }
 
