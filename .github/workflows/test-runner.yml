@@ -29,7 +29,7 @@ jobs:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
       MAGENTO_CLOUD_CLI_TOKEN: ${{ secrets.MAGENTO_CLOUD_CLI_TOKEN }}
     steps:
-      - if: matrix.os == "ubuntu-latest"
+      - if: matrix.os == 'ubuntu-latest'
         run: |
           sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
@@ -55,7 +55,7 @@ jobs:
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
-      - if: matrix.os == "ubuntu-latest"
+      - if: matrix.os == 'ubuntu-latest'
         run: |
           sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
@@ -86,7 +86,7 @@ jobs:
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
-      - if: matrix.os == "ubuntu-latest"
+      - if: matrix.os == 'ubuntu-latest'
         run: |
           sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
