@@ -16,6 +16,7 @@ env:
   MDM_CONFIG_URL: ${{ secrets.MDM_CONFIG_URL }}
   MC_PROJ_ENV_URL: ${{ secrets.MC_PROJ_ENV_URL }}
   MC_ENV_SITE_URL: ${{ secrets.MC_ENV_SITE_URL }}
+  MAGENTO_CLOUD_CLI_TOKEN: ${{ secrets.MAGENTO_CLOUD_CLI_TOKEN }}
 
 jobs:
 
