@@ -26,7 +26,7 @@ setup() {
   hostname3="reset.com"
 }
 
-@test 'dockerize_app of installed cloud env' {
+@test 'dockerize_app of installed cloud env from mc proj env url' {
   is_CI && disable_strict_host_key_checking
   run "./$app_link_name" dockerize_app << RESPONSES
 $MC_PROJ_ENV_URL
@@ -65,7 +65,7 @@ RESPONSES
 }
 
 # same proj & env but use magento site url format
-@test 'dockerize_app of installed cloud env' {
+@test 'dockerize_app of installed cloud env from mc env site url' {
   is_CI && disable_strict_host_key_checking
   run "./$app_link_name" dockerize_app << RESPONSES
 $MC_ENV_SITE_URL

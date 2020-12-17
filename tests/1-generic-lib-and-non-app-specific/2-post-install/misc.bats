@@ -99,3 +99,42 @@ RESPONSES
   # prompt for numbers should happen twice b/c bad initial response
   assert_output -e "numbers.*numbers"
 }
+
+# requires mc cli to be installed and logged in
+@test 'is_valid_mc_site_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  run is_valid_mc_site_url "https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/"
+  assert_success
+  assert_output ""
+}
+
+@test 'is_active_project_env valid' {
+  run is_active_project_env "a6terwtbk67os" "master"
+  assert_success
+  assert_output ""
+}
+
+@test 'is_active_project_env invalid' {
+  run is_active_project_env "a6terwtbk67os" "master-not-real-env-asdfasd"
+  assert_failure
+  assert_output ""
+}
+
+@test 'get_project_from_mc_site_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  run get_project_from_mc_site_url "https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/"
+  assert_success
+  assert_output "bdbasn83n3otg"
+}
+
+@test 'get_active_env_from_mc_env_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
+  # invalid project
+  run get_active_env_from_mc_env_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/
+  assert_failure
+  assert_output ""
+}
+
+@test 'get_active_env_from_mc_env_url https://user:pass@master-7rqtwti-a6terwtbk67os.demo.magentosite.cloud/admin/' {
+  # valid project
+  run get_active_env_from_mc_env_url "https://user:pass@master-7rqtwti-a6terwtbk67os.demo.magentosite.cloud/"
+  assert_success
+  assert_output "master"
+}
