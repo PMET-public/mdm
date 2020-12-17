@@ -1,5 +1,7 @@
 # Instructions
 
+DO NOT DOWNLOAD APPS FROM THE ONEDRIVE WEB UI. USE FINDER. - Currently, OSX prevents apps downloaded via the web UI from running. We are looking into possible solutions.
+
 Copy any MDM app from your synced OneDrive folder to another local folder like Downloads or Documents.
 
 Double click the local app and look for the Magento icon in your menu bar.
