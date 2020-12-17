@@ -591,6 +591,34 @@ switch_to_developer_mode() {
   run_as_bash_cmds_in_app "bin/magento deploy:mode:set developer"
 }
 
+toggle_email() {
+  local cmds
+  cmds=$(cat <<'EOF'
+
+read -r host dbname username password <<<"$(
+  php -r '
+    $a=include("/app/app/etc/env.php");
+    $db=($a["db"]["connection"]["default"]);
+    echo($db["host"]." ".$db["dbname"]." ".$db["username"]." ".$db["password"]);
+  '
+)"
+val="$(mysql -h "$host" -u "$username" --password="$password" "$dbname" -sNe "select value from core_config_data where path = 'system/smtp/disable';")"
+if [[ "$val" -eq 0 ]]; then
+  toggled_val=1
+  echo Turning system emails off
+else
+  toggled_val=0
+  echo Turning system emails on
+fi
+mysql -h "$host" -u "$username" --password="$password" "$dbname" -e "insert into core_config_data (scope, scope_id, path, value) values ('default', 0, 'system/smtp/disable', $toggled_val) on duplicate key update path='system/smtp/disable', value=${toggled_val};"
+php bin/magento cache:flush config
+
+EOF
+)
+  run_as_bash_cmds_in_app "$cmds"
+
+}
+
 start_mdm_shell() {
   run_this_menu_item_handler_in_new_terminal_if_applicable || {
     local services_status

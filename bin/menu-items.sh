@@ -235,6 +235,11 @@ is_magento_app_running_cached && is_docker_compatible && {
       mdm_menu_items_keys+=("$key")
       mdm_menu_items["$key-handler"]=resize_images
 
+      key="Toggle email"
+      description=""
+      mdm_menu_items_keys+=("$key")
+      mdm_menu_items["$key-handler"]=toggle_email
+
       key="Change url for app"
       description="Use ANY url for your app. Combine with certificate spoofing for better browser compatibility."
       mdm_menu_items_keys+=("$key")
