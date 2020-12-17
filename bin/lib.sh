@@ -1131,14 +1131,15 @@ download_and_link_repo_ref() {
 }
 
 # "-" dashes must be stripped out of COMPOSE_PROJECT_NAME prior to docker-compose 1.21.0 https://docs.docker.com/compose/release-notes/#1210
-adjust_compose_project_name_for_docker_compose_version() {
-  local docker_compose_ver more_recent_of_two
+adjust_compose_project_name_for_docker_compose_reqs() {
+  local compose_project_name="$1" docker_compose_ver more_recent_of_two
+  compose_project_name="$(echo "$compose_project_name" | tr '[:upper:]' '[:lower:]')"
   docker_compose_ver="$(docker-compose -v | perl -ne 's/.*\b(\d+\.\d+\.\d+).*/$1/ and print')"
   more_recent_of_two="$(printf "%s\n%s" 1.21.0 "$docker_compose_ver" | "$sort_cmd" -V | tail -1)"
   if [[ "$more_recent_of_two" != "$docker_compose_ver" ]]; then
-    echo "$1" | perl -pe 's/[\-\.]//g' # strip dashes and dots if 1.21.0 is more recent
+    echo "$compose_project_name" | perl -pe 's/[\-\.]//g' # strip dashes and dots if 1.21.0 is more recent
   else
-    echo "$1" | perl -pe 's/\.//g' # only strip dots
+    echo "$compose_project_name" | perl -pe 's/\.//g' # only strip dots
   fi
 }
 
