@@ -63,3 +63,10 @@ setup() {
   run are_required_ports_free
   assert_failure
 }
+
+@test '[docker] adjust_compose_project_name_for_docker_compose_reqs SomeProj-Env' {
+  shopt -u nocasematch
+  run adjust_compose_project_name_for_docker_compose_reqs "SomeProj-Env"
+  assert_success
+  assert_output "someproj-env"
+}
