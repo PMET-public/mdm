@@ -29,7 +29,7 @@ setup() {
 @test 'dockerize_app of installed cloud env' {
   is_CI && disable_strict_host_key_checking
   run "./$app_link_name" dockerize_app << RESPONSES
-$EXISTING_MAGENTO_CLOUD_TEST_ENV
+$MC_PROJ_ENV_URL
 n
 RESPONSES
   assert_success
@@ -44,7 +44,7 @@ RESPONSES
 
 @test 'sync_remote_to_app' {
   "./$app_link_name" sync_remote_to_app << RESPONSES
-$EXISTING_MAGENTO_CLOUD_TEST_ENV
+$MC_PROJ_ENV_URL
 n
 RESPONSES
   run echo ""
@@ -56,10 +56,21 @@ RESPONSES
   # skip when MDM_CONFIG_URL is not set, only so parallel matrix runs do not interfere by both syncing to remote simultaneously
   [[ "$MDM_CONFIG_URL" ]] || skip
   "./$app_link_name" sync_app_to_remote << RESPONSES
-$EXISTING_MAGENTO_CLOUD_TEST_ENV
+$MC_PROJ_ENV_URL
 n
 RESPONSES
   run echo ""
   assert_success
 
+}
+
+# same proj & env but use magento site url format
+@test 'dockerize_app of installed cloud env' {
+  is_CI && disable_strict_host_key_checking
+  run "./$app_link_name" dockerize_app << RESPONSES
+$MC_ENV_SITE_URL
+n
+RESPONSES
+  assert_success
+  assert_output -e "complete.*success"
 }
