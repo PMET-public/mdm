@@ -239,6 +239,18 @@ setup() {
   assert_output ""
 }
 
+@test 'is_active_project_env valid' {
+  run is_active_project_env "a6terwtbk67os" "master"
+  assert_success
+  assert_output ""
+}
+
+@test 'is_active_project_env invalid' {
+  run is_active_project_env "a6terwtbk67os" "master-not-real-env-asdfasd"
+  assert_failure
+  assert_output ""
+}
+
 @test 'get_project_from_mc_site_url https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/' {
   run get_project_from_mc_site_url "https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/"
   assert_success

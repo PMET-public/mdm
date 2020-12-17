@@ -392,6 +392,16 @@ is_valid_mc_site_url() {
   [[ "$url" =~ https?://.*\.magentosite\.cloud$ ]]
 }
 
+is_active_project_env() {
+  local project="$1" env="$2" e
+  ensure_user_logged_into_mc_cli
+  envs="$("$magento_cloud_cmd" environments -p "$project" --pipe --no-inactive 2> /dev/null)"
+  for e in $envs; do
+    [[ "$e" = "$env" ]] && return 0
+  done
+  return 1
+}
+
 is_hostname_resolving_to_local() {
   local curl_output
   curl_output="$(curl --max-time 0.5 -vI "$1" 2>&1 >/dev/null | grep Trying)"
@@ -609,7 +619,6 @@ get_active_env_from_mc_env_url() {
 }
 
 ensure_user_logged_into_mc_cli() {
-  msg_w_newlines "Checking if logged into the Magento Cloud CLI ..."
   if ! is_magento_cloud_cli_logged_in; then
     warning_w_newlines "Not logged in. Attempting login ..."
     "$magento_cloud_cmd" login

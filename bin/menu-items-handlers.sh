@@ -349,9 +349,7 @@ Enter a valid Magento Cloud url or a valid GitHub url (ex. https://github.com...
       read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
     fi
 
-    if [[ ! "$project" || ! "$env" ]]; then
-      error "Project or env could not be determined from url: $url"
-    fi
+    is_active_project_env "$project" "$env" || error "Project: $project, env: $env is invalid or inactive. Url: $url"
 
     msg_w_newlines "Pre-bundle all modules? (Defaults to No)
   Pros:
@@ -394,6 +392,8 @@ Enter a valid Magento Cloud url"
     elif is_valid_mc_env_url "$url"; then
       read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
     fi
+
+    is_active_project_env "$project" "$env" || error "Project: $project, env: $env is invalid or inactive. Url: $url"
 
     msg_w_newlines "Copying cloud media to app ..."
     media_tmp_dir="$(mktemp -d)"
@@ -459,6 +459,8 @@ Enter a valid Magento Cloud url."
     elif is_valid_mc_env_url "$url"; then
       read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
     fi
+
+    is_active_project_env "$project" "$env" || error "Project: $project, env: $env is invalid or inactive. Url: $url"
 
     msg_w_newlines "Copying app media to cloud ..."
     media_tmp_dir="$(mktemp -d)"
