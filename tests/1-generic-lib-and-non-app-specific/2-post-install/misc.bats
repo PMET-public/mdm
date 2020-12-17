@@ -79,3 +79,23 @@ setup() {
   assert_failure
   assert_output ""
 }
+
+@test 'prompt_user_for_token valid' {
+  run prompt_user_for_token << RESPONSES
+9662d057e4e52b1b236fa237a232349841e60b44e
+RESPONSES
+  assert_success
+  assert_output -p "numbers"
+  refute_output -e "numbers.*numbers"
+
+}
+
+@test 'prompt_user_for_token invalid' {
+  run prompt_user_for_token << RESPONSES
+z
+9662d057e4e52b1b236fa237a232349841e60b44e
+RESPONSES
+  assert_success
+  # prompt for numbers should happen twice b/c bad initial response
+  assert_output -e "numbers.*numbers"
+}
