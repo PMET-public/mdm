@@ -306,14 +306,18 @@ uninstall_app() {
 }
 
 stop_other_apps() {
+  local cids
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     compose_project_names="$(docker ps -a -f "label=com.docker.compose.service=db" --format="{{ .Names  }}" |
       perl -pe 's/_db_1$//')"
     for name in $compose_project_names; do
       [[ "$name" == "$COMPOSE_PROJECT_NAME" ]] && continue
-      # shellcheck disable=SC2046
-      docker stop $(docker ps -q -f "name=^${name}_")
+      cids="$(docker ps -q -f "name=^${name}_")"
+      if [[ "$cids" ]]; then
+        # shellcheck disable=SC2046
+        docker stop $cids
+      fi
     done
   } >> "$handler_log_file" 2>&1 &
   track_job_status_and_wait_for_exit $! "Stopping other apps ..."
