@@ -818,7 +818,7 @@ add_hostnames_to_hosts_file() {
   for hostname in $hostnames; do
     lines+="$(print_local_hosts_file_entry "$hostname")"$'\n'
   done
-  echo "Password may be required to modify /etc/hosts."
+  warning_w_newlines "Password may be required to modify /etc/hosts!"
   tmp_hosts=$(mktemp)
   cat /etc/hosts <(echo "$lines") > "$tmp_hosts"
   backup_hosts
