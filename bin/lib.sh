@@ -324,7 +324,7 @@ lib_sourced_for_specific_bundled_app() {
 
 lookup_latest_remote_sem_ver() {
   curl -sL "$repo_url/releases" | \
-    perl -ne 'BEGIN{undef $/;} /archive\/([\d.]+)\.tar\.gz/ and print $1'
+    perl -ne 'BEGIN{undef $/;} /([\d.]+)\.tar\.gz/ and print $1'
 }
 
 is_update_available() {
