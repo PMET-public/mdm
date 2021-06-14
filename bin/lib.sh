@@ -435,9 +435,16 @@ is_string_valid_composer_credentials() {
   md5_file="$mdm_path/.md5-of-passed-composer-cred-${md5}"
   # for max menu rendering speed, check for md5 of prev passed credentials
   [[ -f "$md5_file" ]] && return 0
-  echo "$1" | jq -e -c '[."github-oauth"."github.com", ."http-basic"."repo.magento.com"["username","password"]] |
-      map(strings) |
-      length == 3' > /dev/null 2>&1 || status="$?"
+  # verify the credentials have a user & pass for repo.magento.com
+  # and a github oauth token or a github user & pass if using basic
+  echo "$1" | jq -e -c '
+  ([."http-basic"."repo.magento.com"["username","password"]]
+  | map(strings)
+  | length == 2)
+  and
+  ([."github-oauth"."github.com", ."http-basic"."github-oauth"["username","password"]] 
+  | map(strings)
+  | length > 0)' ~/.composer/auth.json > /dev/null 2>&1 || status="$?"
   if [[ "$status" -eq 0 ]]; then
     touch "$md5_file"
   fi
