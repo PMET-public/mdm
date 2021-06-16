@@ -442,7 +442,7 @@ is_string_valid_composer_credentials() {
   | map(strings)
   | length == 2)
   and
-  ([."github-oauth"."github.com", ."http-basic"."github-oauth"["username","password"]] 
+  ([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] 
   | map(strings)
   | length > 0)' ~/.composer/auth.json > /dev/null 2>&1 || status="$?"
   if [[ "$status" -eq 0 ]]; then
