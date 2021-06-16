@@ -580,11 +580,13 @@ get_github_token_from_composer_auth() {
   local token
   [[ "$COMPOSER_AUTH" ]] && {
     token="$(echo "$COMPOSER_AUTH" | perl -ne '/github.com".*?"([^"]*)"/ and print "$1"')"
-    [[ "$token" =~ [a-zA-Z0-9]{20,} ]] && echo "$token" && return
+    [[ "$token" ]] || token="$(echo "$COMPOSER_AUTH" | perl -ne '/(ghp_[^"]*)/ and print "$1"')"
+    [[ "$token" =~ [a-zA-Z0-9_]{20,} ]] && echo "$token" && return
   }
   [[ -f "$HOME/.composer/auth.json" ]] && {
     token="$(perl -ne '/github.com".*?"([^"]*)"/ and print "$1"' "$HOME/.composer/auth.json")"
-    [[ "$token" =~ [a-zA-Z0-9]{20,} ]] && echo "$token" && return
+    [[ "$token" ]] || token="$(perl -ne '/(ghp_[^"]*)/ and print "$1"' "$HOME/.composer/auth.json")"
+    [[ "$token" =~ [a-zA-Z0-9_]{20,} ]] && echo "$token" && return
   }
   return 1
 }
