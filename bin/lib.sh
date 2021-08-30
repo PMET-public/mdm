@@ -437,7 +437,7 @@ is_string_valid_composer_credentials() {
   [[ -f "$md5_file" ]] && return 0
   # verify the credentials have a user & pass for repo.magento.com
   # and a github oauth token or a github user & pass if using basic
-  echo "$str" | jq -e -c '
+  echo "$str" | jq -r -e -c '
   ([."http-basic"."repo.magento.com"["username","password"]]
   | map(strings)
   | length == 2)
@@ -577,11 +577,11 @@ prompt_user_for_token() {
 
 # look in env and fallback to expected home path
 get_github_token_from_composer_auth() {
-  [[ -n "$COMPOSER_AUTH" ]] && 
-    echo "$COMPOSER_AUTH" | jq -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' &&
+  [[ -n "$COMPOSER_AUTH" ]] &&
+    echo "$COMPOSER_AUTH" | jq -r -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' &&
     return
   [[ -f "$HOME/.composer/auth.json" ]] &&
-    jq -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' "$HOME/.composer/auth.json" && 
+    jq -r -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' "$HOME/.composer/auth.json" &&
     return
   return 1
 }
