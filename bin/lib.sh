@@ -431,20 +431,20 @@ is_mkcert_CA_installed() {
 
 is_string_valid_composer_credentials() {
   local str="$1" status=0 md5 md5_file
-  md5="$(echo "$1" | md5sum | sed 's/ .*//')"
+  md5="$(echo "$str" | md5sum | sed 's/ .*//')"
   md5_file="$mdm_path/.md5-of-passed-composer-cred-${md5}"
   # for max menu rendering speed, check for md5 of prev passed credentials
   [[ -f "$md5_file" ]] && return 0
   # verify the credentials have a user & pass for repo.magento.com
   # and a github oauth token or a github user & pass if using basic
-  echo "$1" | jq -e -c '
+  echo "$str" | jq -e -c '
   ([."http-basic"."repo.magento.com"["username","password"]]
   | map(strings)
   | length == 2)
   and
   ([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] 
   | map(strings)
-  | length > 0)' ~/.composer/auth.json > /dev/null 2>&1 || status="$?"
+  | length > 0)' > /dev/null 2>&1 || status="$?"
   if [[ "$status" -eq 0 ]]; then
     touch "$md5_file"
   fi
