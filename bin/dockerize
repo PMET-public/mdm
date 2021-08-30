@@ -351,6 +351,13 @@ else
   docker cp "$cid:/app/docker-compose.yml" "$app_dir"
   docker cp "$cid:/app/.docker" "$app_dir"
 
+  # sharing local composer cache into docker container can cause problems
+  # - composer user may be different (fs permission issues)
+  # - package access may be different (container user should not have access to package)
+  # - composer incompatibilities may happen (v1 vs v2 on host vs container)
+  # so remove composer volume sharing
+  perl -i.b4-composer-vol-removed -pe 's/.*\/\.composer.*:.*//' docker-compose.yml
+
 fi
 
 # add to some vars to generated config
