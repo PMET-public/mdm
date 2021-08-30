@@ -577,17 +577,12 @@ prompt_user_for_token() {
 
 # look in env and fallback to expected home path
 get_github_token_from_composer_auth() {
-  local token
-  [[ "$COMPOSER_AUTH" ]] && {
-    token="$(echo "$COMPOSER_AUTH" | perl -ne '/github.com".*?"([^"]*)"/ and print "$1"')"
-    [[ "$token" ]] || token="$(echo "$COMPOSER_AUTH" | perl -ne '/(ghp_[^"]*)/ and print "$1"')"
-    [[ "$token" =~ [a-zA-Z0-9_]{20,} ]] && echo "$token" && return
-  }
-  [[ -f "$HOME/.composer/auth.json" ]] && {
-    token="$(perl -ne '/github.com".*?"([^"]*)"/ and print "$1"' "$HOME/.composer/auth.json")"
-    [[ "$token" ]] || token="$(perl -ne '/(ghp_[^"]*)/ and print "$1"' "$HOME/.composer/auth.json")"
-    [[ "$token" =~ [a-zA-Z0-9_]{20,} ]] && echo "$token" && return
-  }
+  [[ -n "$COMPOSER_AUTH" ]] && 
+    echo "$COMPOSER_AUTH" | jq -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' &&
+    return
+  [[ -f "$HOME/.composer/auth.json" ]] &&
+    jq -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' "$HOME/.composer/auth.json" && 
+    return
   return 1
 }
 
