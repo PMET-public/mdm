@@ -1406,19 +1406,6 @@ self_install() {
 
   # create expected directory structure
   mkdir -p "$launched_apps_dir" "$certs_dir" "$hosts_backup_dir"
-  
-  # determine which MDM version to install and what MDM config to use 
-  if [[ "$MDM_REPO_DIR" ]]; then # dev's env or mdm is checked out for another project
-    rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
-    ln -sfn "$mdm_path/repo/" "$mdm_path/current"
-    [[ -f "$MDM_REPO_DIR/.mdm_config.sh" ]] && cp "$MDM_REPO_DIR/.mdm_config.sh" "$mdm_config_file"
-    [[ ! -f "$mdm_config_file" && "$MDM_CONFIG_URL" ]] && download_mdm_config
-  elif [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then # mdm is testing itself
-    download_and_link_repo_ref "$GITHUB_SHA"
-    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
-  else # end user case. mdm_config_file should already be copied from launcher
-    download_and_link_repo_ref # no param = latest sem ver
-  fi
 
   msg_w_newlines "
 Once all requirements are installed and validated, this script will not need to run again."
@@ -1445,6 +1432,24 @@ Once all requirements are installed and validated, this script will not need to 
       brew install "${brew_pkgs_for_mac[@]}"
     }
     brew upgrade "${brew_pkgs_for_mac[@]}"
+
+  fi
+
+  # determine which MDM version to install and what MDM config to use
+  # requires jq to get github token so should run after jq is installed via homebrew
+  if [[ "$MDM_REPO_DIR" ]]; then # dev's env or mdm is checked out for another project
+    rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
+    ln -sfn "$mdm_path/repo/" "$mdm_path/current"
+    [[ -f "$MDM_REPO_DIR/.mdm_config.sh" ]] && cp "$MDM_REPO_DIR/.mdm_config.sh" "$mdm_config_file"
+    [[ ! -f "$mdm_config_file" && "$MDM_CONFIG_URL" ]] && download_mdm_config
+  elif [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then # mdm is testing itself
+    download_and_link_repo_ref "$GITHUB_SHA"
+    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
+  else # end user case. mdm_config_file should already be copied from launcher
+    download_and_link_repo_ref # no param = latest sem ver
+  fi
+
+  if is_mac; then
 
     [[ -d /Applications/Docker.app ]] || {
       msg_w_newlines "
