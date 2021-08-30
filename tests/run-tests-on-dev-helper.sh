@@ -10,11 +10,16 @@ deferred_tests=()
 
 for test in "${tests[@]}"; do
   # defer sudo tests until end b/c will have to enter password multiple times
-  [[ "$test" =~ sudo ]] && deferred_tests+=("$test") && continue
+  [[ "$test" =~ sudo ]] &&
+    deferred_tests+=("$test") &&
+    echo "Deferring: \"$test\"" &&
+    continue
 
+  echo "Running: \"$this_dir/libs/bats/bin/bats\" -T \"$test\""
   "$this_dir/libs/bats/bin/bats" -T "$test"
 done
 
 for test in "${deferred_tests[@]}"; do
-  echo "$this_dir/libs/bats/bin/bats" -T "$test"
+  echo "Running deferred test: \"$this_dir/libs/bats/bin/bats\" -T \"$test\""
+  "$this_dir/libs/bats/bin/bats" -T "$test"
 done

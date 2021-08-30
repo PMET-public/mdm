@@ -577,6 +577,7 @@ prompt_user_for_token() {
 
 # look in env and fallback to expected home path
 get_github_token_from_composer_auth() {
+  # prefer COMPOSER_AUTH over auth.json
   [[ -n "$COMPOSER_AUTH" ]] &&
     echo "$COMPOSER_AUTH" | jq -r -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' &&
     return
