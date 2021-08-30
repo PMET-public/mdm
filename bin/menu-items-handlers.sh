@@ -742,7 +742,7 @@ start_remote_web_access() {
     # shellcheck disable=SC2031
     local_port="$(docker ps -a --filter "name=varnish" --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME" --format "{{.Ports}}" | \
       tr ',' '\n' | \
-      perl -ne "s/.*:(?=\d{5})// and s/-.*// and print"
+      perl -ne "s/.*\d+\.\d+:(?=\d{5})// and s/-.*// and print"
     )"
     [[ ! "$local_port" =~ ^[0-9]+$ ]] && echo "Could not find valid local port" && exit 1
     tmp_file="$(mktemp)"
