@@ -454,13 +454,13 @@ is_string_valid_composer_credentials() {
 has_valid_composer_credentials_cached() {
   [[ "${mdm_store["composer_credentials_are_valid"]}" ]] && return "${mdm_store["composer_credentials_are_valid"]}" # already calculated
   # check the env var
-  [[ "$COMPOSER_AUTH" ]] && 
-    is_string_valid_composer_credentials "$COMPOSER_AUTH" && 
-    mdm_store["composer_credentials_are_valid"]=0 && 
+  [[ "$COMPOSER_AUTH" ]] &&
+    is_string_valid_composer_credentials "$COMPOSER_AUTH" &&
+    mdm_store["composer_credentials_are_valid"]=0 &&
     return "${mdm_store["composer_credentials_are_valid"]}"
   # check the user's file
-  [[ -f "$HOME/.composer/auth.json" ]] && 
-    COMPOSER_AUTH="$(<"$HOME/.composer/auth.json")" && 
+  [[ -f "$HOME/.composer/auth.json" ]] &&
+    COMPOSER_AUTH="$(<"$HOME/.composer/auth.json")" &&
     is_string_valid_composer_credentials "$COMPOSER_AUTH" &&
     mdm_store["composer_credentials_are_valid"]=0 &&
     export COMPOSER_AUTH &&
@@ -903,7 +903,7 @@ does_cert_follow_convention() {
 }
 
 is_new_cert_required_for_domain() {
-  ! { does_cert_and_key_exist_for_domain "$1" && is_cert_current_for_domain "$1" && 
+  ! { does_cert_and_key_exist_for_domain "$1" && is_cert_current_for_domain "$1" &&
     does_cert_follow_convention "$1" && ! is_cert_for_domain_expiring_soon "$1"; }
 }
 

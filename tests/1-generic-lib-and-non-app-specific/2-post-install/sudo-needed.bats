@@ -20,7 +20,7 @@ setup() {
 
 @test 'add_hostnames_to_hosts_file "random-hostname-that-should-not-exist"' {
   add_hostnames_to_hosts_file "random-hostname-that-should-not-exist"
-  run grep -q "$hosts_file_line_marker" /etc/hosts && 
+  run grep -q "$hosts_file_line_marker" /etc/hosts &&
     is_hostname_resolving_to_local "random-hostname-that-should-not-exist"
   assert_success
   assert_output ''

@@ -474,7 +474,7 @@ Enter a valid Magento Cloud url."
 
     msg_w_newlines "Copying app DB to cloud ..."
     backup_sql_path="$(docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "
-      bin/magento config:set -q system/backup/functionality_enabled 1 && 
+      bin/magento config:set -q system/backup/functionality_enabled 1 &&
       bin/magento setup:backup --db | sed -n 's/.*path: //p' | tr -d '\n'
     ")"
     sql_tmp_file="$(mktemp)"
