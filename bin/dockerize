@@ -135,7 +135,7 @@ fi
 [[ -f "$mdm_config_dir/$mdm_config_filename" ]] ||
     error "Could not find $mdm_config_dir/$mdm_config_filename to bundle with new app."
 
-[[ "$detached" && "$app_hostname" ]] && 
+[[ "$detached" && "$app_hostname" ]] &&
   error "Name provided for magento app, but detached app also selected. Incompatible selection."
 
 [[ "$detached" ]] && {
@@ -156,7 +156,7 @@ fi
 # additional error checking
 {
   { # project and env are not empty but other related opts are
-    [[ ! -z "$project" ]] && [[ ! -z "$env" ]] && [[ -z "$git_url" ]] && [[ -z "$branch" ]] && [[ -z "$tag" ]] && \
+    [[ ! -z "$project" ]] && [[ ! -z "$env" ]] && [[ -z "$git_url" ]] && [[ -z "$branch" ]] && [[ -z "$tag" ]] &&
       env_is_existing_cloud=true
   } ||
   { # git url and branch are not empty but other related opts are
@@ -229,7 +229,7 @@ is_existing_cloud_env && {
   # extract current env DB into the expected dir
   mkdir -p "$app_dir/.docker/mysql/docker-entrypoint-initdb.d"
   # by giving the db dump a filename prefixed with "zz-", ensure it runs/imports after any other files in the dir
-  "$magento_cloud_cmd" db:dump -p "$project" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d" -f zz-$project-$env-dump.sql 2> /dev/null
+  "$magento_cloud_cmd" db:dump -p "$project" -e "$env" -d "$app_dir/.docker/mysql/docker-entrypoint-initdb.d" -f zz-"$project"-"$env"-dump.sql 2> /dev/null
 
   # extract only the encryption key from the env's app/etc/env.php
   mkdir -p "$app_dir/app/etc"
@@ -252,6 +252,23 @@ is_existing_cloud_env && {
 
 }
 
+# get php version of app to run composer operations inside a version specific container
+app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' "$tmp_app_dir/.magento.app.yaml")
+
+# need to create docker-compose MCD branch based on EE version
+case "$ee_version" in
+"2.4.3")
+  mcd_branch="1.2.4.x-dev"
+  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.2-latest"
+  COMPOSER_VERSION="2.1.6"
+  ;;
+*)
+  mcd_branch="dev-develop"
+  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
+  ;;
+esac
+
+
 if [[ "$skip_composer_cache" ]]; then
 
   mcd_only_tmp_dir="$(mktemp -d)"
@@ -259,7 +276,7 @@ if [[ "$skip_composer_cache" ]]; then
   # install only mcd
   echo "{}" > composer.json
   composer config repositories.mcd git git@github.com:pmet-public/magento-cloud-docker.git
-  composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
+  composer require magento/magento-cloud-docker:"$mcd_branch" --no-suggest --no-ansi --no-interaction --no-progress
   # create the dirs in the extra > map section of the composer.json
   jq -r ".extra.map | map(.[1]) | .[]" vendor/magento/magento-cloud-docker/composer.json |
     xargs -n 1 dirname |
@@ -293,7 +310,8 @@ else
   # 4. use modified version of magento-cloud-docker to create modified docker-compose files
   # 5. restore original composer.json and composer.lock to ensure originals are used for deployment in containers
   cd "$tmp_app_dir" || exit 1
-  [[ ! -z "$auth_json_path" ]] && # if auth.json provided, use it
+  # if auth.json provided, use it
+  [[ ! -z "$auth_json_path" ]] &&
     cp "$auth_json_path" "$tmp_app_dir/auth.json"
   [[ ! -f "auth.json" && ! "$COMPOSER_AUTH" && ! "$skip_composer_cache" ]] &&
     warning_w_newlines "No auth.json OR COMPOSER_AUTH env var file detected!
@@ -307,9 +325,6 @@ else
   python -c "import sys, json; data = json.load(sys.stdin); data.pop('scripts', 0); print(json.dumps(data))" \
     < composer.json.bak > composer.json
 
-  # get php version of app to run composer operations inside a version specific container
-  app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' .magento.app.yaml)
-
   # if using ssh, set ssh options
   [[ "$USE_SSH_AUTH_SOCK_FOR_DOCKER" && "$SSH_AUTH_SOCK" ]] && {
     is_mac && SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"
@@ -317,9 +332,9 @@ else
       --mount type=bind,src=$HOME/.ssh/known_hosts,target=/root/.ssh/known_hosts"
   }
 
-  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
   docker pull "$composer_image"
   cid="$(docker create $ssh_auth_opts \
+    -e COMPOSER_VERSION="$COMPOSER_VERSION" \
     -e COMPOSER_AUTH -e COMPOSER_HOME=/app/.composer -e app_hostname="$app_hostname" -e OVERRIDE_MCD_IMAGE_VERSION \
     "$composer_image" /tmp/script)"
   docker cp . "$cid:/app/"
@@ -340,6 +355,13 @@ else
   docker cp "$cid:/app/.docker" "$app_dir"
 
 fi
+
+# sharing local composer cache into docker container can cause problems
+# - composer user may be different (fs permission issues)
+# - package access may be different (container user should not have access to package)
+# - composer incompatibilities may happen (v1 vs v2 on host vs container)
+# so remove composer volume sharing
+perl -i.b4-composer-vol-removed -pe 's/.*\/\.composer.*:.*//' "$app_dir/docker-compose.yml"
 
 # add to some vars to generated config
 printf "APP_HOSTNAME=%s\nPREV_APP_HOSTNAME=%s\nCOMPOSE_PROJECT_NAME=%s" \

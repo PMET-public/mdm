@@ -381,6 +381,11 @@ get_branch_from_github_web_url() {
   echo "$url" | perl -ne '/.*\/(tree|blob|commit)\/([^\/]+)/ and print $2'
 }
 
+normalize_github_web_url() {
+  local url="$1"
+  echo "$url" | perl -pe 's/(.*?github.com\/[^\/]+\/[^\/]+)\/(tree|blob|commit)\/.*/$1.git/'
+}
+
 is_valid_mc_env_url() {
   local url="$1"
   # 2nd case accounts for master env (not always present)
@@ -432,13 +437,20 @@ is_mkcert_CA_installed() {
 
 is_string_valid_composer_credentials() {
   local str="$1" status=0 md5 md5_file
-  md5="$(echo "$1" | md5sum | sed 's/ .*//')"
+  md5="$(echo "$str" | md5sum | sed 's/ .*//')"
   md5_file="$mdm_path/.md5-of-passed-composer-cred-${md5}"
   # for max menu rendering speed, check for md5 of prev passed credentials
   [[ -f "$md5_file" ]] && return 0
-  echo "$1" | jq -e -c '[."github-oauth"."github.com", ."http-basic"."repo.magento.com"["username","password"]] |
-      map(strings) |
-      length == 3' > /dev/null 2>&1 || status="$?"
+  # verify the credentials have a user & pass for repo.magento.com
+  # and a github oauth token or a github user & pass if using basic
+  echo "$str" | jq -r -e -c '
+  ([."http-basic"."repo.magento.com"["username","password"]]
+  | map(strings)
+  | length == 2)
+  and
+  ([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] 
+  | map(strings)
+  | length > 0)' > /dev/null 2>&1 || status="$?"
   if [[ "$status" -eq 0 ]]; then
     touch "$md5_file"
   fi
@@ -448,13 +460,13 @@ is_string_valid_composer_credentials() {
 has_valid_composer_credentials_cached() {
   [[ "${mdm_store["composer_credentials_are_valid"]}" ]] && return "${mdm_store["composer_credentials_are_valid"]}" # already calculated
   # check the env var
-  [[ "$COMPOSER_AUTH" ]] && 
-    is_string_valid_composer_credentials "$COMPOSER_AUTH" && 
-    mdm_store["composer_credentials_are_valid"]=0 && 
+  [[ "$COMPOSER_AUTH" ]] &&
+    is_string_valid_composer_credentials "$COMPOSER_AUTH" &&
+    mdm_store["composer_credentials_are_valid"]=0 &&
     return "${mdm_store["composer_credentials_are_valid"]}"
   # check the user's file
-  [[ -f "$HOME/.composer/auth.json" ]] && 
-    COMPOSER_AUTH="$(<"$HOME/.composer/auth.json")" && 
+  [[ -f "$HOME/.composer/auth.json" ]] &&
+    COMPOSER_AUTH="$(<"$HOME/.composer/auth.json")" &&
     is_string_valid_composer_credentials "$COMPOSER_AUTH" &&
     mdm_store["composer_credentials_are_valid"]=0 &&
     export COMPOSER_AUTH &&
@@ -571,15 +583,13 @@ prompt_user_for_token() {
 
 # look in env and fallback to expected home path
 get_github_token_from_composer_auth() {
-  local token
-  [[ "$COMPOSER_AUTH" ]] && {
-    token="$(echo "$COMPOSER_AUTH" | perl -ne '/github.com".*?"([^"]*)"/ and print "$1"')"
-    [[ "$token" =~ [a-zA-Z0-9]{20,} ]] && echo "$token" && return
-  }
-  [[ -f "$HOME/.composer/auth.json" ]] && {
-    token="$(perl -ne '/github.com".*?"([^"]*)"/ and print "$1"' "$HOME/.composer/auth.json")"
-    [[ "$token" =~ [a-zA-Z0-9]{20,} ]] && echo "$token" && return
-  }
+  # prefer COMPOSER_AUTH over auth.json
+  [[ -n "$COMPOSER_AUTH" ]] &&
+    echo "$COMPOSER_AUTH" | jq -r -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' &&
+    return
+  [[ -f "$HOME/.composer/auth.json" ]] &&
+    jq -r -e -c '([."github-oauth"."github.com", ."http-basic"."github.com"["username","password"]] | map(strings) | last )' "$HOME/.composer/auth.json" &&
+    return
   return 1
 }
 
@@ -900,7 +910,7 @@ does_cert_follow_convention() {
 }
 
 is_new_cert_required_for_domain() {
-  ! { does_cert_and_key_exist_for_domain "$1" && is_cert_current_for_domain "$1" && 
+  ! { does_cert_and_key_exist_for_domain "$1" && is_cert_current_for_domain "$1" &&
     does_cert_follow_convention "$1" && ! is_cert_for_domain_expiring_soon "$1"; }
 }
 
@@ -1402,19 +1412,6 @@ self_install() {
 
   # create expected directory structure
   mkdir -p "$launched_apps_dir" "$certs_dir" "$hosts_backup_dir"
-  
-  # determine which MDM version to install and what MDM config to use 
-  if [[ "$MDM_REPO_DIR" ]]; then # dev's env or mdm is checked out for another project
-    rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
-    ln -sfn "$mdm_path/repo/" "$mdm_path/current"
-    [[ -f "$MDM_REPO_DIR/.mdm_config.sh" ]] && cp "$MDM_REPO_DIR/.mdm_config.sh" "$mdm_config_file"
-    [[ ! -f "$mdm_config_file" && "$MDM_CONFIG_URL" ]] && download_mdm_config
-  elif [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then # mdm is testing itself
-    download_and_link_repo_ref "$GITHUB_SHA"
-    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
-  else # end user case. mdm_config_file should already be copied from launcher
-    download_and_link_repo_ref # no param = latest sem ver
-  fi
 
   msg_w_newlines "
 Once all requirements are installed and validated, this script will not need to run again."
@@ -1441,6 +1438,24 @@ Once all requirements are installed and validated, this script will not need to 
       brew install "${brew_pkgs_for_mac[@]}"
     }
     brew upgrade "${brew_pkgs_for_mac[@]}"
+
+  fi
+
+  # determine which MDM version to install and what MDM config to use
+  # requires jq to get github token so should run after jq is installed via homebrew
+  if [[ "$MDM_REPO_DIR" ]]; then # dev's env or mdm is checked out for another project
+    rsync --cvs-exclude --delete -az "$MDM_REPO_DIR/" "$mdm_path/repo/"
+    ln -sfn "$mdm_path/repo/" "$mdm_path/current"
+    [[ -f "$MDM_REPO_DIR/.mdm_config.sh" ]] && cp "$MDM_REPO_DIR/.mdm_config.sh" "$mdm_config_file"
+    [[ ! -f "$mdm_config_file" && "$MDM_CONFIG_URL" ]] && download_mdm_config
+  elif [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then # mdm is testing itself
+    download_and_link_repo_ref "$GITHUB_SHA"
+    [[ "$MDM_CONFIG_URL" ]] && download_mdm_config
+  else # end user case. mdm_config_file should already be copied from launcher
+    download_and_link_repo_ref # no param = latest sem ver
+  fi
+
+  if is_mac; then
 
     [[ -d /Applications/Docker.app ]] || {
       msg_w_newlines "
