@@ -15,7 +15,7 @@ grep -q 'pmet-public/magento-cloud-docker' composer.json ||
 
 # if there is not a specified required version of MCD, require one
 # TODO: add some case logic based on magento EE version?
-jq -e -c '.require."magento/magento-cloud-docker"' composer.json ||
+jq -r -e -c '.require."magento/magento-cloud-docker"' composer.json > /dev/null 2>&1 ||
   composer require magento/magento-cloud-docker:dev-develop --no-suggest --no-ansi --no-interaction --no-progress
 
 # creates docker-compose.yml & .docker/config.env w/ base64 encoded vals for the "generic" service extended by others
