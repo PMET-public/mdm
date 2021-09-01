@@ -335,37 +335,40 @@ Enter a valid Magento Cloud url or a valid GitHub url (ex. https://github.com...
     url="$REPLY"
 
     if is_valid_github_web_url "$url"; then
+
       branch="$(get_branch_from_github_web_url "$url")"
+      url="$(normalize_github_web_url "$url")"
       "$lib_dir/dockerize" -g "$url" -b "$branch" -i "$HOME/.mdm/current/icons/magento.icns"
       show_success_msg_plus_duration "$start"
-    fi
 
-    ensure_user_logged_into_mc_cli
+    else
 
-    if is_valid_mc_site_url "$url"; then
-      project="$(get_project_from_mc_site_url "$url")"
-      env="$(get_active_env_from_mc_env_url "$url")"
-    elif is_valid_mc_env_url "$url"; then
-      read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
-    fi
+      ensure_user_logged_into_mc_cli
 
-    is_active_project_env "$project" "$env" || error "Project: $project, env: $env is invalid or inactive. Url: $url"
+      if is_valid_mc_site_url "$url"; then
+        project="$(get_project_from_mc_site_url "$url")"
+        env="$(get_active_env_from_mc_env_url "$url")"
+      elif is_valid_mc_env_url "$url"; then
+        read -r project env <<<"$(get_project_and_env_from_mc_url "$url")"
+      fi
 
-    msg_w_newlines "Pre-bundle all modules? (Defaults to No)
-  Pros:
-    Slightly faster to deploy the 1st time
-    End user will not need their own credentials to install (but will for any future update)
-  Cons:
-    Much slower to create initial app
-    Larger app to distribute
+      is_active_project_env "$project" "$env" || error "Project: $project, env: $env is invalid or inactive. Url: $url"
+
+      msg_w_newlines "Pre-bundle all modules? (Defaults to No)
+Pros:
+  Slightly faster to deploy the 1st time
+  End user will not need their own credentials to install (but will for any future update)
+Cons:
+  Much slower to create initial app
+  Larger app to distribute
 
 [yes|No]?"
-    read -r -p ''
-    start="$(date +"%s")"
-    [[ "$REPLY" =~ ^[Yy]$ ]] && skip_option=""
-    "$lib_dir/dockerize" -p "$project" -e "$env" -i "$HOME/.mdm/current/icons/magento.icns" "$skip_option"
-    show_success_msg_plus_duration "$start"
-
+      read -r -p ''
+      start="$(date +"%s")"
+      [[ "$REPLY" =~ ^[Yy]$ ]] && skip_option=""
+      "$lib_dir/dockerize" -p "$project" -e "$env" -i "$HOME/.mdm/current/icons/magento.icns" "$skip_option"
+      show_success_msg_plus_duration "$start"
+    fi
   }
 }
 
