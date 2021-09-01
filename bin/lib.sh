@@ -380,6 +380,11 @@ get_branch_from_github_web_url() {
   echo "$url" | perl -ne '/.*\/(tree|blob|commit)\/([^\/]+)/ and print $2'
 }
 
+normalize_github_web_url() {
+  local url="$1"
+  echo "$url" | perl -pe 's/(.*?github.com\/[^\/]+\/[^\/]+)\/(tree|blob|commit)\/.*/$1.git/'
+}
+
 is_valid_mc_env_url() {
   local url="$1"
   # 2nd case accounts for master env (not always present)
