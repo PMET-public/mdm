@@ -257,14 +257,14 @@ app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' "$tmp_app_dir/.ma
 
 # need to create docker-compose MCD branch based on EE version
 case "$ee_version" in
+"2.4.1"|"2.4.2")
+  mcd_branch="dev-develop"
+  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
+  ;;
 "2.4.3")
   mcd_branch="1.2.4.x-dev"
   composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.2-latest"
   COMPOSER_VERSION="2.1.6"
-  ;;
-*)
-  mcd_branch="dev-develop"
-  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
   ;;
 esac
 
