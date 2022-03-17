@@ -63,12 +63,12 @@ setup() {
   assert_output ""
 }
 
-@test 'is_cert_current_for_domain ".$mdm_domain"' {
-  [[ "$mdm_domain" ]] || skip
-  run is_cert_current_for_domain ".$mdm_domain"
-  assert_success
-  assert_output ""
-}
+# @test 'is_cert_current_for_domain ".$mdm_domain"' {
+#   [[ "$mdm_domain" ]] || skip
+#   run is_cert_current_for_domain ".$mdm_domain"
+#   assert_success
+#   assert_output ""
+# }
 
 @test 'is_cert_current_for_domain "made-up-localhost"' {
   run is_cert_current_for_domain "made-up-localhost"
@@ -82,12 +82,12 @@ setup() {
   assert_output ""
 }
 
-@test 'is_cert_for_domain_expiring_soon ".$mdm_domain"' {
-  [[ "$mdm_domain" ]] || skip
-  run is_cert_for_domain_expiring_soon ".$mdm_domain"
-  assert_failure
-  assert_output ""
-}
+# @test 'is_cert_for_domain_expiring_soon ".$mdm_domain"' {
+#   [[ "$mdm_domain" ]] || skip
+#   run is_cert_for_domain_expiring_soon ".$mdm_domain"
+#   assert_failure
+#   assert_output ""
+# }
 
 @test 'is_cert_for_domain_expiring_soon "made-up-localhost"' {
   run is_cert_for_domain_expiring_soon "made-up-localhost"
@@ -128,12 +128,12 @@ setup() {
   assert_output ""
 }
 
-@test 'is_new_cert_required_for_domain ".$mdm_domain"' {
-  [[ "$mdm_domain" ]] || skip
-  run is_new_cert_required_for_domain ".$mdm_domain"
-  assert_failure
-  assert_output ""
-}
+# @test 'is_new_cert_required_for_domain ".$mdm_domain"' {
+#   [[ "$mdm_domain" ]] || skip
+#   run is_new_cert_required_for_domain ".$mdm_domain"
+#   assert_failure
+#   assert_output ""
+# }
 
 @test 'is_new_cert_required_for_domain "made-up-localhost"' {
   run is_new_cert_required_for_domain "made-up-localhost"
