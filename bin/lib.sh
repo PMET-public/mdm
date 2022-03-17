@@ -574,7 +574,7 @@ ARE YOU SURE?! (y/n)
 prompt_user_for_token() {
   REPLY=""
   while [[ ! "$REPLY" =~ ^[0-9a-p_]+$ ]]; do
-    printf "Ex. $(warning "9662d057e4e52b1b236fa237a232349841e60b44e or ghp_9662d057e4e52b1b236fa237a232349841e60b44e")" >&2
+    printf "Typically 'ghp_' followed by numbers and letters. e.g. ghp_9662d057e4e52b1b236fa237a232349841e60b54e" >&2
     read -r -p '> '
     REPLY="$(trim $REPLY)"
   done
