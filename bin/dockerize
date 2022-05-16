@@ -261,10 +261,15 @@ case "$ee_version" in
   mcd_branch="dev-develop"
   composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
   ;;
-2.4.*)
+2.4.3|2.4.3-p*)
   mcd_branch="1.2.4.x-dev"
   composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.2-latest"
   COMPOSER_VERSION="2.1.6"
+  ;;
+2.4.4|2.4.4-p*)
+  mcd_branch="1.3.2.x-dev"
+  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.3.2-latest"
+  COMPOSER_VERSION="2.1.4"
   ;;
 esac
 

@@ -52,7 +52,7 @@
         "vsc_debugger_arg": "n/a",
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir":
-          "${env:HOME}/Downloads/mc-2.4.0-p1.app/Contents/Resources"
+          "${env:HOME}/Downloads/mc-2.4.4.app/Contents/Resources"
       },
       "args": []
     },
@@ -89,7 +89,7 @@
         //"vsc_debugger_arg": "⚠️ Remove Magento images (breaks stopped apps)",
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir": 
-          "${env:HOME}/Downloads/mc-2.4.0-p1.app/Contents/Resources"
+          "${env:HOME}/Downloads/mc-2.4.4.app/Contents/Resources"
       },
       "args": []
     },
@@ -112,7 +112,7 @@
         "MDM_REPO_DIR": "${workspaceFolder}",
         "apps_resources_dir": 
           //"${env:HOME}/Downloads/detached-mdm.app/Contents/Resources"
-          "${env:HOME}/Downloads/mc-2.4.0-p1.app/Contents/Resources"
+          "${env:HOME}/Downloads/mc-2.4.4.app/Contents/Resources"
       },
       "args": []
     },
@@ -157,7 +157,7 @@
       },
       "args": [
         "-g", "git@github.com:pmet-public/magento-cloud.git",
-        "-b", "pmet-2.4.1-ref",
+        "-b", "pmet-2.4.4-ref",
         "-n", "ref",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/ref.icns"
@@ -174,7 +174,7 @@
       },
       "args": [
         "-g", "git@github.com:pmet-public/magento-cloud.git",
-        "-b", "pmet-2.4.1-demo",
+        "-b", "pmet-2.4.4-demo",
         "-n", "demo",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/demo.icns"
@@ -191,7 +191,7 @@
       },
       "args": [
         "-g", "git@github.com:pmet-public/magento-cloud.git",
-        "-b", "pmet-2.4.1-b2b",
+        "-b", "pmet-2.4.4-b2b",
         "-n", "b2b",
         "-a", "${env:HOME}/.composer/auth.json",
         "-i", "${env:HOME}/.mdm/current/icons/b2b.icns"
