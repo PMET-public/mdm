@@ -20,13 +20,13 @@ services:
   deploy:
     environment:
       - COMPOSER_AUTH
-  elasticsearch:
+  opensearch:
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     networks:
       default:
         aliases:
-          - elasticsearch.internal
+          - opensearch.internal
     # extending generic to disable healthcheck did not work. docker-compsoe issue?
     healthcheck:
       disable: true
