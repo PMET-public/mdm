@@ -71,7 +71,7 @@ jobs:
           ./tests/libs/bats/bin/bats -T ./tests/3-dockerize-then-run-magento-app/**/*.bats
       - name: bats tests for 2nd app
         run: |
-          export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.0-ref
+          export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.4-ref
           ./tests/libs/bats/bin/bats -T ./tests/3-dockerize-then-run-magento-app/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
