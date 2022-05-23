@@ -3,7 +3,7 @@ services:
   storystore-pwa:
     image: pmetpublic/storystore-pwa:docker
     environment:
-      - MAGENTO_URL=${MAGENTO_URL:-https://pwa-cloud.storystore.dev/api/graphql}
+      - MAGENTO_URL=${MAGENTO_URL:-https://pwa-cloud.the1umastory.com/api/graphql}
       - NEXT_TELEMETRY_DISABLED=1
       - CLOUD_MODE=${CLOUD_MODE:-false}
       - PREV_RELEASE_REDIRECT_URL=https://${PWA_PREV_HOSTNAME:-pwa-prev}
@@ -12,7 +12,7 @@ services:
   storystore-pwa-prev:
     image: pmetpublic/storystore-pwa:docker-prev
     environment:
-      - MAGENTO_URL=${MAGENTO_URL:-https://pwa-cloud.storystore.dev/api/graphql}
+      - MAGENTO_URL=${MAGENTO_URL:-https://pwa-cloud.the1umastory.com/api/graphql}
       - NEXT_TELEMETRY_DISABLED=1
       - CLOUD_MODE=${CLOUD_MODE:-false}
       - LATEST_RELEASE_REDIRECT_URL=https://${PWA_PREV_HOSTNAME:-pwa-prev}
