@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   shopt -s nocasematch
 }
 
@@ -231,4 +232,8 @@ setup() {
   run normalize_url_without_path_or_credentials https://user:pass@master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud/admin/
   assert_success
   assert_output "https://master-7rqtwtj-bdbasn83n3otg.demo.magentosite.cloud"
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

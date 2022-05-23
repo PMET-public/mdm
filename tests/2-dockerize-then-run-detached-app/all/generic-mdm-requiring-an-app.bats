@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   shopt -s nocasematch
 }
 
@@ -25,3 +26,7 @@ setup() {
 #   assert_output -e "debugging.*on"
 #   assert_output -e "debugging.*off"
 # }
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
+}

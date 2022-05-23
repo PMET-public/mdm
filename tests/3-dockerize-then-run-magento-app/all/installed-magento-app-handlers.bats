@@ -12,6 +12,7 @@ load '../../bats-lib.sh'
 
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   post_magento_install_setup
 }
 
@@ -121,4 +122,8 @@ setup() {
   run echo "$output"
   assert_success
   assert_output -e "success.*mysite.com"
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

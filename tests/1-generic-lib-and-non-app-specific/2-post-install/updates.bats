@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   shopt -s nocasematch
 }
 
@@ -34,4 +35,8 @@ setup() {
   # mdm_ver_file metadata should be different even if content hasn't changed
   run diff <(echo "$output1") <(echo "$output2")
   assert_failure
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

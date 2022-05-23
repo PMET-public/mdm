@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   shopt -s nocasematch
 }
 
@@ -78,4 +79,8 @@ setup() {
   run "$lib_dir/launcher"
   assert_success
   assert_output -e "advanced"
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

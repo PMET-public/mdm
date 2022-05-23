@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   shopt -s nocasematch
 }
 
@@ -45,4 +46,8 @@ setup() {
   run "$stat_cmd" -c '%a' /etc/hosts
   assert_success
   assert_output '644'
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   shopt -s nocasematch
   is_docker_compatible || skip
   is_docker_running || {
@@ -69,4 +70,8 @@ setup() {
   run adjust_compose_project_name_for_docker_compose_reqs "SomeProj-Env"
   assert_success
   assert_output "someproj-env"
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

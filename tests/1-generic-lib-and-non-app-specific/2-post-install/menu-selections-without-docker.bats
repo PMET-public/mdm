@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   shopt -s nocasematch
   bak_suffix="$(date +"%s")"
 }
@@ -49,4 +50,8 @@ RESPONSES
   [[ -f "$HOME/.composer/auth.json.$bak_suffix" ]] && mv "$HOME/.composer/auth.json.$bak_suffix" "$HOME/.composer/auth.json"
   run test "$status" -eq 0
   assert_success
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

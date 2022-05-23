@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
   shopt -s nocasematch
 }
 
@@ -147,4 +148,8 @@ RESPONSES
   run get_active_env_from_mc_env_url "https://user:pass@master-7rqtwti-a6terwtbk67os.demo.magentosite.cloud/"
   assert_success
   assert_output "master"
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }
