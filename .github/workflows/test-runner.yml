@@ -26,7 +26,8 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-        MDM_OVERRIDE_CONFIG: [true, ""]
+        #MDM_OVERRIDE_CONFIG: [true, ""]
+        MDM_OVERRIDE_CONFIG: [true]
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
       MAGENTO_CLOUD_CLI_TOKEN: ${{ secrets.MAGENTO_CLOUD_CLI_TOKEN }}
@@ -53,7 +54,8 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-        MDM_OVERRIDE_CONFIG: [true,""]
+        #MDM_OVERRIDE_CONFIG: [true, ""]
+        MDM_OVERRIDE_CONFIG: [true]
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
@@ -84,7 +86,8 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-        MDM_OVERRIDE_CONFIG: [true, ""]
+        #MDM_OVERRIDE_CONFIG: [true, ""]
+        MDM_OVERRIDE_CONFIG: [true]
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
     steps:
