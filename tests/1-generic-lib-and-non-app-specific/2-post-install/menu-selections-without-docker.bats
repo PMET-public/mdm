@@ -25,6 +25,7 @@ setup() {
 }
 
 @test 'toggle_mkcert_CA_install' {
+  is_CI && is_mac && skip
   is_advanced_mode || "$lib_dir/launcher" toggle_advanced_mode
   output1="$("$lib_dir/launcher")"
   "$lib_dir/launcher" toggle_mkcert_CA_install
