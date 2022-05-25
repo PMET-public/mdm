@@ -21,6 +21,7 @@ setup() {
 
 @test 'add_hostnames_to_hosts_file "random-hostname-that-should-not-exist"' {
   add_hostnames_to_hosts_file "random-hostname-that-should-not-exist"
+  sleep 2 # slight delay needed b/c prev cmd runs async
   run grep -q "$hosts_file_line_marker" /etc/hosts &&
     is_hostname_resolving_to_local "random-hostname-that-should-not-exist"
   assert_success
@@ -29,6 +30,7 @@ setup() {
 
 @test 'add_hostnames_to_hosts_file "a b"' {
   add_hostnames_to_hosts_file "a b"
+  sleep 2 # slight delay needed b/c prev cmd runs async
   run is_hostname_resolving_to_local "a" && is_hostname_resolving_to_local "b"
   assert_success
   assert_output ''
