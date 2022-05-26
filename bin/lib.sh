@@ -1183,6 +1183,11 @@ export_compose_file() {
       COMPOSE_FILE+=":$lib_dir/../docker-files/mcd.override.yml"
     }
   fi
+  if [[ -f "$apps_resources_dir/$rel_app_config_file" ]]; then
+    if grep -q -v "COMPOSE_FILE="; then
+      echo "COMPOSE_FILE=$COMPOSE_FILE" >> "$apps_resources_dir/$rel_app_config_file"
+    fi
+  fi
   export COMPOSE_FILE
 }
 
