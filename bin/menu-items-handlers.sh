@@ -422,7 +422,7 @@ Enter a valid Magento Cloud url"
       # frustrating!! looks like basic back up and rollback from magento is broken (also auto-deletes backup file??!)
       warning "Could not rollback via magento CLI. Attempting direct import ..."
       docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}_db_1:/tmp/${start}_db.sql"
-      docker exec -it "${COMPOSE_PROJECT_NAME}_db_1" bash -c "mysql -u user --password="" main < /tmp/${start}_db.sql"
+      docker exec "${COMPOSE_PROJECT_NAME}_db_1" bash -c "mysql -u user --password='' main < /tmp/${start}_db.sql"
     fi
     rm "$sql_tmp_file"
 
