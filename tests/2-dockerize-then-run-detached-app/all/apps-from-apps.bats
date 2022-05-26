@@ -37,11 +37,11 @@ RESPONSES
   assert_output -e "complete.*success"
 }
 
-# @test 'install_app of dockerized cloud env' {
-#   mdm_app_dir="$(get_most_recent_mdm_app)"
-#   run "$mdm_app_dir/Contents/Resources/script" install_app
-#   assert_success
-# }
+@test 'install_app of dockerized cloud env' {
+  mdm_app_dir="$(get_most_recent_mdm_app)"
+  run "$mdm_app_dir/Contents/Resources/script" install_app
+  assert_success
+}
 
 @test 'sync_remote_to_app' {
   "./$app_link_name" sync_remote_to_app << RESPONSES
