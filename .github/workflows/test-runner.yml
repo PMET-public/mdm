@@ -27,7 +27,7 @@ jobs:
         os:
           - ubuntu-latest
         #MDM_OVERRIDE_CONFIG: [true, ""]
-        MDM_OVERRIDE_CONFIG: [true]
+        MDM_OVERRIDE_CONFIG: [""]
     env:
       MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
       MAGENTO_CLOUD_CLI_TOKEN: ${{ secrets.MAGENTO_CLOUD_CLI_TOKEN }}
