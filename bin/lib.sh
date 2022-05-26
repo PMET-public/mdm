@@ -1175,7 +1175,7 @@ export_compose_file() {
     COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml"
   else
     COMPOSE_FILE="$apps_resources_dir/app/docker-compose.yml"
-    [[ -f "$apps_resources_dir/docker-compose.override.yml" ]] && {
+    [[ -f "$apps_resources_dir/app/docker-compose.override.yml" ]] && {
       COMPOSE_FILE+=":$apps_resources_dir/app/docker-compose.override.yml"
     }
     # also use the global override file included with MDM
