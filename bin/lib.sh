@@ -1185,7 +1185,7 @@ export_compose_file() {
   fi
   if [[ -f "$apps_resources_dir/$rel_app_config_file" ]]; then
     if grep -q -v "COMPOSE_FILE=" "$apps_resources_dir/$rel_app_config_file"; then
-      echo "COMPOSE_FILE=$COMPOSE_FILE" >> "$apps_resources_dir/$rel_app_config_file"
+      echo -e "\nCOMPOSE_FILE=$COMPOSE_FILE" >> "$apps_resources_dir/$rel_app_config_file"
     fi
   fi
   export COMPOSE_FILE
