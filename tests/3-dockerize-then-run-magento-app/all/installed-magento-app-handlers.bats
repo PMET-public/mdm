@@ -22,6 +22,7 @@ setup() {
 }
 
 @test 'reindex' {
+  sleep 10 # allow time for search nodes to be available
   run "./$app_link_name" reindex
   assert_success
 }
