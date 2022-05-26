@@ -27,13 +27,13 @@ services:
       default:
         aliases:
           - opensearch.internal
-    # extending generic to disable healthcheck did not work. docker-compsoe issue?
+    # extending generic to disable healthcheck did not work. docker-compose issue?
     healthcheck:
       disable: true
   web:
     ports:
       - 80
   fpm:
-    # extending generic to disable healthcheck did not work. docker-compsoe issue?
+    # extending generic to disable healthcheck did not work. docker-compose issue?
     healthcheck:
       disable: true
