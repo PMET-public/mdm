@@ -229,16 +229,20 @@ install_app() {
     # add it to the container's /etc/hosts file before running post deploy hook
     # so curl https://magento-app-hostname/ (the base url) properly resolves for cache warm-up
 
-    # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
     cid="$(docker-compose run -d deploy bash -c "
       sleep 10 # need time to copy over root CA
       update-ca-certificates
-      echo '$(print_containers_hosts_file_entry)' >> /etc/hosts
       bin/magento cache:enable
       cloud-post-deploy
     ")"
 
     docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid:/usr/local/share/ca-certificates/rootCA.crt"
+
+    # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
+    docker-compose exec -d -T deploy bash -c "
+      echo '$(print_containers_hosts_file_entry)' >> /etc/hosts
+    "
+
     open_app
     echo "$finished_msg"
   } >> "$handler_log_file" 2>&1 &
