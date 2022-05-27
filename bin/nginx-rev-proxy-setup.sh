@@ -86,10 +86,7 @@ hostnames="$(find_mdm_hostnames)"
 hostnames_not_resolving_to_local="$(find_hostnames_not_resolving_to_local "$hostnames")"
 # do not add tunneled hosts
 hosts_to_add="$(echo "$hostnames_not_resolving_to_local" | perl -pe "s/\s?\d+\.$mdm_tunnel_domain//g")"
-[[ "$hosts_to_add" ]] && { 
-  echo "$hosts_to_add" >> /tmp/new-hosts
-  add_hostnames_to_hosts_file "$hosts_to_add"
-}
+[[ "$hosts_to_add" ]] && add_hostnames_to_hosts_file "$hosts_to_add"
 
 prepare_certs_and_keys "$hostnames"
 write_nginx_configs "$hostnames"

@@ -792,7 +792,9 @@ find_running_app_hostname_by_network() {
   local cid resources_dir
   cid="$(docker ps --filter "network=$1" --filter "label=com.docker.compose.service=fpm" --format "{{.ID}}")"
   [[ "$cid" ]] || return 0
-  docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"' | perl -pe 's#^.*//(.*)/#$1#'
+  # on magento 2.4.4 on php 8.1 with sodium php extension installed
+  # this error occurred and php err msg was interpretted as result until piped to /dev/null
+  docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url" 2> /dev/null' | perl -pe 's#^.*//(.*)/#$1#'
 }
 
 find_mdm_hostnames() {
