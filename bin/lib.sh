@@ -795,7 +795,7 @@ find_running_app_hostname_by_network() {
   # on magento 2.4.4 on php 8.1 with sodium php extension installed
   # this error occurred and php err msg was interpretted as result until piped to /dev/null
   output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url" 2> /dev/null' | perl -pe 's#^.*//(.*)/#$1#')"
-  echo -e "cid=$cid\noutput=$output" > /tmp/vars-of-find-running-app-hostname-"$(date +"%s")"
+  echo -e "cid=$cid\noutput=$output" >> /tmp/vars-of-find-running-app-hostname-"$(date +"%s")"
   echo $output
 }
 
