@@ -789,24 +789,22 @@ find_varnish_port_by_network() {
 }
 
 find_running_app_hostname_by_network() {
-  local cid resources_dir output
+  local cid resources_dir output count
   cid="$(docker ps --filter "network=$1" --filter "label=com.docker.compose.service=fpm" --format "{{.ID}}")"
   [[ "$cid" ]] || return 0
-  # on magento 2.4.4 on php 8.1 with sodium php extension installed
-  # this error occurred and php err msg was interpretted as result until piped to /dev/null
-  output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url" 2> /dev/null' | perl -pe 's#^.*//(.*)/#$1#')"
-  echo -e "cid=$cid\noutput=$output" >> /tmp/vars-of-find-running-app-hostname-"$(date +"%s")"
-  echo $output
+  # obscure errors can occur if related services are not fully up, so wait for expected output
+  count=0
+  output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"')"
+  while [[ ! "$output" =~ https://* ]]; do
+    sleep 5
+    output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"')"
+    ((count++))
+    if [[ $count -gt 5 ]]; then
+      exit 1
+    fi
+  done
+  echo "$output" | perl -pe 's#^.*//(.*)/#$1#'
 }
-
-# find_running_app_hostname_by_network() {
-#   local cid resources_dir
-#   cid="$(docker ps --filter "network=$1" --filter "label=com.docker.compose.service=fpm" --format "{{.ID}}")"
-#   [[ "$cid" ]] || return 0
-#   # on magento 2.4.4 on php 8.1 with sodium php extension installed
-#   # this error occurred and php err msg was interpretted as result until piped to /dev/null
-#   docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url" 2> /dev/null' | perl -pe 's#^.*//(.*)/#$1#'
-# }
 
 find_mdm_hostnames() {
   local hostnames hostname networks network
