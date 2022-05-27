@@ -16,7 +16,6 @@ load '../../bats-lib.sh'
 
 setup() {
   [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
-  cp /etc/hosts /tmp/hosts."$(echo $BATS_TEST_NAME | sed 's/ /-/g')"
   post_magento_install_setup
 }
 

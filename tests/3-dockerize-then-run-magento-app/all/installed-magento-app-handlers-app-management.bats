@@ -13,7 +13,7 @@ load '../../bats-lib.sh'
 
 setup() {
   [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
-  cp /etc/hosts /tmp/hosts."$(echo $BATS_TEST_NAME | sed 's/ /-/g')"
+  cp /etc/hosts /tmp/hosts.start-$BATS_TEST_NUMBER-"$(echo $BATS_TEST_NAME | sed 's/ /-/g')"
   post_magento_install_setup
 }
 
@@ -51,5 +51,6 @@ setup() {
 }
 
 teardown() {
+  cp /etc/hosts /tmp/hosts.end-$BATS_TEST_NUMBER-"$(echo $BATS_TEST_NAME | sed 's/ /-/g')"
   [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }
