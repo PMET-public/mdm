@@ -717,8 +717,10 @@ If you continue, anyone with your unique url will be able to access to your syst
       sleep 3
     }
     if [[ "$mdm_tmate_authorized_keys_url" ]]; then
+      unset TMUX
       tmate -a "$auth_keys_file" -S "$tmate_socket" new-session -d
     else
+      unset TMUX
       tmate -S "$tmate_socket" new-session -d
     fi
     tmate -S "$tmate_socket" wait tmate-ready
