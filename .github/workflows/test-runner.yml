@@ -20,32 +20,32 @@ env:
 
 jobs:
 
-  dockerize-then-run-detached-app:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-        #MDM_OVERRIDE_CONFIG: [true, ""]
-        MDM_OVERRIDE_CONFIG: [""]
-    env:
-      MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
-      MAGENTO_CLOUD_CLI_TOKEN: ${{ secrets.MAGENTO_CLOUD_CLI_TOKEN }}
-    steps:
-      - if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo update-alternatives --set php /usr/bin/php7.4
-      - run: |
-          if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - name: bats tests
-        run: |
-          ./tests/libs/bats/bin/bats -T -r ./tests/2-dockerize-then-run-detached-app
-      - name: keep alive to debug
-        if: ${{ failure() }}
-        uses: PMET-public/action-tmate@master
+  # dockerize-then-run-detached-app:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - ubuntu-latest
+  #       #MDM_OVERRIDE_CONFIG: [true, ""]
+  #       MDM_OVERRIDE_CONFIG: [""]
+  #   env:
+  #     MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
+  #     MAGENTO_CLOUD_CLI_TOKEN: ${{ secrets.MAGENTO_CLOUD_CLI_TOKEN }}
+  #   steps:
+  #     - if: matrix.os == 'ubuntu-latest'
+  #       run: |
+  #         sudo update-alternatives --set php /usr/bin/php7.4
+  #     - run: |
+  #         if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         submodules: 'true'
+  #     - name: bats tests
+  #       run: |
+  #         ./tests/libs/bats/bin/bats -T -r ./tests/2-dockerize-then-run-detached-app
+  #     - name: keep alive to debug
+  #       if: ${{ failure() }}
+  #       uses: PMET-public/action-tmate@master
 
 
   dockerize-then-run-magento-apps:
@@ -71,37 +71,37 @@ jobs:
         run: |
           # install the master and a 2nd to test simultaneous compatibility
           ./tests/libs/bats/bin/bats -T ./tests/3-dockerize-then-run-magento-app/**/*.bats
-      - name: bats tests for 2nd app
-        run: |
-          export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.4-ref
-          ./tests/libs/bats/bin/bats -T ./tests/3-dockerize-then-run-magento-app/**/*.bats
+      # - name: bats tests for 2nd app
+      #   run: |
+      #     export MAGENTO_CLOUD_REF_TO_TEST=pmet-2.4.4-ref
+      #     ./tests/libs/bats/bin/bats -T ./tests/3-dockerize-then-run-magento-app/**/*.bats
       - name: keep alive to debug
         if: ${{ failure() }}
         uses: PMET-public/action-tmate@master
 
-  generic-lib-and-non-app-specific:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-        #MDM_OVERRIDE_CONFIG: [true, ""]
-        MDM_OVERRIDE_CONFIG: [true]
-    env:
-      MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
-    steps:
-      - if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo update-alternatives --set php /usr/bin/php7.4
-      - run: |
-          if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - name: bats tests
-        run: |
-          ./tests/libs/bats/bin/bats -T ./tests/1-generic-lib-and-non-app-specific/**/*.bats
-      - name: keep alive to debug
-        if: ${{ failure() }}
-        uses: PMET-public/action-tmate@master
+  # generic-lib-and-non-app-specific:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - ubuntu-latest
+  #         - macos-latest
+  #       #MDM_OVERRIDE_CONFIG: [true, ""]
+  #       MDM_OVERRIDE_CONFIG: [true]
+  #   env:
+  #     MDM_OVERRIDE_CONFIG: ${{ matrix.MDM_OVERRIDE_CONFIG }}
+  #   steps:
+  #     - if: matrix.os == 'ubuntu-latest'
+  #       run: |
+  #         sudo update-alternatives --set php /usr/bin/php7.4
+  #     - run: |
+  #         if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         submodules: 'true'
+  #     - name: bats tests
+  #       run: |
+  #         ./tests/libs/bats/bin/bats -T ./tests/1-generic-lib-and-non-app-specific/**/*.bats
+  #     - name: keep alive to debug
+  #       if: ${{ failure() }}
+  #       uses: PMET-public/action-tmate@master

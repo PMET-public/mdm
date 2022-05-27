@@ -789,12 +789,13 @@ find_varnish_port_by_network() {
 }
 
 find_running_app_hostname_by_network() {
-  local cid resources_dir
+  local cid resources_dir output
   cid="$(docker ps --filter "network=$1" --filter "label=com.docker.compose.service=fpm" --format "{{.ID}}")"
   [[ "$cid" ]] || return 0
   # on magento 2.4.4 on php 8.1 with sodium php extension installed
   # this error occurred and php err msg was interpretted as result until piped to /dev/null
-  docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url" 2> /dev/null' | perl -pe 's#^.*//(.*)/#$1#'
+  output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url" 2> /dev/null' | perl -pe 's#^.*//(.*)/#$1#')"
+  echo -e "cid=$cid\noutput=$output" > /tmp/vars-of-find-running-app-hostname-"$(date +"%s")"
 }
 
 find_mdm_hostnames() {
