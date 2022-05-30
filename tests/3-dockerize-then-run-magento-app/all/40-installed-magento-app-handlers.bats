@@ -61,7 +61,8 @@ setup() {
   is_CI || skip # install_app already opens browser tab in gui and in non-CI text won't be available as output
   run "./$app_link_name" open_app
   assert_success
-  assert_output -e 'copyright.*magento'
+  assert_output -e 'HTTP/2 200'
+  assert_output -e 'x-magento'
 }
 
 # can't use get_* funcs directly b/c lib.sh is loaded independently of any specific app

@@ -267,7 +267,7 @@ open_app() {
   if is_mac; then
     open "$url"
   else
-    curl --write-out 'Opening app url: %{http_code} %{url_effective}' --silent --output /dev/null -L "$url"
+    curl -s -I -L --write-out '%{url_effective}' "$url" | grep -i -E '^(http|x-magento)'
   fi
 }
 
