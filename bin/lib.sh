@@ -685,9 +685,14 @@ set_hostname_for_this_app() {
     echo -e "new = $new_hostname\ncur = $cur_hostname\nprev = $prev_hostname\ntunnel = $mdm_tunnel_domain" > /tmp/out
     [[ "$cur_hostname" != "$new_hostname" ]] &&
       perl -i -pe "s/^(APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$new_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
-    # update prev hostname unless a tunnel domain to prevent reverting to a tunnel domain
-    [[ "$cur_hostname" != "$prev_hostname" && ! "$cur_hostname" =~ "$mdm_tunnel_domain"$ ]] &&
-      perl -i -pe "s/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$cur_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
+    # update prev hostname 
+    if [[ "$cur_hostname" != "$prev_hostname" ]]; then
+      if [[ is_web_tunnel_configured && ! "$cur_hostname" =~ "$mdm_tunnel_domain"$ ]]; then
+        : # unless prev hostname is a tunnel domain (to prevent reverting to a tunnel domain)
+      else
+        perl -i -pe "s/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$cur_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
+      fi
+    fi
     return 0
   else
     error "Host not found"
