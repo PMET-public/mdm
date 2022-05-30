@@ -682,7 +682,6 @@ set_hostname_for_this_app() {
   if [[ -f "$apps_resources_dir/$rel_app_config_file" ]]; then
     cur_hostname="$(perl -ne '/^(APP_HOSTNAME=\s*)(.*)(\s*)/ and print $2' "$apps_resources_dir/$rel_app_config_file")"
     prev_hostname="$(perl -ne '/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/ and print $2' "$apps_resources_dir/$rel_app_config_file")"
-    echo -e "new = $new_hostname\ncur = $cur_hostname\nprev = $prev_hostname\ntunnel = $mdm_tunnel_domain" > /tmp/out
     [[ "$cur_hostname" != "$new_hostname" ]] &&
       perl -i -pe "s/^(APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$new_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
     # update prev hostname 
