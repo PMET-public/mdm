@@ -713,19 +713,20 @@ update_hostname() {
     set_hostname_for_this_app "$new_hostname"
     run_as_bash_cmds_in_app "$(get_magento_cmds_to_update_hostname_to $new_hostname)"
     warm_cache > /dev/null 2>&1 &
-    if is_web_tunnel_configured; then
-      # reload the proxy if the new hostname is not a tunnel domain b/c it will be a public url
-      # UNLESS reverting from a tunnel domain to the previous hostname b/c proxy settings will not have changed
-      if [[ ! "$new_hostname" =~ "$mdm_tunnel_domain"$ ]]; then
-        if [[ "$cur_hostname" =~ "$mdm_tunnel_domain"$ && "$new_hostname" = "$prev_hostname" ]]; then
-          : # do nothing b/c reverting from tunnel domain that did not change proxy settings
-        else
-          reload_rev_proxy
-        fi
-      fi
-    else
-      reload_rev_proxy
-    fi
+    # if is_web_tunnel_configured; then
+    #   # reload the proxy if the new hostname is not a tunnel domain b/c it will be a public url
+    #   # UNLESS reverting from a tunnel domain to the previous hostname b/c proxy settings will not have changed
+    #   if [[ ! "$new_hostname" =~ "$mdm_tunnel_domain"$ ]]; then
+    #     if [[ "$cur_hostname" =~ "$mdm_tunnel_domain"$ && "$new_hostname" = "$prev_hostname" ]]; then
+    #       : # do nothing b/c reverting from tunnel domain that did not change proxy settings
+    #     else
+    #       reload_rev_proxy
+    #     fi
+    #   fi
+    # else
+    #   reload_rev_proxy
+    # fi
+    reload_rev_proxy # always reload after change
     open_app
   fi
 }
