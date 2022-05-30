@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   shopt -s nocasematch
   is_docker_compatible || skip
 }
@@ -70,4 +71,8 @@ setup() {
   run echo "$(docker ps -qa)$(docker images -q)$(find_non_default_networks)$(docker volume ls -q)"
   assert_success
   assert_output ''
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

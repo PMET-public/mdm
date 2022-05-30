@@ -16,6 +16,7 @@ load '../../../bin/lib.sh'
 
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   shopt -s nocasematch
   # if repo is not specified
   if [[ -z "$MAGENTO_CLOUD_REPO" ]]; then
@@ -76,4 +77,8 @@ setup() {
   app_dir="$(ls -dtr "$HOME"/Downloads/*.app | tail -1 || :)"
   run "$app_dir/Contents/Resources/script" install_app
   assert_success
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

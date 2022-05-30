@@ -10,6 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   shopt -s nocasematch
 }
 
@@ -90,6 +91,16 @@ RESPONSES
 
 }
 
+@test 'prompt_user_for_new_GH_token valid' {
+  run prompt_user_for_token << RESPONSES
+ghp_9662d057e4e52b1b236fa237a232349841e60b44e
+RESPONSES
+  assert_success
+  assert_output -p "numbers"
+  refute_output -e "numbers.*numbers"
+
+}
+
 @test 'prompt_user_for_token invalid' {
   run prompt_user_for_token << RESPONSES
 z
@@ -137,4 +148,8 @@ RESPONSES
   run get_active_env_from_mc_env_url "https://user:pass@master-7rqtwti-a6terwtbk67os.demo.magentosite.cloud/"
   assert_success
   assert_output "master"
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

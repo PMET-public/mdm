@@ -17,13 +17,14 @@ load '../../bats-lib.sh'
 
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   post_magento_install_setup
   # get the most recently created app dir
   app_dir="$(ls -dtr "$HOME"/Downloads/*.app | tail -1 || :)"
   export apps_resources_dir="$app_dir/Contents/Resources"
-  hostname1="34653.some-new.site.dev"
-  hostname2="blah.testing.io"
-  hostname3="reset.com"
+  hostname1="random34653.some-new.site.dev"
+  hostname2="altrandom2.testing.dev"
+  hostname3="reset.testing.dev"
 }
 
 
@@ -84,4 +85,8 @@ setup() {
   assert_output -e "db"
   assert_output -e "varnish"
   assert_output -e "web"
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

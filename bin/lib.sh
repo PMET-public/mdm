@@ -573,8 +573,8 @@ ARE YOU SURE?! (y/n)
 
 prompt_user_for_token() {
   REPLY=""
-  while [[ ! "$REPLY" =~ ^[0-9a-f]+$ ]]; do
-    printf "Numbers [0-9] and letters [a-f] only (ex. $(warning "9662d057e4e52b1b236fa237a232349841e60b44e"))" >&2
+  while [[ ! "$REPLY" =~ ^[0-9a-p_]+$ ]]; do
+    printf "Typically 'ghp_' followed by numbers and letters. e.g. ghp_9662d057e4e52b1b236fa237a232349841e60b54e" >&2
     read -r -p '> '
     REPLY="$(trim $REPLY)"
   done
@@ -684,9 +684,14 @@ set_hostname_for_this_app() {
     prev_hostname="$(perl -ne '/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/ and print $2' "$apps_resources_dir/$rel_app_config_file")"
     [[ "$cur_hostname" != "$new_hostname" ]] &&
       perl -i -pe "s/^(APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$new_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
-    # update prev hostname unless a tunnel domain to prevent reverting to a tunnel domain
-    [[ "$cur_hostname" != "$prev_hostname" && ! "$cur_hostname" =~ "$mdm_tunnel_domain"$ ]] &&
-      perl -i -pe "s/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$cur_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
+    # update prev hostname 
+    if [[ "$cur_hostname" != "$prev_hostname" ]]; then
+      if [[ is_web_tunnel_configured && ! "$cur_hostname" =~ "$mdm_tunnel_domain"$ ]]; then
+        : # unless prev hostname is a tunnel domain (to prevent reverting to a tunnel domain)
+      else
+        perl -i -pe "s/^(PREV_APP_HOSTNAME=\s*)(.*)(\s*)/\${1}$cur_hostname\${3}/" "$apps_resources_dir/$rel_app_config_file"
+      fi
+    fi
     return 0
   else
     error "Host not found"
@@ -713,19 +718,20 @@ update_hostname() {
     set_hostname_for_this_app "$new_hostname"
     run_as_bash_cmds_in_app "$(get_magento_cmds_to_update_hostname_to $new_hostname)"
     warm_cache > /dev/null 2>&1 &
-    if is_web_tunnel_configured; then
-      # reload the proxy if the new hostname is not a tunnel domain b/c it will be a public url
-      # UNLESS reverting from a tunnel domain to the previous hostname b/c proxy settings will not have changed
-      if [[ ! "$new_hostname" =~ "$mdm_tunnel_domain"$ ]]; then
-        if [[ "$cur_hostname" =~ "$mdm_tunnel_domain"$ && "$new_hostname" = "$prev_hostname" ]]; then
-          : # do nothing b/c reverting from tunnel domain that did not change proxy settings
-        else
-          reload_rev_proxy
-        fi
-      fi
-    else
-      reload_rev_proxy
-    fi
+    # if is_web_tunnel_configured; then
+    #   # reload the proxy if the new hostname is not a tunnel domain b/c it will be a public url
+    #   # UNLESS reverting from a tunnel domain to the previous hostname b/c proxy settings will not have changed
+    #   if [[ ! "$new_hostname" =~ "$mdm_tunnel_domain"$ ]]; then
+    #     if [[ "$cur_hostname" =~ "$mdm_tunnel_domain"$ && "$new_hostname" = "$prev_hostname" ]]; then
+    #       : # do nothing b/c reverting from tunnel domain that did not change proxy settings
+    #     else
+    #       reload_rev_proxy
+    #     fi
+    #   fi
+    # else
+    #   reload_rev_proxy
+    # fi
+    reload_rev_proxy # always reload after change
     open_app
   fi
 }
@@ -789,10 +795,21 @@ find_varnish_port_by_network() {
 }
 
 find_running_app_hostname_by_network() {
-  local cid resources_dir
+  local cid resources_dir output count
   cid="$(docker ps --filter "network=$1" --filter "label=com.docker.compose.service=fpm" --format "{{.ID}}")"
   [[ "$cid" ]] || return 0
-  docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"' | perl -pe 's#^.*//(.*)/#$1#'
+  # obscure errors can occur if related services are not fully up, so wait for expected output
+  count=0
+  output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"' || :)"
+  while [[ ! "$output" =~ https://* ]]; do
+    sleep 5
+    output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"' || :)"
+    ((++count))
+    if [[ $count -gt 5 ]]; then
+      exit 1
+    fi
+  done
+  echo "$output" | perl -pe 's#^.*//(.*)/#$1#'
 }
 
 find_mdm_hostnames() {
@@ -1175,13 +1192,18 @@ export_compose_file() {
     COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml"
   else
     COMPOSE_FILE="$apps_resources_dir/app/docker-compose.yml"
-    [[ -f "$apps_resources_dir/docker-compose.override.yml" ]] && {
+    [[ -f "$apps_resources_dir/app/docker-compose.override.yml" ]] && {
       COMPOSE_FILE+=":$apps_resources_dir/app/docker-compose.override.yml"
     }
     # also use the global override file included with MDM
     [[  -f "$lib_dir/../docker-files/mcd.override.yml" ]] && {
       COMPOSE_FILE+=":$lib_dir/../docker-files/mcd.override.yml"
     }
+  fi
+  if [[ -f "$apps_resources_dir/$rel_app_config_file" ]]; then
+    if ! grep -q "COMPOSE_FILE=" "$apps_resources_dir/$rel_app_config_file"; then
+      echo -e "\nCOMPOSE_FILE=$COMPOSE_FILE" >> "$apps_resources_dir/$rel_app_config_file"
+    fi
   fi
   export COMPOSE_FILE
 }
@@ -1401,7 +1423,7 @@ download_mdm_config() {
 }
 
 self_install() {
-  local brew_pkgs_for_mac=("bash" "coreutils" "jq" "composer") brew_pkgs_for_all_platforms=("mkcert" "nss")
+  local brew_pkgs_for_mac=("bash" "coreutils" "jq" "composer" "php@7.4") brew_pkgs_for_all_platforms=("mkcert" "nss")
   is_interactive_terminal && printf '\e[8;50;140t' # resize terminal
 
   # on linux, some services require a min virtual memory map count and may need to be raised

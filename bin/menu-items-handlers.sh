@@ -229,16 +229,20 @@ install_app() {
     # add it to the container's /etc/hosts file before running post deploy hook
     # so curl https://magento-app-hostname/ (the base url) properly resolves for cache warm-up
 
-    # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
     cid="$(docker-compose run -d deploy bash -c "
       sleep 10 # need time to copy over root CA
       update-ca-certificates
-      echo '$(print_containers_hosts_file_entry)' >> /etc/hosts
       bin/magento cache:enable
       cloud-post-deploy
     ")"
 
     docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid:/usr/local/share/ca-certificates/rootCA.crt"
+
+    # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
+    docker-compose exec -d -T deploy bash -c "
+      echo '$(print_containers_hosts_file_entry)' >> /etc/hosts
+    "
+
     open_app
     echo "$finished_msg"
   } >> "$handler_log_file" 2>&1 &
@@ -263,7 +267,7 @@ open_app() {
   if is_mac; then
     open "$url"
   else
-    curl -L "$url"
+    curl -s -I -L --write-out '%{url_effective}' "$url" | grep -i -E '^(http|x-magento)'
   fi
 }
 
@@ -422,7 +426,7 @@ Enter a valid Magento Cloud url"
       # frustrating!! looks like basic back up and rollback from magento is broken (also auto-deletes backup file??!)
       warning "Could not rollback via magento CLI. Attempting direct import ..."
       docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}_db_1:/tmp/${start}_db.sql"
-      docker exec -it "${COMPOSE_PROJECT_NAME}_db_1" bash -c "mysql -u user --password="" main < /tmp/${start}_db.sql"
+      docker exec "${COMPOSE_PROJECT_NAME}_db_1" bash -c "mysql -u user --password='' main < /tmp/${start}_db.sql"
     fi
     rm "$sql_tmp_file"
 
@@ -713,8 +717,10 @@ If you continue, anyone with your unique url will be able to access to your syst
       sleep 3
     }
     if [[ "$mdm_tmate_authorized_keys_url" ]]; then
+      unset TMUX
       tmate -a "$auth_keys_file" -S "$tmate_socket" new-session -d
     else
+      unset TMUX
       tmate -S "$tmate_socket" new-session -d
     fi
     tmate -S "$tmate_socket" wait tmate-ready

@@ -124,7 +124,7 @@ menu item, then MDM has determined it's not currently appropiate. Many items onl
 |📱 This app|   |The PWA will use the local Magento app as the backend.|
 |🛑 App stopped. Start PWA offline|   |   |
 |📲 Choose your own|   |   |
-|🎗 Storystore PWA @ GitHub |[link](https://github.com/PMET-public/storystore-pwa/blob/master/README.md)|   |
+|🎗 PWA @ GitHub |[link](https://github.com/PMET-public/storystore-pwa/blob/master/README.md)|   |
 |<nobr>                  </nobr>|<nobr>   </nobr>|   |
 <!--- # end PWA submenu --->
 
@@ -279,25 +279,34 @@ To debug the launching script, run `export debug_launcher=1`, too. This is curre
 
 ## Development on Linux (optional)
 
-Since the included Travis CI and GitHub Workflow configuration use Ubuntu Bionic (18.04) for testing, you will probably also want a local version for faster feedback and debugging.
+Since the included GitHub Workflow configuration use Ubuntu Focal (20.04) for testing, you will probably also want a local version for faster feedback and debugging.
 
 You can use the default included Vagrantfile. Remember to install the vagrant-diskzie plugin first.
 
-```
-$ vagrant plugin install vagrant-disksize
-$ vagrant up
-$ vagrant ssh
+```bash
+# if you don't have vagrant (or virtualbox) already, install them first
+# NOTES:
+# - do NOT install virtualbox-extension-pack due to licensing and NOT needed
+# - you may have to approve VB via Mac's security prefs and it may require a reboot
+brew install --cask virtualbox
+brew install vagrant
+
+# then
+export VAGRANT_DISABLE_VBOXSYMLINKCREATE=1 # disable shared folders
+vagrant plugin install vagrant-disksize
+vagrant up
+vagrant ssh
 ```
 
 In your test vm, there's are just a few remaining setup steps.
 
 ### 1. add the default user to the docker group
 
-```
-$ sudo apt update && sudo apt upgrade -y
-$ sudo apt install docker-compose php -y
-$ sudo usermod -aG docker vagrant
-$ sudo shutdown -r now
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install docker-compose php -y
+sudo usermod -aG docker vagrant
+sudo shutdown -r now
 ```
 
 ### 2. clone this repo

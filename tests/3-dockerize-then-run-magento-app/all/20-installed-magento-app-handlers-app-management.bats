@@ -12,6 +12,7 @@ load '../../bats-lib.sh'
 
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   post_magento_install_setup
 }
 
@@ -46,4 +47,8 @@ setup() {
   run "./$app_link_name"
   assert_success
   refute_output -p "clear_job_statuses" # if cleared, the cmd shouldn't be listed
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }

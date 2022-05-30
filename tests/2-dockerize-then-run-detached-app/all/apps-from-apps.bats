@@ -17,6 +17,7 @@ load '../../bats-lib.sh'
 
 
 setup() {
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   post_magento_install_setup
   # get the most recently created app dir
   app_dir="$(ls -dtr "$HOME"/Downloads/*.app | tail -1 || :)"
@@ -73,4 +74,8 @@ n
 RESPONSES
   assert_success
   assert_output -e "complete.*success"
+}
+
+teardown() {
+  [ -n "$BATS_TEST_COMPLETED" ] || touch ${BATS_PARENT_TMPNAME}.skip
 }
