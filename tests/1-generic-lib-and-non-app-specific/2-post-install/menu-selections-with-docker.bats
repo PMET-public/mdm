@@ -10,7 +10,7 @@ load '../../libs/bats-file/load'
 load '../../../bin/lib.sh'
 
 setup() {
-  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   shopt -s nocasematch
   is_docker_compatible || skip
 }

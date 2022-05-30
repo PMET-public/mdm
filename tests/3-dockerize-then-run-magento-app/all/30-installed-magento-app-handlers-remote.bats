@@ -15,7 +15,7 @@ load '../../bats-lib.sh'
 # https://github.com/bats-core/bats-core#file-descriptor-3-read-this-if-bats-hangs
 
 setup() {
-  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   post_magento_install_setup
 }
 

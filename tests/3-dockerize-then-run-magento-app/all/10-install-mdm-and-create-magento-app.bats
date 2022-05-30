@@ -16,7 +16,7 @@ load '../../../bin/lib.sh'
 
 
 setup() {
-  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   shopt -s nocasematch
   # if repo is not specified
   if [[ -z "$MAGENTO_CLOUD_REPO" ]]; then

@@ -17,7 +17,7 @@ load '../../bats-lib.sh'
 
 
 setup() {
-  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
+  [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "remaining tests"
   post_magento_install_setup
   # get the most recently created app dir
   app_dir="$(ls -dtr "$HOME"/Downloads/*.app | tail -1 || :)"
