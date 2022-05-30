@@ -795,11 +795,11 @@ find_running_app_hostname_by_network() {
   [[ "$cid" ]] || return 0
   # obscure errors can occur if related services are not fully up, so wait for expected output
   count=0
-  output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"')"
+  output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"' || :)"
   while [[ ! "$output" =~ https://* ]]; do
     sleep 5
-    output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"')"
-    ((count++))
+    output="$(docker exec "$cid" bash -c 'bin/magento config:show "web/secure/base_url"' || :)"
+    ((++count))
     if [[ $count -gt 5 ]]; then
       exit 1
     fi
