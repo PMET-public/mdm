@@ -33,6 +33,7 @@
     - [2. configure additional features](#2-configure-additional-features)
     - [3. set up your env](#3-set-up-your-env)
     - [4. run the launcher](#4-run-the-launcher)
+  - [Development of this project itself](#development-of-this-project-itself)
   - [Additional troubleshooting notes](#additional-troubleshooting-notes)
   - [Application Configuration For Development](#application-configuration-for-development)
     - [Configuration of MDM](#configuration-of-mdm)
@@ -343,6 +344,12 @@ $ ./bin/launcher
 Install missing requirements on this computer
 
 $ ./bin/launcher "Install missing requirements on this computer"
+```
+
+## Development of this project itself
+As you're making changes to the scripts, copy them to the `~/.mdm` dir like such:
+```
+rsync --exclude='.git/' -avz . ~/.mdm/0.0.0-dev; ln -sfn ~/.mdm/0.0.0-dev ~/.mdm/current
 ```
 
 ## Additional troubleshooting notes
