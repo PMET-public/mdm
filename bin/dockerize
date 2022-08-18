@@ -327,8 +327,11 @@ else
   # install with original composer.lock (but with composer.json scripts skipped if they exist) 
   # so exact versions needed for build in cache
   cp composer.json composer.json.bak
-  python -c "import sys, json; data = json.load(sys.stdin); data.pop('scripts', 0); print(json.dumps(data))" \
-    < composer.json.bak > composer.json
+  # python removed from OSX
+  # python -c "import sys, json; data = json.load(sys.stdin); data.pop('scripts', 0); print(json.dumps(data))" \
+  #   < composer.json.bak > composer.json
+  # use jq instead
+  jq -r -e 'del(.scripts)' composer.json.bak > composer.json
 
   # if using ssh, set ssh options
   [[ "$USE_SSH_AUTH_SOCK_FOR_DOCKER" && "$SSH_AUTH_SOCK" ]] && {
