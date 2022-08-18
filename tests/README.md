@@ -1,6 +1,6 @@
 # Testing notes
 
-Not all tests are appropiate for all environments, so some tests may be designated for specific testing environments or conditions. For example, some environments will not run docker commands (e.g. continuous integration (CI) cloud services are prevented from running docker on OSX as a service). Other tests may be very time consuming and disruptive to conduct locally on an actively used, developer machine.
+Not all tests are appropriate for all environments, so some tests may be designated for specific testing environments or conditions. For example, some environments will not run docker commands (e.g. continuous integration (CI) cloud services are prevented from running docker on OSX as a service). Other tests may be very time consuming and disruptive to conduct locally on an actively used, developer machine.
 
 To help quickly identify these tests, use these labels: 
 
