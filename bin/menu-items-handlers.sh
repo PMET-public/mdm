@@ -75,11 +75,11 @@ install_additional_tools() {
       else
         brew install --cask platypus
       fi
-      gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /usr/local/bin/platypus
-      mkdir -p /usr/local/share/platypus
-      cp -R /Applications/Platypus.app/Contents/Resources/PlatypusDefault.icns /Applications/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/
-      gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > /usr/local/share/platypus/ScriptExec
-      chmod +x /usr/local/bin/platypus /usr/local/share/platypus/ScriptExec
+      gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > "$(brew --prefix)/bin/platypus"
+      mkdir -p "$(brew --prefix)/share/platypus"
+      cp -R /Applications/Platypus.app/Contents/Resources/PlatypusDefault.icns /Applications/Platypus.app/Contents/Resources/MainMenu.nib "$(brew --prefix)/share/platypus/"
+      gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > "$(brew --prefix)/share/platypus/ScriptExec"
+      chmod +x "$(brew --prefix)/bin/platypus" "$(brew --prefix)/share/platypus/ScriptExec"
     }
 
     ! is_mkcert_installed && {
@@ -228,7 +228,7 @@ install_app() {
       cloud-post-deploy
     ")"
 
-    docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid:/usr/local/share/ca-certificates/rootCA.crt"
+    docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid:$(brew --prefix)/share/ca-certificates/rootCA.crt"
 
     # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
     docker-compose exec -d -T deploy bash -c "

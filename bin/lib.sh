@@ -173,7 +173,7 @@ is_mac && host_docker_internal="host.docker.internal"
 # if the core_utils are installed (should always be true after initial install), use the GNU tools
 # there may be some inconsistencies prior to install.
 # if they are significant, hopefully testing finds them and will be accounted for
-if is_mac && [[ -d /usr/local/Cellar/coreutils ]]; then
+if is_mac && [[ -d "$(brew --prefix)/Cellar/coreutils" ]]; then
   # use homebrew's core utils
   stat_cmd="gstat"
   sort_cmd="gsort"
@@ -1348,7 +1348,7 @@ run_bundled_app_as_script() {
   local script_arg="$1"
   # invoke in the same way platypus would
   if is_mac; then
-    /usr/bin/env -P "/usr/local/bin:/bin" bash -c "$apps_resources_dir/script $script_arg"
+    /usr/bin/env -P "$(brew --prefix)/bin:/bin" bash -c "$apps_resources_dir/script $script_arg"
   else
     /usr/bin/env bash -c "debug=1; set -x; env; $apps_resources_dir/script $script_arg"
   fi
@@ -1441,7 +1441,7 @@ Once all requirements are installed and validated, this script will not need to 
   if is_mac; then
 
     # install homebrew
-    [[ -f /usr/local/bin/brew ]] || {
+    [[ -f "$(brew --prefix)/bin/brew" ]] || {
       warning_w_newlines "This script installs Homebrew, which may require your password. If you're
     skeptical about entering your password here, you can install Homebrew (https://brew.sh/)
     independently first. Then you will NOT be prompted for your password by this script."
