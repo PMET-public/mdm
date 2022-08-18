@@ -130,7 +130,7 @@ are_additional_tools_installed() {
   is_magento_cloud_cli_installed || return 1
   is_mac && {
     if is_docker_compatible; then 
-      is_docker_bash_completion_installed_on_mac || return 1
+      : # placeholder
     fi
     is_platypus_installed || return 1
   }

@@ -7,7 +7,6 @@
 included_by_mdm
 has_uncleared_jobs_statuses
 is_magento_cloud_cli_installed
-is_docker_bash_completion_installed_on_mac
 @test is_platypus_installed
 @test is_mkcert_installed
 @test is_tmate_installed

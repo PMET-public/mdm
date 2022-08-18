@@ -67,14 +67,6 @@ install_additional_tools() {
       curl -sLS https://accounts.magento.cloud/cli/installer | php
     }
 
-    ! is_docker_bash_completion_installed_on_mac && is_mac && {
-      msg_w_newlines "Installing shell completion support for Docker for Mac ..."
-      etc=/Applications/Docker.app/Contents/Resources/etc
-      [[ -d /usr/local/etc ]] || error "Expected destination for bash completion does not exist"
-      ln -s "$etc/docker.bash-completion" "/usr/local/etc/bash_completion.d/docker"
-      ln -s "$etc/docker-compose.bash-completion" "/usr/local/etc/bash_completion.d/docker-compose"
-    }
-
     is_mac && ! is_platypus_installed && {
       msg_w_newlines "Installing Platypus ..."
       # check if previouly installed but must not have completed b/c failing is_platypus_installed check

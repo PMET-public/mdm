@@ -34,7 +34,7 @@ has_uncleared_jobs_statuses && {
 
 ! are_additional_tools_installed && {
   key="🔼 Install added tools for more features"
-  description="Highly recommended - includes the magento-cloud CLI, mkcert, tmate, platypus, docker CLI completion"
+  description="Highly recommended - includes the magento-cloud CLI, mkcert, tmate, platypus"
   mdm_menu_items_keys+=("$key")
   mdm_menu_items["$key-handler"]=install_additional_tools
 }
