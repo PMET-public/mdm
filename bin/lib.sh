@@ -106,12 +106,8 @@ is_magento_cloud_cli_logged_in() {
   [[ "$status" -eq 0 ]]
 }
 
-is_docker_bash_completion_installed_on_mac() {
-  [[ -h "/usr/local/etc/bash_completion.d/docker" ]]
-}
-
 is_platypus_installed() {
-  [[ -x /usr/local/share/platypus/ScriptExec ]]
+  [[ -x "$(brew --prefix)/share/platypus/ScriptExec" ]]
 }
 
 is_mkcert_installed() {
