@@ -17,6 +17,15 @@
     - ["What's auth.json used for?"](#whats-authjson-used-for)
     - ["What does this error mean?"](#what-does-this-error-mean)
     - ["How do I upgrade WITHOUT preserving old installations? (i.e. start over)"](#how-do-i-upgrade-without-preserving-old-installations-ie-start-over)
+- [Prebuilt Apps Instructions & FAQ](#prebuilt-apps-instructions--faq)
+- [Frequently Asked Questions](#frequently-asked-questions)
+  - [What's the difference between the "bundled-new" apps and the "cloned" apps?](#whats-the-difference-between-the-bundled-new-apps-and-the-cloned-apps)
+  - [What is MDM-lite?](#what-is-mdm-lite)
+- [Certs FAQ](#certs-faq)
+  - [How MDM creates/retrieves & stores certs](#how-mdm-createsretrieves--stores-certs)
+  - [How MDM handles certs with a fallback strategy](#how-mdm-handles-certs-with-a-fallback-strategy)
+  - [The preferred order explained](#the-preferred-order-explained)
+  - [(Re)starting new web services](#restarting-new-web-services)
 - [MDM Developers](#mdm-developers)
   - [Recommended IDE & Extensions](#recommended-ide--extensions)
   - [Development on a Mac](#development-on-a-mac)
@@ -232,6 +241,62 @@ Whichever error you encounter, please check (i.e. search) to see if your [issue]
 ### "How do I upgrade WITHOUT preserving old installations? (i.e. start over)"
 
 In a terminal, run `rm -rf ~/.mdm` and the follow any instructions from the MDM menu afterward. Then ensure advanced mode is toggled on to see the maintenance menu. From the maintenance menu, prune everything except images. The Docker VM is now cleaned from old installs, and you can also remove any old MDM apps from the host computer.
+
+---
+
+# Prebuilt Apps Instructions & FAQ
+
+DO NOT DOWNLOAD APPS FROM THE ONEDRIVE WEB UI. USE FINDER. - Currently, OSX prevents apps downloaded via the web UI from running. We are looking into possible solutions.
+
+Copy any MDM app from your synced OneDrive folder to another local folder like Downloads or Documents.
+
+Double click the local app and look for the Magento icon in your menu bar.
+
+
+# Frequently Asked Questions
+
+## What's the difference between the "bundled-new" apps and the "cloned" apps?
+
+The "bundled-new" apps have all the composer dependencies bundled with them and will install a new Magento store from the beginning. No composer credentials are required to run, but they will be required to update.
+
+The "cloned" apps represent a snapshot of sample Magento install just after installation has completed. Credentials will be required to run, but because it is a snapshot of an already installed app, the initial start up will be **MUCH faster.**
+
+## What is MDM-lite?
+
+It's a version of MDM with no associated Magento application, so it downloads from OneDrive and starts up almost instantly.
+
+Despite no associated app, MDM-lite still has several uses such as:
+- cloning your existing envs instead of using one of the pre-made, generic apps.
+- running PWA against remote back-ends
+- getting support access for your local systme
+
+---
+
+# Certs FAQ
+
+## How MDM creates/retrieves & stores certs
+
+Certs for a hostname are stored in a directory of the same name. For example, certs for `test.example.com` are stored in `~/.mdm/certs/test.example.com/`
+
+Wildcard certs are stored in a directory minus the leading "*". For example, certs for `*.exmple.com` are stored in `~/.mdm/certs/.example.com`
+
+A user can add existing [Let's Encrypt](https://letsencrypt.org/) certs in these dirs, or set up a system to automatically deploy/retrieve certs to those direcorties much like the MDM demo domain for the Magento team.
+
+
+## How MDM handles certs with a fallback strategy
+
+1. MDM will first look for a current, valid, existing cert in the hostname dir.
+2. If valid hostname cert is not available, MDM will look for a valid wildcard cert dir. If that exists, it will be copied to the hostname dir.
+3. If the hostname and wildcard certs are not available, then MDM will create one in the hostname dir with `mkcert` (if enabled).
+4. If `mkcert` is not enabled, then an invalid cert created for `localhost` will be used. Browsers will show the site as invalid but will likely allow the user to proceed. In Chrome, to bypass invalid certs, the user must type "_thisisunsafe_" in the site's tab.
+
+## The preferred order explained
+
+[Let's Encrypt](https://letsencrypt.org/) are real certs that should be accepted by **all browsers** on **all hosts**. Certs from `mkcert` are only valid on the host with the CA installed, and while they are valid for 10 yrs, more browsers are choosing to reject very long lived certs. `mkcert` also imposes additional responsibility on the user. If the user's CA is compromised, a "valid" spoofed cert may be created for a malicious web service attempting to steal credentials. While unlikely that the CA would be compromised without the rest of the user's system also being compromised, the user should understand this risk.
+
+## (Re)starting new web services
+
+Each time a new web service is added (or an existing one restarted), MDM will check that every found web service hostname resolves to `127.0.0.1` (a.k.a. `localhost`) and that a cert is provided by the fallback strategy outlined above. Then MDM will dynamically create the necessary nginx config for each service to be handle by the reverse proxy listening on local ports 80 & 443.
 
 ---
 
