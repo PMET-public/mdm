@@ -32,6 +32,7 @@
     - [1. clone this repo](#1-clone-this-repo)
     - [2. configure additional features](#2-configure-additional-features)
     - [3. set up your env](#3-set-up-your-env)
+    - [4. run the launcher](#4-run-the-launcher)
   - [Additional troubleshooting notes](#additional-troubleshooting-notes)
   - [Application Configuration For Development](#application-configuration-for-development)
     - [Configuration of MDM](#configuration-of-mdm)
@@ -326,13 +327,22 @@ $ git clone https://github.com/PMET-public/mdm.git && cd mdm
 ### 2. configure additional features
 
 ```
-cp .mdm_config.tmpl.sh .mdm_config.sh
+$ cp .mdm_config.tmpl.sh .mdm_config.sh
 ```
 
 ### 3. set up your env
 
 ```
 $ export debug=1 MDM_REPO_DIR=. COMPOSER_AUTH='{"github-oauth":{"github.com":"..."}}'
+```
+
+### 4. run the launcher
+The launch script controls both the platypus GUI and the CLI. For this reason, arguments must be fed to the launch script as strings.
+```
+$ ./bin/launcher
+Install missing requirements on this computer
+
+$ ./bin/launcher "Install missing requirements on this computer"
 ```
 
 ## Additional troubleshooting notes
