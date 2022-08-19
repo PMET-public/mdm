@@ -342,7 +342,7 @@ Enter a valid Magento Cloud url or a valid GitHub url (ex. https://github.com...
     url="$REPLY"
 
     if is_valid_github_web_url "$url"; then
-
+      start="$(date +"%s")"
       branch="$(get_branch_from_github_web_url "$url")"
       url="$(normalize_github_web_url "$url")"
       "$lib_dir/dockerize" -g "$url" -b "$branch" -i "$HOME/.mdm/current/icons/magento.icns"
