@@ -107,7 +107,7 @@ is_magento_cloud_cli_logged_in() {
 }
 
 is_platypus_installed() {
-  [[ -x "$(brew --prefix)/share/platypus/ScriptExec" ]]
+  [[ -x "/usr/local/share/platypus/ScriptExec" ]]
 }
 
 is_mkcert_installed() {
