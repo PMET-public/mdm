@@ -18,12 +18,12 @@ set -e # stop on errors
 #
 # the depedency check should run every time in case its copied to new computer
 #
-# also noote this launching script is invoked as
-# `/usr/bin/env -P "$(brew --prefix)/bin:/bin" bash "/path/to/osx.app/Content/Resoources/name-of-launching-script"`
-# using the upgraded $(brew --prefix)/bin/bash if found or /bin/bash.
+# also note: this launching script is invoked as
+# `/usr/bin/env -P "/opt/homebrew/bin:/usr/local/bin:/bin" bash "/path/to/osx.app/Content/Resoources/name-of-launching-script"`
+# using the upgraded homebrew bash if found or /bin/bash.
 # however, -P does not export the path, just sets it for `env` command. so export PATH if necessary
 
-[[ "$PATH" =~ "$(brew --prefix)/bin" ]] || export PATH="$(brew --prefix)/bin:$PATH"
+[[ "$PATH" =~ "/opt/homebrew/bin:/usr/local/bin" ]] || export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 is_mac() {
   # [[ "$(uname)" = "Darwin" ]]

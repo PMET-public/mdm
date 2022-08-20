@@ -1344,7 +1344,7 @@ run_bundled_app_as_script() {
   local script_arg="$1"
   # invoke in the same way platypus would
   if is_mac; then
-    /usr/bin/env -P "$(brew --prefix)/bin:/bin" bash -c "$apps_resources_dir/script $script_arg"
+    /usr/bin/env -P "/opt/homebrew/bin:/usr/local/bin:/bin" bash -c "$apps_resources_dir/script $script_arg"
   else
     /usr/bin/env bash -c "debug=1; set -x; env; $apps_resources_dir/script $script_arg"
   fi

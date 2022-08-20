@@ -35,7 +35,7 @@ create_platypus_app() {
     --status-item-icon "$status_menu_icon_path" \
     --interface-type 'Status Menu' \
     --interpreter '/usr/bin/env' \
-    --interpreter-args "-P|$(brew --prefix)/bin:/bin|bash" \
+    --interpreter-args '-P|/opt/homebrew/bin:/usr/local/bin:/bin|bash' \
     --overwrite \
     --text-background-color '#000000' \
     --text-foreground-color '#FFFFFF' \
