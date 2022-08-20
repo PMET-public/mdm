@@ -102,22 +102,22 @@ setup() {
   assert_output "f3f84327f7308a983b8464a333ac0ec323a66553"
 }
 
-@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/develop"' {
-  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/develop"
+@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/somebranch"' {
+  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/somebranch"
   assert_success
-  assert_output "develop"
+  assert_output "somebranch"
 }
 
-@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/travis/docker-files"' {
-  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/travis/docker-files"
+@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/somebranch/somedir"' {
+  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/tree/somebranch/somedir"
   assert_success
-  assert_output "travis"
+  assert_output "somebranch"
 }
 
-@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/blob/travis/some/file.yml"' {
-  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/blob/travis/some/file.yml"
+@test 'get_branch_from_github_web_url "https://github.com/PMET-public/mdm/blob/somebranch/some/file.yml"' {
+  run get_branch_from_github_web_url "https://github.com/PMET-public/mdm/blob/somebranch/some/file.yml"
   assert_success
-  assert_output "travis"
+  assert_output "somebranch"
 }
 
 
