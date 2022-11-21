@@ -33,9 +33,10 @@ is_mac() {
 }
 
 is_CI() {
-  [[ $GITHUB_WORKSPACE || $TRAVIS ]]
+  [[ -n "$GITHUB_WORKSPACE" ]]
 }
 
+# GITHUB CI does not support docker
 is_docker_compatible() {
   ! ( is_mac && is_CI )
 }
@@ -43,8 +44,6 @@ is_docker_compatible() {
 if [[ -z "$MDM_REPO_DIR" ]]; then # allow repo dir to be set by env var for debugging or testing
   if [[ "$GITHUB_REPOSITORY" = "PMET-public/mdm" ]]; then
     MDM_REPO_DIR="$GITHUB_WORKSPACE"
-  elif [[ $TRAVIS ]]; then
-    MDM_REPO_DIR="$TRAVIS_BUILD_DIR"
   fi
 fi
 
@@ -53,18 +52,37 @@ mdm_path="$HOME/.mdm"
 mdm_config_filename=".mdm_config.sh"
 mdm_config_file="$mdm_path/$mdm_config_filename"
 
-if [[
+if ! is_docker_compatible; then
+  echo "System is not docker compatible." && exit
+fi
 
-  -f "$mdm_path/current/bin/mdm" &&
-  ( -n "$(which brew)" || ! "$(is_mac)" ) &&
-  ${BASH_VERSINFO[0]} -ge 4 &&
-  -n "$(which realpath)" &&
-  -n "$(which mkcert)" &&
-  -n "$(which jq)" &&
-  -n "$(which composer)" &&
-  ( -n "$(which docker)" || ! "$(is_docker_compatible)" )
+missing_deps=""
+if [[ ! -f "$mdm_path/current/bin/mdm" ]]; then
+  missing_deps="${missing_deps}MDM not found at $mdm_path/current/bin/mdm.\n"
+fi
+if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
+  missing_deps="${missing_deps}Bash 4+ is required.\n"
+fi
+if [[ -z "$(which brew)" && "$(is_mac)" ]]; then
+  missing_deps="${missing_deps}Homebrew required on Mac OS.\n"
+fi
+if [[ -z "$(which realpath)" ]]; then
+  missing_deps="${missing_deps}realpath is required.\n"
+fi
+if [[ -z "$(which mkcert)" ]]; then
+  missing_deps="${missing_deps}mkcert is required.\n"
+fi
+if [[ -z "$(which jq)" ]]; then
+  missing_deps="${missing_deps}jq is required.\n"
+fi
+if [[ -z "$(which composer)" ]]; then
+  missing_deps="${missing_deps}compose is required.\n"
+fi
+if [[ -z "$(which docker)" ]]; then
+  missing_deps="${missing_deps}docker is required.\n"
+fi
 
-]]; then
+if [[ -z "$missing_deps" ]]; then
 
   mdm_script_path="${MDM_REPO_DIR:-$mdm_path/current}/bin/mdm"
   # shellcheck source=mdm
@@ -72,7 +90,7 @@ if [[
 
 else
 
-  # some dependency is missing 
+  printf "$missing_deps"
 
   if [[ ${#BASH_ARGV[@]} -eq 0 ]]; then # this script was called without args, so prompt user to install
 
