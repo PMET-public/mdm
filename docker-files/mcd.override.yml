@@ -1,4 +1,3 @@
-version: '2.1'
 services:
   # this should only exist if .magento.env.yaml exists and then values should be translated
   db:
@@ -35,6 +34,8 @@ services:
   web:
     ports:
       - 80
+    environment:
+      - NGINX_WORKER_PROCESSES=auto
   fpm:
     # extending generic to disable healthcheck did not work. docker-compose issue?
     healthcheck:
