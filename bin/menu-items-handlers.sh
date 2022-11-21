@@ -201,6 +201,7 @@ install_app() {
     # TODO need way to output install log b/c may appear frozen for mins to hours
     docker-compose run deploy cloud-deploy
     
+    # caching_application 2 represents varnish
     docker-compose run --rm deploy magento-command config:set system/full_page_cache/caching_application 2 --lock-env
     # this command causes indexer to be set in app/etc/env.php but without the expected values for host/username
     docker-compose run --rm deploy magento-command setup:config:set --http-cache-hosts=varnish
