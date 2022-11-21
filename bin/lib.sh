@@ -181,10 +181,10 @@ else
 fi
 
 is_CI() {
-  [[ "$GITHUB_WORKSPACE" || "$TRAVIS" ]]
+  [[ "$GITHUB_WORKSPACE" ]]
 }
 
-# this exists for CI testing of some functionality even when docker is n/a (e.g. travis and github ci with a mac)
+# this exists for CI testing of some functionality even when docker is n/a (e.g. github ci with a mac)
 is_docker_compatible() {
   ! ( is_mac && is_CI )
 }
@@ -198,6 +198,7 @@ is_docker_initialized_on_mac() {
 }
 
 are_docker_settings_optimized() {
+  return 0 # accept defaults for now
   local md5 md5_file
   md5="$(md5sum "$docker_settings_file" | sed 's/ .*//')"
   md5_file="$mdm_path/.md5-of-optimized-docker-settings-${md5}"
@@ -1185,7 +1186,7 @@ export_compose_project_name() {
 
 export_compose_file() {
   if is_detached; then
-    COMPOSE_FILE="$lib_dir/../docker-files/docker-compose.yml"
+    : # unused for now
   else
     COMPOSE_FILE="$apps_resources_dir/app/docker-compose.yml"
     [[ -f "$apps_resources_dir/app/docker-compose.override.yml" ]] && {
@@ -1439,7 +1440,7 @@ Once all requirements are installed and validated, this script will not need to 
     # install homebrew
     [[ -f "$(brew --prefix)/bin/brew" ]] || {
       warning_w_newlines "This script installs Homebrew, which may require your password. If you're
-    skeptical about entering your password here, you can install Homebrew (https://brew.sh/)
+    hesitant about entering your password here, you can install Homebrew (https://brew.sh/)
     independently first. Then you will NOT be prompted for your password by this script."
       msg_w_newlines "Alternatively, you can allow this script to install Homebrew by pressing ANY key to continue."
 
