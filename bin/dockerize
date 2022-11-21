@@ -13,6 +13,7 @@ exec 2> >(tee -ia "$dockerize_log_file")
 # if supported tools/icons are detected, bundles into a OSX style app
 # order of stpes matter because some operations depend on the results of others
 #
+# the parts to assemble:
 # 1. the app from an existing env or git repo + branch
 # 2. the database
 # 3. the encryption key
@@ -156,14 +157,14 @@ fi
 # additional error checking
 {
   { # project and env are not empty but other related opts are
-    [[ ! -z "$project" ]] && [[ ! -z "$env" ]] && [[ -z "$git_url" ]] && [[ -z "$branch" ]] && [[ -z "$tag" ]] &&
+    [[ -n "$project" ]] && [[ -n "$env" ]] && [[ -z "$git_url" ]] && [[ -z "$branch" ]] && [[ -z "$tag" ]] &&
       env_is_existing_cloud=true
   } ||
   { # git url and branch are not empty but other related opts are
-    [[ ! -z "$git_url" ]] && [[ ! -z "$branch" ]] && [[ -z "$tag" ]] && [[ -z "$project" ]] && [[ -z "$env" ]]
+    [[ -n "$git_url" ]] && [[ -n "$branch" ]] && [[ -z "$tag" ]] && [[ -z "$project" ]] && [[ -z "$env" ]]
   } ||
   { # git url and tag are not empty but other related opts are
-    [[ ! -z "$git_url" ]] && [[ ! -z "$tag" ]] && [[ -z "$branch" ]] && [[ -z "$project" ]] && [[ -z "$env" ]]
+    [[ -n "$git_url" ]] && [[ -n "$tag" ]] && [[ -z "$branch" ]] && [[ -z "$project" ]] && [[ -z "$env" ]]
   }
 } ||
   error "
@@ -258,15 +259,15 @@ app_php_version=$(perl -ne '/type: (php:[^\s]*)/ and print $1' "$tmp_app_dir/.ma
 # need to create docker-compose MCD branch based on EE version
 case "$ee_version" in
 2.4.[12]|2.4.[12]-p*)
-  mcd_branch="dev-develop"
-  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
-  ;;
+  # mcd_branch="dev-develop"
+  # composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.1"
+  error "Magento version $ee_version no longer supported" ;;
 2.4.3|2.4.3-p*)
-  mcd_branch="1.2.4.x-dev"
-  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.2-latest"
-  COMPOSER_VERSION="2.1.6"
-  ;;
-2.4.4|2.4.4-p*|2.4.5)
+  # mcd_branch="1.2.4.x-dev"
+  # composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.2-latest"
+  # COMPOSER_VERSION="2.1.6"
+  error "Magento version $ee_version no longer supported" ;;
+2.4.[45678]|2.4.[45678]-p*)
   mcd_branch="1.3.2.x-dev"
   composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.3.2-latest"
   COMPOSER_VERSION="2.1.4"
@@ -316,7 +317,7 @@ else
   # 5. restore original composer.json and composer.lock to ensure originals are used for deployment in containers
   cd "$tmp_app_dir" || exit 1
   # if auth.json provided, use it
-  [[ ! -z "$auth_json_path" ]] &&
+  [[ -n "$auth_json_path" ]] &&
     cp "$auth_json_path" "$tmp_app_dir/auth.json"
   [[ ! -f "auth.json" && ! "$COMPOSER_AUTH" && ! "$skip_composer_cache" ]] &&
     warning_w_newlines "No auth.json OR COMPOSER_AUTH env var file detected!
