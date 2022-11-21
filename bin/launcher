@@ -53,7 +53,7 @@ mdm_config_filename=".mdm_config.sh"
 mdm_config_file="$mdm_path/$mdm_config_filename"
 
 if ! is_docker_compatible; then
-  echo "System is not docker compatible." && exit
+  echo "System is not docker compatible."
 fi
 
 missing_deps=""
