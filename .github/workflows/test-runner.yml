@@ -35,9 +35,9 @@ jobs:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
-      - if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo update-alternatives --set php /usr/bin/php7.4
+      # - if: matrix.os == 'ubuntu-latest'
+      #   run: |
+      #     sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
           if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
       - uses: actions/checkout@v2
@@ -65,9 +65,9 @@ jobs:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
-      - if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo update-alternatives --set php /usr/bin/php7.4
+      # - if: matrix.os == 'ubuntu-latest'
+      #   run: |
+      #     sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
           if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
       - uses: actions/checkout@v2
@@ -105,9 +105,9 @@ jobs:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
-      - if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo update-alternatives --set php /usr/bin/php7.4
+      # - if: matrix.os == 'ubuntu-latest'
+      #   run: |
+      #     sudo update-alternatives --set php /usr/bin/php7.4
       - run: |
           if [[ "$MDM_OVERRIDE_CONFIG" ]]; then echo "MDM_CONFIG_URL=" >> $GITHUB_ENV; fi
       - uses: actions/checkout@v2
