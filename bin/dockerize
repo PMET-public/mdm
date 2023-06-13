@@ -267,9 +267,14 @@ case "$ee_version" in
   # composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.2-latest"
   # COMPOSER_VERSION="2.1.6"
   error "Magento version $ee_version no longer supported" ;;
-2.4.[45678]|2.4.[45678]-p*)
+2.4.[45]|2.4.[45]-p*)
   mcd_branch="1.3.2.x-dev"
   composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.3.2-latest"
+  COMPOSER_VERSION="2.1.4"
+  ;;
+2.4.[678]|2.4.[678]-p*)
+  mcd_branch="1.3.5.x-dev"
+  composer_image="pmetpublic/magento-cloud-docker-$app_php_version-cli-1.3.5-latest"
   COMPOSER_VERSION="2.1.4"
   ;;
 esac
