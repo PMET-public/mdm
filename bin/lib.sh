@@ -955,8 +955,14 @@ get_wildcard_cert_and_key_for_mdm_domain() {
   is_new_cert_required_for_domain ".$mdm_domain" || return 0
   cert_dir="$certs_dir/.$mdm_domain"
   mkdir -p "$cert_dir"
-  get_github_file_contents "$mdm_domain_fullchain_gh_url" > "$cert_dir/fullchain1.pem"
-  get_github_file_contents "$mdm_domain_privkey_gh_url" > "$cert_dir/privkey1.pem"
+  if [[ -n "$mdm_domain_fullchain_gh_url" ]]; then
+    get_github_file_contents "$mdm_domain_fullchain_gh_url" > "$cert_dir/fullchain1.pem"
+    get_github_file_contents "$mdm_domain_privkey_gh_url" > "$cert_dir/privkey1.pem"
+  fi
+  if [[ ! -s "$cert_dir/fullchain1.pem" ]]; then
+    echo "Domain cert not found. Generating one ..."
+    mkcert -cert-file "$cert_dir/fullchain1.pem" -key-file "$cert_dir/privkey1.pem" "*.$domain"
+  fi
 }
 
 mkcert_for_domain() {
