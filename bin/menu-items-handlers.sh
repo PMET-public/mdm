@@ -305,7 +305,7 @@ uninstall_app() {
     warning_w_newlines "THIS WILL DELETE ANY CHANGES TO $COMPOSE_PROJECT_NAME!"
     confirm_or_exit
     cd "$apps_resources_dir/app" || exit 1
-    docker-compose down -v
+    docker-compose down -v --remove-orphans
   }
 }
 
