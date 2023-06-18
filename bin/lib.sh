@@ -877,7 +877,8 @@ does_cert_and_key_exist_for_domain() {
   local domain cert_dir
   domain="$(normalize_domain_if_wildcard "$1")"
   cert_dir="$certs_dir/$domain"
-  [[ -d "$cert_dir" && -f "$cert_dir/fullchain1.pem" && -f "$cert_dir/privkey1.pem" ]]
+  # check file exists and greater than 0
+  [[ -d "$cert_dir" && -s "$cert_dir/fullchain1.pem" && -s "$cert_dir/privkey1.pem" ]]
 }
 
 read_cert_for_domain() {
