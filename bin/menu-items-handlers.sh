@@ -187,15 +187,15 @@ install_app() {
     # create containers but do not start
     docker-compose up --no-start
     # copy db files to db container & start it up
-    docker cp .docker/mysql/docker-entrypoint-initdb.d "${COMPOSE_PROJECT_NAME}_db_1:/"
+    docker cp .docker/mysql/docker-entrypoint-initdb.d "${COMPOSE_PROJECT_NAME}-db-1:/"
     docker-compose up -d db
     # copy over most files in local app dir to build container
     tar -cf - --exclude .docker --exclude .composer.tar.gz --exclude media.tar.gz . | \
-      docker cp - "${COMPOSE_PROJECT_NAME}_build_1:/app"
+      docker cp - "${COMPOSE_PROJECT_NAME}-build-1:/app"
     # extract tars created for distribution via sync service e.g. dropbox, onedrive
-    [[ -f .composer.tar.gz ]] && extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
-    [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}_build_1:/app"
-    [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}_deploy_1:/app/app/"
+    [[ -f .composer.tar.gz ]] && extract_tar_to_existing_container_path .composer.tar.gz "${COMPOSE_PROJECT_NAME}-build-1:/app"
+    [[ -f media.tar.gz ]] && extract_tar_to_existing_container_path media.tar.gz "${COMPOSE_PROJECT_NAME}-build-1:/app"
+    [[ -d app/etc ]] && docker cp app/etc "${COMPOSE_PROJECT_NAME}-deploy-1:/app/app/"
     docker-compose run build cloud-build
 
     # TODO need way to output install log b/c may appear frozen for mins to hours
@@ -314,7 +314,7 @@ stop_other_apps() {
   {
     msg_w_timestamp "${FUNCNAME[0]}"
     compose_project_names="$(docker ps -a -f "label=com.docker.compose.service=db" --format="{{ .Names  }}" |
-      perl -pe 's/_db_1$//')"
+      perl -pe 's/-db-1$//')"
     for name in $compose_project_names; do
       [[ "$name" == "$COMPOSE_PROJECT_NAME" ]] && continue
       cids="$(docker ps -q -f "name=^${name}_")"
@@ -409,30 +409,30 @@ Enter a valid Magento Cloud url"
     msg_w_newlines "Copying cloud media to app ..."
     media_tmp_dir="$(mktemp -d)"
     # copy from container to tmp dir for easy rsync comparison
-    docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media" "$media_tmp_dir"
+    docker cp "${COMPOSE_PROJECT_NAME}-fpm-1:/app/pub/media" "$media_tmp_dir"
     "$magento_cloud_cmd" mount:download -y -p "$project" -e "$env" -m pub/media --target "$media_tmp_dir/media" 2>&1 |
       filter_cloud_mount_transfer_output
-    docker cp "$media_tmp_dir/media/." "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media/"
+    docker cp "$media_tmp_dir/media/." "${COMPOSE_PROJECT_NAME}-fpm-1:/app/pub/media/"
     rm -rf "$media_tmp_dir"
 
     msg_w_newlines "Copying cloud DB to app ..."
     sql_tmp_file="$(mktemp)"
     "$magento_cloud_cmd" db:dump -y -p "$project" -e "$env" -f "$sql_tmp_file"
     # create backup fold in case it does not exist yet
-    docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" mkdir -p /app/var/backups
+    docker exec "${COMPOSE_PROJECT_NAME}-fpm-1" mkdir -p /app/var/backups
     # magento requires specific naming for it's backups to restore from (e.g. 1601987083_db.sql b/c why??)
-    docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}_fpm_1:/app/var/backups/${start}_db.sql"
-    if ! docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bin/magento setup:rollback -n -d "${start}_db.sql"; then
+    docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}-fpm-1:/app/var/backups/${start}_db.sql"
+    if ! docker exec "${COMPOSE_PROJECT_NAME}-fpm-1" bin/magento setup:rollback -n -d "${start}_db.sql"; then
       # frustrating!! looks like basic back up and rollback from magento is broken (also auto-deletes backup file??!)
       warning "Could not rollback via magento CLI. Attempting direct import ..."
-      docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}_db_1:/tmp/${start}_db.sql"
-      docker exec "${COMPOSE_PROJECT_NAME}_db_1" bash -c "mysql -u user --password='' main < /tmp/${start}_db.sql"
+      docker cp "$sql_tmp_file" "${COMPOSE_PROJECT_NAME}-db-1:/tmp/${start}_db.sql"
+      docker exec "${COMPOSE_PROJECT_NAME}-db-1" bash -c "mysql -u user --password='' main < /tmp/${start}_db.sql"
     fi
     rm "$sql_tmp_file"
 
     hostname="$(get_hostname_for_this_app)"
     msg_w_newlines "Resetting urls to https://$hostname and flushing the cache ..."
-    docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "$(get_magento_cmds_to_update_hostname_to "$hostname")"
+    docker exec "${COMPOSE_PROJECT_NAME}-fpm-1" bash -c "$(get_magento_cmds_to_update_hostname_to "$hostname")"
 
     show_success_msg_plus_duration "$start"
 
@@ -475,7 +475,7 @@ Enter a valid Magento Cloud url."
 
     msg_w_newlines "Copying app media to cloud ..."
     media_tmp_dir="$(mktemp -d)"
-    docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:/app/pub/media" "$media_tmp_dir"
+    docker cp "${COMPOSE_PROJECT_NAME}-fpm-1:/app/pub/media" "$media_tmp_dir"
     "$magento_cloud_cmd" mount:upload -y -p "$project" -e "$env" -m pub/media --source "$media_tmp_dir/media" 2>&1 |
       filter_cloud_mount_transfer_output
     rm -rf "$media_tmp_dir"
@@ -484,12 +484,12 @@ Enter a valid Magento Cloud url."
       perl -pe 's/^https?:\/\///;s/\s+$//')"
 
     msg_w_newlines "Copying app DB to cloud ..."
-    backup_sql_path="$(docker exec "${COMPOSE_PROJECT_NAME}_fpm_1" bash -c "
+    backup_sql_path="$(docker exec "${COMPOSE_PROJECT_NAME}-fpm-1" bash -c "
       bin/magento config:set -q system/backup/functionality_enabled 1 &&
       bin/magento setup:backup --db | sed -n 's/.*path: //p' | tr -d '\n'
     ")"
     sql_tmp_file="$(mktemp)"
-    docker cp "${COMPOSE_PROJECT_NAME}_fpm_1:$backup_sql_path" "$sql_tmp_file"
+    docker cp "${COMPOSE_PROJECT_NAME}-fpm-1:$backup_sql_path" "$sql_tmp_file"
     "$magento_cloud_cmd" sql -p "$project" -e "$env" < "$sql_tmp_file"
     rm "$sql_tmp_file"
 

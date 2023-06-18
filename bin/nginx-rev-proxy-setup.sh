@@ -90,7 +90,6 @@ hosts_to_add="$(echo "$hostnames_not_resolving_to_local" | perl -pe "s/\s?\d+\.$
 prepare_certs_and_keys "$hostnames"
 write_nginx_configs "$hostnames"
 
-
 # ensure latest nginx image
 docker_nginx_image="pmetpublic/nginx-with-pagespeed:1.0"
 docker pull "$docker_nginx_image"

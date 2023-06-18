@@ -230,7 +230,7 @@ is_magento_app_installed_cached() {
   is_detached && return 1
   [[ "${mdm_store["app_is_installed"]}" ]] && return "${mdm_store["app_is_installed"]}" # already calculated
   mdm_store["app_is_installed"]=0
-  echo "${mdm_store["formatted_docker_ps_output"]}" | grep -q "^${COMPOSE_PROJECT_NAME}_db_1 " || mdm_store["app_is_installed"]="$?"
+  echo "${mdm_store["formatted_docker_ps_output"]}" | grep -q "^${COMPOSE_PROJECT_NAME}-db-1 " || mdm_store["app_is_installed"]="$?"
   return "${mdm_store["app_is_installed"]}"
 }
 
@@ -242,7 +242,7 @@ is_magento_app_running_cached() {
   mdm_store["magento_app_is_running"]=0 # assume up and will return 0 unless an expected up service is not found
   for service in $services; do
     # if a service sets to 1, func will have non-zero exit, so false (app is not fully running)
-    echo "${mdm_store["formatted_docker_ps_output"]}" | grep -q "^${COMPOSE_PROJECT_NAME}_${service}_1 Up" ||
+    echo "${mdm_store["formatted_docker_ps_output"]}" | grep -q "^${COMPOSE_PROJECT_NAME}-${service}-1 Up" ||
       { mdm_store["magento_app_is_running"]="$?"; break; }
   done
   return "${mdm_store["magento_app_is_running"]}"
@@ -272,10 +272,10 @@ is_network_state_ok() {
 
 are_other_magento_apps_running() {
   echo "${mdm_store["formatted_docker_ps_output"]}" |
-    grep "_db_1 " |
-    grep -v "^${COMPOSE_PROJECT_NAME}_db_1 " |
-    grep -v '_db_1 Exited' |
-    grep -q -v '_db_1 Created'
+    grep '\-db-1 ' |
+    grep -v "^${COMPOSE_PROJECT_NAME}-db-1 " |
+    grep -v '\-db-1 Exited' |
+    grep -q -v '\-db-1 Created'
   return "$?"
 }
 
