@@ -236,7 +236,7 @@ install_app() {
       cloud-post-deploy
     ")"
 
-    docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid:$(brew --prefix)/share/ca-certificates/rootCA.crt"
+    docker cp "$(mkcert -CAROOT)/rootCA.pem" "$cid:/usr/local/share/ca-certificates/rootCA.crt"
 
     # TODO would this be an option instead? https://docs.docker.com/compose/compose-file/#extra_hosts
     docker-compose exec -d -T deploy bash -c "
